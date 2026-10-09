@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Management Study Guides</title>
+<style>
+:root{--bg:#f7f5f2;--card:#fff;--ink:#1f1d1a;--muted:#5f5a53;--line:#e3ded6;--accent:#c9471a}
+@media (prefers-color-scheme:dark){:root{--bg:#141312;--card:#1d1c1a;--ink:#eeebe6;--muted:#a8a29a;--line:#35322e;--accent:#f07a4a}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:860px;margin:0 auto;padding:48px 16px}
+.k{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+h1{font-size:clamp(1.8rem,4vw,2.5rem);margin:.2em 0}
+p{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:24px}
+a.c{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .15s,transform .15s}
+a.c:hover{border-color:var(--accent);transform:translateY(-2px)}
+a.c b{color:var(--accent);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+a.c h2{font-size:1.15rem;margin:.3em 0}
+a.c span{font-size:.9rem;color:var(--muted)}
+footer{margin-top:32px;font-size:.85rem;color:var(--muted)}
+footer a{color:var(--accent)}
+</style></head><body><main>
+<div class="k">Data Management · SRH University Heidelberg</div>
+<h1>Interactive study guides</h1>
+<p>One page per chapter, with concepts, worked examples, hands-on widgets, links to real tools and a self-check quiz.</p>
+<div class="grid">
+<a class="c" href="Chapter1_Foundations_FAIR.html"><b>Chapter 1</b><h2>Foundations, Data Architectures &amp; FAIR</h2><span>Lifecycle, OLTP/OLAP, ETL/ELT, warehouse vs lake vs lakehouse, FAIR, DOIs, metadata</span></a>
+<a class="c" href="Chapter2_Data_Quality_Preparation.html"><b>Chapter 2</b><h2>Data Quality, Profiling &amp; Preparation</h2><span>Quality dimensions &amp; KPIs, profiling, missing values, duplicates, outliers, scaling, joins</span></a>
+<a class="c" href="Chapter3_Reproducible_Pipelines.html"><b>Chapter 3</b><h2>Reproducible &amp; Validated Pipelines</h2><span>Raw/clean/output layers, pandera rules, stop vs quarantine, Git &amp; CI, lineage, dbt</span></a>
+<a class="c" href="Chapter4_Governance_AI_Ready.html"><b>Chapter 4</b><h2>Governance, Lineage &amp; AI-Ready Data</h2><span>Catalogs, contracts, observability, roles, privacy, AI-readiness, graph data</span></a>
+</div>
+<footer>Prof. Dr. Mehrdad Jalali · <a href="https://github.com/MehrdadJalali-AI/DataManagement">Course repository</a></footer>
+</main></body></html>

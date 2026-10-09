@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch1 · Foundations & FAIR</title>
+<style>:root{
+  --bg:#f7f5f2; --surface:#ffffff; --surface2:#f1eee9; --ink:#1f1d1a; --muted:#5f5a53; --line:#e3ded6;
+  --accent:#c9471a; --accent-soft:#fbe9e1; --blue:#1f5fa8; --blue-soft:#e6eef8; --green:#21794f; --green-soft:#e2f2ea;
+  --amber:#9a5a0f; --amber-soft:#fbf0de; --purple:#5a43a6; --purple-soft:#ece8f8; --red:#b42318; --red-soft:#fde8e6;
+  --code-bg:#1e1f24; --code-ink:#e8e6e3; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+  --radius:14px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface2);padding:.1em .35em;border-radius:5px}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5em}
+h2{font-size:1.65rem;letter-spacing:-.01em}
+h3{font-size:1.15rem}
+p{margin:0 0 1em}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
+.brand{font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.chapnav{display:flex;gap:6px;overflow-x:auto;flex:1}
+.chapnav a{padding:6px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:.9rem;white-space:nowrap;border:1px solid transparent}
+.chapnav a.on{background:var(--accent-soft);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);font-weight:600}
+.iconbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+.progress{height:3px;background:var(--accent);width:0;transition:width .1s}
+.hero{max-width:1240px;margin:0 auto;padding:48px 20px 24px}
+.hero .kicker{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+.hero h1{font-size:clamp(1.9rem,4vw,2.8rem);letter-spacing:-.02em;margin:.2em 0 .35em}
+.hero p.lead{font-size:1.12rem;color:var(--muted);max-width:760px}
+.objectives{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}
+.objectives div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.93rem}
+.objectives b{display:block;color:var(--accent);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;padding:0 20px 80px}
+.toc{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto;font-size:.9rem}
+.toc h4{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.toc a{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;color:var(--muted);text-decoration:none;border-left:2px solid transparent}
+.toc a.active{color:var(--ink);background:var(--surface);border-left-color:var(--accent)}
+.toc a .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.toc a.done .dot{background:var(--green);border-color:var(--green)}
+section.chap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;margin-bottom:24px;box-shadow:var(--shadow)}
+section.chap > .sec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
+.secnum{color:var(--accent);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.donebtn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.donebtn.on{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.card{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h4{margin-bottom:.3em}
+.card p:last-child{margin-bottom:0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.green{border-color:var(--green);background:var(--green-soft)}
+.callout.blue{border-color:var(--blue);background:var(--blue-soft)}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+.callout b:first-child{display:block;margin-bottom:2px}
+.analogy{display:flex;gap:12px;background:var(--purple-soft);border-radius:12px;padding:14px 16px;margin:16px 0}
+.analogy .ico{font-size:1.5rem;line-height:1}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.tag.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.tag.green{background:var(--green-soft);color:var(--green);border-color:transparent}
+.tag.amber{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.tag.red{background:var(--red-soft);color:var(--red);border-color:transparent}
+.tag.purple{background:var(--purple-soft);color:var(--purple);border-color:transparent}
+.widget{border:1px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:12px;padding:18px;margin:18px 0;background:var(--bg)}
+.widget > .wtitle{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
+.widget > .wtitle::before{content:"▶ TRY IT";font-size:.7rem;letter-spacing:.08em;background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:9px;cursor:pointer;font:inherit;font-size:.92rem}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+textarea{font-family:var(--mono);font-size:.85rem;width:100%}
+label{font-size:.9rem}
+input[type=range]{accent-color:var(--accent);width:100%}
+.tablewrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface2);font-weight:600;white-space:nowrap}
+td.bad,span.bad{background:var(--red-soft);color:var(--red)}
+td.good{background:var(--green-soft);color:var(--green)}
+td.warn{background:var(--amber-soft);color:var(--amber)}
+tr.hl td{background:var(--accent-soft)}
+td[contenteditable]{outline:none;cursor:text}
+td[contenteditable]:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.55 var(--mono);position:relative;margin:10px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .copy{position:absolute;top:8px;right:8px;font-size:.72rem;background:#ffffff1a;color:#ddd;border:1px solid #ffffff30;border-radius:6px;padding:2px 8px;cursor:pointer}
+.c-k{color:#f4a261}.c-s{color:#9ad59a}.c-c{color:#8b8f98;font-style:italic}.c-n{color:#82b8ff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{border:0;background:none;color:var(--muted);padding:9px 14px;cursor:pointer;font:inherit;font-size:.93rem;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabpanel{display:none}.tabpanel.on{display:block}
+details.reveal{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.reveal summary{cursor:pointer;font-weight:600}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.links a{display:block;text-decoration:none;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;transition:border-color .15s,transform .15s}
+.links a:hover{border-color:var(--accent);transform:translateY(-1px)}
+.links a b{display:block;color:var(--accent);font-size:.95rem}
+.links a span{font-size:.84rem;color:var(--muted)}
+.quiz .q{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.quiz .q p{font-weight:600;margin-bottom:8px}
+.quiz .opts{display:grid;gap:6px}
+.quiz .opts button{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:.93rem}
+.quiz .opts button.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.quiz .opts button.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.quiz .why{display:none;margin-top:8px;font-size:.9rem;color:var(--muted)}
+.quiz .q.answered .why{display:block}
+.score{font-weight:700;color:var(--accent)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .step{flex:1 1 130px;background:var(--surface2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;position:relative}
+.flow .step small{display:block;color:var(--muted);font-size:.8rem}
+.flow .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.flow .arrow{align-self:center;color:var(--muted)}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-soft);color:var(--green)}
+.feedback.no{background:var(--red-soft);color:var(--red)}
+.feedback.info{background:var(--blue-soft);color:var(--blue)}
+.meter{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.meter > div{height:100%;background:var(--green);transition:width .3s}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:1.5rem;font-weight:700}
+.kpi .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sorter{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.bucket{min-height:110px;border:2px dashed var(--line);border-radius:10px;padding:8px}
+.bucket h5{margin:0 0 6px;font-size:.85rem}
+.bucket.over{border-color:var(--accent);background:var(--accent-soft)}
+.chip{display:inline-block;margin:3px;padding:5px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;cursor:grab;user-select:none}
+.chip.sel{outline:2px solid var(--accent)}
+.chip.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.chip.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.pool{min-height:50px;padding:8px;border-radius:10px;background:var(--surface2);margin-bottom:10px}
+.small{font-size:.86rem;color:var(--muted)}
+.foot{max-width:1240px;margin:0 auto;padding:20px;color:var(--muted);font-size:.85rem;text-align:center}
+svg text{font-family:inherit}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .toc{display:none}
+  section.chap{padding:18px}
+  .hero{padding:28px 16px 16px}
+  .layout{padding:0 16px 60px}
+  .topbar-inner{padding:8px 16px}
+}
+@media print{.topbar,.toc,.widget,.donebtn{display:none}.layout{display:block}}
+@media (max-width:700px){#doneCount{display:none}.brand{display:none}}
+</style></head>
+<body data-chapter="1">
+<div class="topbar"><div class="topbar-inner"><a class="brand" href="#top">Data Management</a><nav class="chapnav"><a href="Chapter1_Foundations_FAIR.html" class="on">Ch 1 · Foundations & FAIR</a><a href="Chapter2_Data_Quality_Preparation.html" class="">Ch 2 · Data Quality & Prep</a><a href="Chapter3_Reproducible_Pipelines.html" class="">Ch 3 · Pipelines</a><a href="Chapter4_Governance_AI_Ready.html" class="">Ch 4 · Governance & AI</a></nav><span class="small" id="doneCount"></span><button class="iconbtn" id="themeBtn">☾ Dark</button></div><div class="progress" id="progress"></div></div>
+<header class="hero" id="top">
+  <div class="kicker">Chapter 1 · Interactive study guide</div>
+  <h1>Foundations, Data Architectures &amp; FAIR</h1>
+  <p class="lead">Why data management is the foundation of every analysis and every AI model — and how lifecycles, OLTP/OLAP, ETL/ELT, warehouses, lakes, lakehouses, FAIR principles and metadata fit together. Read, click, sort and test yourself.</p>
+  <div class="objectives">
+    <div><b>You will be able to</b>Explain data management and the 6-stage data lifecycle</div>
+    <div><b>You will be able to</b>Tell OLTP from OLAP and ETL from ELT in real scenarios</div>
+    <div><b>You will be able to</b>Choose between a warehouse, a lake and a lakehouse</div>
+    <div><b>You will be able to</b>Apply FAIR and write a DataCite / schema.org metadata record</div>
+  </div>
+</header>
+<div class="layout">
+<aside class="toc"><h4>In this chapter</h4><nav id="tocList"></nav></aside>
+<main>
+
+<!-- 1 -->
+<section class="chap" id="why" data-title="Why data management?">
+  <div class="sec-head"><div><div class="secnum">Section 1</div><h2>From raw data to value</h2></div></div>
+  <p><b>Data management</b> is the process of <b>collecting, storing, organizing and maintaining</b> data so it stays <b>accurate, accessible, secure and usable</b>. It is what turns raw data into decisions you can trust.</p>
+  <div class="callout"><b>The one-line summary of the course</b>Without data management → no reliable AI.</div>
+  <div class="tabs" data-group="why"><button class="on" data-tab="bad">😟 Without data management</button><button data-tab="good">✅ With data management</button></div>
+  <div class="tabpanel on" data-group="why" data-tab="bad">
+    <div class="grid2">
+      <div class="card"><h4>Inconsistent results</h4><p>Two teams compute "monthly revenue" and get two different numbers. Nobody knows which one is right.</p></div>
+      <div class="card"><h4>High costs</h4><p>Errors, security gaps and re-work cost money. Gartner has estimated poor data quality costs organizations millions per year on average.</p></div>
+      <div class="card"><h4>Limited reproducibility</h4><p>A thesis result can't be repeated because the cleaned file was <code>final_v3_NEW.xlsx</code> on a laptop that no longer exists.</p></div>
+      <div class="card"><h4>Unreliable AI/ML</h4><p>Models inherit every flaw in their training data — missing values, bias, duplicates — and turn them into wrong predictions.</p></div>
+    </div>
+  </div>
+  <div class="tabpanel" data-group="why" data-tab="good">
+    <div class="grid2">
+      <div class="card"><h4>Accuracy</h4><p>Correct, consistent data → decisions you can trust.</p></div>
+      <div class="card"><h4>Reproducibility</h4><p>Documented data and pipelines let anyone repeat and verify results.</p></div>
+      <div class="card"><h4>Efficiency</h4><p>Clean, well-organized data saves time in every later step.</p></div>
+      <div class="card"><h4>Security &amp; compliance</h4><p>Controlled access protects sensitive data and meets rules like the GDPR.</p></div>
+    </div>
+  </div>
+  <h3 style="margin-top:20px">Where you meet it in the real world</h3>
+  <div class="grid3">
+    <div class="card"><span class="tag purple">AI</span><h4>Training ML models</h4><p>A model is only as good as its data — this is where AI-ready data starts.</p></div>
+    <div class="card"><span class="tag green">Research</span><h4>Research data sharing</h4><p>FAIR data lets teams and disciplines build on each other's work (e.g. COVID-19 genome sharing via GISAID / ENA).</p></div>
+    <div class="card"><span class="tag blue">Real-time</span><h4>Real-time monitoring</h4><p>IoT sensors, financial markets and live dashboards depend on timely, well-managed data streams.</p></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="chap" id="lifecycle" data-title="Data lifecycle">
+  <div class="sec-head"><div><div class="secnum">Section 2</div><h2>The data lifecycle &amp; value chain</h2></div></div>
+  <p>Data moves through six stages. Across <b>every</b> stage you need <b>metadata, quality checks, provenance and governance</b>. Preserved data feeds new cycles — that is why it's a <i>cycle</i>, not a line.</p>
+  <div class="widget">
+    <div class="wtitle">Walk through a lifecycle</div>
+    <label>Organization: <select id="lcOrg"><option value="shop">Online shop</option><option value="hosp">Hospital</option><option value="uni">University</option></select></label>
+    <div class="flow" id="lcFlow"></div>
+    <div class="card" id="lcDetail"></div>
+    <p class="small">This is exactly <b>In-Class Practical 1</b>: for each stage, decide whether it is mainly about <i>running</i> the business (operations / OLTP) or <i>understanding</i> it (analysis / OLAP).</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="chap" id="oltp" data-title="OLTP vs. OLAP">
+  <div class="sec-head"><div><div class="secnum">Section 3</div><h2>OLTP vs. OLAP — run the business vs. understand it</h2></div></div>
+  <p>Organizations run two kinds of systems. <b>OLTP</b> creates the data, <b>OLAP</b> analyses it, and <b>data management</b> (ETL/ELT pipelines + metadata + quality checks + access control) is the bridge.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Aspect</th><th><span class="tag blue">OLTP</span> Online Transaction Processing</th><th><span class="tag purple">OLAP</span> Online Analytical Processing</th></tr>
+    <tr><td>Purpose</td><td>Process day-to-day transactions in real time</td><td>Analyse large volumes for reporting and decisions</td></tr>
+    <tr><td>Workload</td><td>Many small, fast writes (INSERT/UPDATE)</td><td>Few large, complex, read-heavy queries</td></tr>
+    <tr><td>Data</td><td>Current, detailed records</td><td>Historical, integrated data</td></tr>
+    <tr><td>Users</td><td>Clerks, customers, apps</td><td>Analysts, managers, data scientists</td></tr>
+    <tr><td>Storage</td><td>Relational database (PostgreSQL, MySQL, Oracle)</td><td>Data warehouse / lakehouse (Snowflake, BigQuery, Databricks)</td></tr>
+    <tr><td>Speed measured in</td><td>Milliseconds per transaction</td><td>Seconds–minutes over millions of rows</td></tr>
+  </table></div>
+  <div class="grid2">
+    <div><h4>OLTP: one transaction</h4>
+<pre><code data-hl="sql">-- customer clicks "Buy" (runs in milliseconds)
+BEGIN;
+INSERT INTO orders(order_id, customer_id, total) VALUES (1042, 77, 59.90);
+UPDATE stock SET qty = qty - 1 WHERE product_id = 'P-13';
+INSERT INTO payments(order_id, method) VALUES (1042, 'card');
+COMMIT;</code></pre></div>
+    <div><h4>OLAP: one question over millions of rows</h4>
+<pre><code data-hl="sql">-- "Sales trend by region?"
+SELECT region,
+       DATE_TRUNC('month', order_date) AS month,
+       SUM(total) AS revenue
+FROM   fact_orders
+WHERE  order_date >= '2024-01-01'
+GROUP BY region, month
+ORDER BY month;</code></pre></div>
+  </div>
+  <div class="widget"><div class="wtitle">OLTP or OLAP? Sort the scenarios</div><div id="sortOltp"></div></div>
+</section>
+
+<!-- 4 -->
+<section class="chap" id="etl" data-title="ETL vs. ELT">
+  <div class="sec-head"><div><div class="secnum">Section 4</div><h2>ETL vs. ELT — clean first, or store first?</h2></div></div>
+  <div class="widget">
+    <div class="wtitle">Watch the order change</div>
+    <div class="btnrow"><button class="btn sel" data-mode="etl">ETL: Extract → Transform → Load</button><button class="btn" data-mode="elt">ELT: Extract → Load → Transform</button></div>
+    <svg id="etlSvg" viewBox="0 0 760 170" width="100%" role="img" aria-label="ETL and ELT flow"></svg>
+    <p id="etlText" class="small"></p>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>Aspect</th><th>ETL</th><th>ELT</th></tr>
+    <tr><td>Where it transforms</td><td>Outside, in an ETL tool, before loading</td><td>Inside the warehouse / lakehouse, with SQL</td></tr>
+    <tr><td>Raw data</td><td>Only cleaned data reaches the warehouse</td><td>Kept in the warehouse; transforms can be re-run</td></tr>
+    <tr><td>Typical setting</td><td>Traditional, on-premise data warehouses</td><td>Modern cloud warehouses and lakehouses</td></tr>
+    <tr><td>Best fit for</td><td>Regulated, well-defined, structured data — e.g. mask personal data <i>before</i> it is stored</td><td>Large, fast-changing, semi-/unstructured data — e.g. app logs, JSON events, sensor streams</td></tr>
+    <tr><td>Example tools</td><td>Informatica, Talend, SSIS, Pentaho</td><td>Fivetran / Airbyte (EL) + dbt (T) in Snowflake / BigQuery</td></tr>
+  </table></div>
+  <div class="analogy"><span class="ico">🍳</span><div><b>Analogy:</b> ETL is a restaurant that washes and chops vegetables <i>before</i> they go into the fridge. ELT puts all the groceries in a huge fridge first and prepares them when a recipe needs them — you can always re-cook from the original ingredients.</div></div>
+  <div class="widget"><div class="wtitle">ETL or ELT? (Practical 2 warm-up)</div><div id="sortEtl"></div></div>
+</section>
+
+<!-- 5 -->
+<section class="chap" id="arch" data-title="Warehouse, lake, lakehouse">
+  <div class="sec-head"><div><div class="secnum">Section 5</div><h2>Data warehouses, data lakes &amp; lakehouses</h2></div></div>
+  <p>Each architecture solved the main limit of the one before it: warehouses (1990s) were reliable but costly and structured-only → lakes (2010s) added scale and raw data but risked becoming a <b>"data swamp"</b> → lakehouses (2020s) add a metadata &amp; governance layer (ACID tables) on cheap lake storage.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Aspect</th><th>🏛 Data warehouse</th><th>🌊 Data lake</th><th>🏠 Lakehouse</th></tr>
+    <tr><td>Structure</td><td>Structured only — <b>schema-on-write</b> (fixed first)</td><td>Any format — <b>schema-on-read</b> (decide later)</td><td>Raw + structured together</td></tr>
+    <tr><td>Primary use</td><td>BI, dashboards, OLAP</td><td>Data science, ML, exploration</td><td>BI <i>and</i> ML on one copy</td></tr>
+    <tr><td>Cost</td><td>Higher: curated, indexed</td><td>Low-cost object storage</td><td>Low cost, near-warehouse speed</td></tr>
+    <tr><td>Governance</td><td>Strong, mature</td><td>Weak — risk of a data swamp</td><td>ACID transactions + governance</td></tr>
+    <tr><td>Example tech</td><td>Snowflake, Redshift, BigQuery</td><td>Amazon S3, ADLS, HDFS + Spark</td><td>Databricks, Delta Lake, Apache Iceberg</td></tr>
+  </table></div>
+  <div class="widget">
+    <div class="wtitle">Architecture advisor</div>
+    <p class="small">Answer four questions about a (fictional) company. The advisor recommends an architecture and explains why.</p>
+    <div id="advisor"></div>
+    <div class="feedback info" id="advOut"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="chap" id="varieties" data-title="Varieties of data">
+  <div class="sec-head"><div><div class="secnum">Section 6</div><h2>Varieties of data — the structure spectrum</h2></div></div>
+  <div class="grid3">
+    <div class="card"><span class="tag blue">Structured</span><h4>Fixed schema: rows &amp; columns</h4><p>Orders, customers, payments. Stored in OLTP databases and warehouses. <b>Easiest to query.</b></p></div>
+    <div class="card"><span class="tag green">Semi-structured</span><h4>Flexible, self-describing tags</h4><p>JSON, XML, app logs, API responses. Stored in lakes / lakehouses.</p>
+<pre><code>{"user": "Anna K.", "device": "mobile",
+ "tags": ["sale","new"], "rating": 5}</code></pre></div>
+    <div class="card"><span class="tag amber">Unstructured</span><h4>No predefined format</h4><p>Emails, product photos, call recordings, PDFs. Stored in lakes. <b>Most flexible, hardest to analyse</b> — often ~80% of enterprise data.</p></div>
+  </div>
+  <div class="widget"><div class="wtitle">Which kind of data is it?</div><div id="sortVar"></div></div>
+</section>
+
+<!-- 7 -->
+<section class="chap" id="fair" data-title="FAIR principles">
+  <div class="sec-head"><div><div class="secnum">Section 7</div><h2>The FAIR principles</h2></div></div>
+  <p>FAIR = <b>Findable, Accessible, Interoperable, Reusable</b> — guidelines for making data usable by <b>people and machines</b>, introduced by <a href="https://www.nature.com/articles/sdata201618" target="_blank" rel="noopener">Wilkinson et al. (2016)</a>. The running example below is a (fictional) diabetes outpatient cohort.</p>
+  <div class="callout amber"><b>FAIR ≠ open</b>Data can be FAIR even when access is restricted, as long as the rules for access are clear. Patient data is a perfect example.</div>
+  <div class="tabs" data-group="fair"><button class="on" data-tab="f">F · Findable</button><button data-tab="a">A · Accessible</button><button data-tab="i">I · Interoperable</button><button data-tab="r">R · Reusable</button></div>
+  <div class="tabpanel on" data-group="fair" data-tab="f">
+    <p><b>Findable = persistent ID + rich metadata + searchable catalog.</b> The DOI stays the same even if the files move; keywords and description let people and search engines find the dataset — without exposing any patient.</p>
+<pre><code>{
+  "identifier": "https://doi.org/10.5281/zenodo.1234567",
+  "title": "Type 2 Diabetes Outpatient Cohort, 2020–2023",
+  "description": "Anonymized visit and treatment records of 1,250 patients",
+  "keywords": ["diabetes", "metformin", "outpatient care"],
+  "creator": "Example University Hospital",
+  "temporalCoverage": "2020/2023",
+  "registeredIn": "Zenodo"
+}</code></pre>
+    <p class="small">Real-world: try searching <a href="https://datasetsearch.research.google.com/" target="_blank" rel="noopener">Google Dataset Search</a> — it only finds datasets that publish this kind of metadata.</p>
+  </div>
+  <div class="tabpanel" data-group="fair" data-tab="a">
+    <p><b>Accessible = standard protocol + clear access rules + metadata that stays available.</b> Anyone can see the metadata; only approved roles who accept the data use agreement can open the data.</p>
+<pre><code>{
+  "identifier": "https://doi.org/10.5281/zenodo.1234567",
+  "protocol": "HTTPS",
+  "accessRights": "restricted",
+  "authorization": "OAuth 2.0",
+  "allowedRoles": ["Physician", "Approved researcher"],
+  "dataUseAgreement": "Treatment and ethics-approved research only (GDPR)",
+  "metadataAccess": "public and permanent"
+}</code></pre>
+  </div>
+  <div class="tabpanel" data-group="fair" data-tab="i">
+    <p><b>Interoperable = standard format + shared vocabulary + linked references.</b> HL7 <a href="https://hl7.org/fhir/" target="_blank" rel="noopener">FHIR</a> defines the format, <a href="https://loinc.org/2339-0" target="_blank" rel="noopener">LOINC 2339-0</a> defines what "blood glucose" means, a standard unit removes guesswork.</p>
+<pre><code>{
+  "resourceType": "Observation",
+  "status": "final",
+  "code": { "coding": [{ "system": "http://loinc.org", "code": "2339-0",
+            "display": "Glucose [Mass/volume] in Blood" }] },
+  "subject": { "reference": "Patient/P123456789" },
+  "effectiveDateTime": "2023-01-15",
+  "valueQuantity": { "value": 95, "unit": "mg/dL" }
+}
+GET [base]/Observation?patient=P123456789</code></pre>
+  </div>
+  <div class="tabpanel" data-group="fair" data-tab="r">
+    <p><b>Reusable = clear license + provenance + quality + documentation.</b> A future user can judge and reuse the data without asking the original team.</p>
+<pre><code>{
+  "identifier": "https://doi.org/10.5281/zenodo.1234567",
+  "version": "3",
+  "license": "Data use agreement: ethics-approved research only",
+  "quality": "Glucose values checked against reference ranges",
+  "documentation": ["README.md", "codebook.csv"],
+  "provenance": {
+    "source": "Electronic Health Record system",
+    "steps": [
+      { "date": "2024-02-01", "action": "Exported outpatient visits 2020–2023" },
+      { "date": "2024-02-03", "action": "Removed names and addresses" },
+      { "date": "2024-02-05", "action": "Converted to FHIR, coded with LOINC" }
+    ]
+  }
+}</code></pre>
+  </div>
+  <div class="widget">
+    <div class="wtitle">FAIR self-assessment of a dataset</div>
+    <p class="small">Pick a dataset you know (e.g. a Kaggle CSV, a Zenodo record, your thesis data) and tick what is true. This mirrors the manual walkthrough in the home exercise; tools like <a href="https://www.f-uji.net/" target="_blank" rel="noopener">F-UJI</a> automate it.</p>
+    <div class="grid2" id="fairChecks"></div>
+    <div id="fairBars" style="margin-top:12px"></div>
+    <div class="feedback info show" id="fairAdvice"></div>
+  </div>
+  <h3>Benefits &amp; challenges</h3>
+  <div class="grid2">
+    <div class="card"><h4>Benefits</h4><p><b>Efficiency</b> — one documented, citable version instead of <code>DATA_final_NEW.xlsx</code>.<br><b>Visibility</b> — "climate data Germany" returns 1 match instead of 0.<br><b>Collaboration</b> — research, industry, academia and government build on a shared repository.<br><b>Reuse cycle</b> — found → used → shared → new data → …</p></div>
+    <div class="card"><h4>Challenges</h4><p>Effort and cost of good metadata · lack of skills and incentives · privacy &amp; legal constraints · many competing standards and vocabularies · legacy systems with no identifiers.</p></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="chap" id="doi" data-title="DOIs & repositories">
+  <div class="sec-head"><div><div class="secnum">Section 8</div><h2>DOIs — permanent addresses for data</h2></div></div>
+  <p>A <b>DOI (Digital Object Identifier)</b> is a persistent identifier. Even if the file moves to another server, the DOI resolves to its current location via <code>https://doi.org/</code>.</p>
+  <div class="widget">
+    <div class="wtitle">Take a DOI apart</div>
+    <input type="text" id="doiIn" value="https://doi.org/10.24432/C53919" style="width:100%">
+    <div id="doiOut" style="margin-top:10px"></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>How to get a DOI</h4><ol style="margin:0;padding-left:20px"><li>Choose a DOI agency — <b>DataCite</b> (datasets), <b>Crossref</b> (publications)</li><li>Register an account (or use a repository that does it for you)</li><li>Prepare metadata — title, authors, date, …</li><li>Submit resource + metadata</li><li>Receive the DOI and use it to cite &amp; share</li></ol></div>
+    <div class="card"><h4>Repositories that mint DOIs for you</h4><div class="links" style="grid-template-columns:1fr 1fr">
+      <a href="https://zenodo.org/" target="_blank" rel="noopener"><b>Zenodo</b><span>CERN; FAIR metadata, GitHub integration</span></a>
+      <a href="https://figshare.com/" target="_blank" rel="noopener"><b>Figshare</b><span>Public items get a DOI</span></a>
+      <a href="https://datadryad.org/" target="_blank" rel="noopener"><b>Dryad</b><span>Citable research datasets</span></a>
+      <a href="https://dataverse.org/" target="_blank" rel="noopener"><b>Dataverse</b><span>Harvard's open data platform</span></a>
+    </div></div>
+  </div>
+  <div class="callout green"><b>Practical tip</b>Connect your GitHub repo to Zenodo: every GitHub release then automatically gets its own DOI — perfect for citing the exact code + data version of your project.</div>
+</section>
+
+<!-- 9 -->
+<section class="chap" id="metadata" data-title="Metadata & standards">
+  <div class="sec-head"><div><div class="secnum">Section 9</div><h2>Metadata — the hidden part of the iceberg</h2></div></div>
+  <p><b>Metadata is data about data.</b> It describes and documents datasets so they are understandable, findable and reusable. <b>Metadata = context + structure + meaning.</b></p>
+  <div class="grid2" style="align-items:center">
+    <svg viewBox="0 0 320 220" width="100%" role="img" aria-label="Iceberg: data above water, metadata below">
+      <rect x="0" y="80" width="320" height="140" fill="var(--blue-soft)"/>
+      <line x1="0" y1="80" x2="320" y2="80" stroke="var(--blue)" stroke-dasharray="4 4"/>
+      <polygon points="130,20 175,15 200,80 110,80" fill="var(--surface)" stroke="var(--blue)"/>
+      <text x="155" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Data</text>
+      <polygon points="110,80 200,80 260,140 230,205 90,210 55,145" fill="color-mix(in srgb,var(--blue) 25%,var(--surface))" stroke="var(--blue)"/>
+      <text x="158" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Metadata</text>
+      <text x="158" y="145" text-anchor="middle" font-size="10" fill="var(--muted)">who · what · when · where</text>
+      <text x="158" y="160" text-anchor="middle" font-size="10" fill="var(--muted)">format · schema · license</text>
+      <text x="158" y="175" text-anchor="middle" font-size="10" fill="var(--muted)">provenance · access rules</text>
+    </svg>
+    <div>
+      <div class="card" style="margin-bottom:8px"><span class="tag blue">Descriptive</span> title, author, abstract, keywords — <i>what is it?</i></div>
+      <div class="card" style="margin-bottom:8px"><span class="tag green">Structural</span> file format, schema, column types, relationships — <i>how is it organized?</i></div>
+      <div class="card"><span class="tag amber">Administrative</span> access restrictions, license, versioning, retention — <i>who may use it, and how?</i></div>
+    </div>
+  </div>
+  <div class="widget"><div class="wtitle">Descriptive, structural or administrative?</div><div id="sortMeta"></div></div>
+  <h3>Why metadata needs standards</h3>
+  <p>If every team invents its own field names (<code>author</code>, <code>creator</code>, <code>made_by</code>…), machines can't combine catalogs. Standards give everyone the same vocabulary.</p>
+  <div class="tabs" data-group="std"><button class="on" data-tab="dc">Dublin Core</button><button data-tab="dcite">DataCite</button><button data-tab="sorg">schema.org</button></div>
+  <div class="tabpanel on" data-group="std" data-tab="dc"><p>15 simple, general-purpose elements (title, creator, subject, description, date, format, identifier, rights, …). Used by libraries, museums, and as a baseline everywhere. <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/" target="_blank" rel="noopener">DCMI Terms →</a></p></div>
+  <div class="tabpanel" data-group="std" data-tab="dcite"><p>The standard behind DOIs for research data. Mandatory: identifier, creator, title, publisher, publicationYear, resourceType. <a href="https://schema.datacite.org/" target="_blank" rel="noopener">DataCite Metadata Schema →</a></p></div>
+  <div class="tabpanel" data-group="std" data-tab="sorg"><p>JSON-LD embedded in web pages, read by search engines (that's how Google Dataset Search works). <a href="https://schema.org/Dataset" target="_blank" rel="noopener">schema.org/Dataset →</a></p></div>
+  <div class="widget">
+    <div class="wtitle">Metadata record builder (home-exercise helper)</div>
+    <p class="small">Fill in the form — the DataCite XML and schema.org JSON-LD update live. Copy the result into your submission.</p>
+    <div class="grid2">
+      <div style="display:grid;gap:8px" id="mdForm">
+        <label>Title<br><input type="text" data-k="title" value="Heidelberg Bike-Sharing Trips 2024" style="width:100%"></label>
+        <label>Creator (Family, Given)<br><input type="text" data-k="creator" value="Doe, Jane" style="width:100%"></label>
+        <label>Publisher<br><input type="text" data-k="publisher" value="SRH University Heidelberg" style="width:100%"></label>
+        <label>Year<br><input type="number" data-k="year" value="2026" style="width:100%"></label>
+        <label>DOI (optional)<br><input type="text" data-k="doi" value="10.5281/zenodo.0000000" style="width:100%"></label>
+        <label>Keywords (comma-separated)<br><input type="text" data-k="keywords" value="mobility, bike sharing, Heidelberg" style="width:100%"></label>
+        <label>Description<br><input type="text" data-k="desc" value="Anonymized trip records (start, end, duration) of a city bike-sharing scheme." style="width:100%"></label>
+        <label>License<br><select data-k="license"><option>CC-BY-4.0</option><option>CC0-1.0</option><option>CC-BY-NC-4.0</option><option>Restricted (data use agreement)</option></select></label>
+        <label>File format<br><input type="text" data-k="format" value="text/csv" style="width:100%"></label>
+      </div>
+      <div>
+        <div class="tabs" data-group="mdout"><button class="on" data-tab="x">DataCite XML</button><button data-tab="j">schema.org JSON-LD</button></div>
+        <div class="tabpanel on" data-group="mdout" data-tab="x"><pre><code id="mdXml"></code></pre></div>
+        <div class="tabpanel" data-group="mdout" data-tab="j"><pre><code id="mdJson"></code></pre></div>
+        <div class="feedback show" id="mdCheck"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="chap" id="practice" data-title="Practicals & exercise">
+  <div class="sec-head"><div><div class="secnum">Section 10</div><h2>Practicals &amp; home exercise — with hints</h2></div></div>
+  <div class="grid3">
+    <div class="card"><span class="tag">In class · 15–20 min</span><h4>Practical 1: Lifecycle mapping</h4><p>Pick an organization, sketch all 6 stages, mark each as operations vs. analysis.</p><details class="reveal"><summary>Hint</summary>Use the lifecycle widget in Section 2. "Create/collect" and "Store" are usually operational; "Analyze &amp; model" is analytical; "Process &amp; integrate" is the bridge.</details></div>
+    <div class="card"><span class="tag">In class · 15–20 min</span><h4>Practical 2: OLTP/OLAP, ETL/ELT</h4><p>Classify instructor scenarios and justify with this chapter's characteristics.</p><details class="reveal"><summary>Hint</summary>Ask: Is it many small writes on current data (OLTP) or big reads over history (OLAP)? Is raw data kept and transformed later (ELT) or cleaned before storing (ETL)?</details></div>
+    <div class="card"><span class="tag">Home · groups of 3–5</span><h4>Metadata record &amp; FAIR assessment</h4><p>Choose a public dataset, write DataCite XML or schema.org JSON-LD, run a FAIR assessment, note 2 strengths + 2 improvements.</p><details class="reveal"><summary>Hint</summary>Use the builder in Section 9 and the self-assessment in Section 7, then validate with F-UJI if your dataset has a DOI.</details></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="chap" id="links" data-title="Real-world links">
+  <div class="sec-head"><div><div class="secnum">Section 11</div><h2>Explore real applications</h2></div></div>
+  <div class="links">
+    <a href="https://www.go-fair.org/fair-principles/" target="_blank" rel="noopener"><b>GO FAIR</b><span>The full list of FAIR sub-principles (F1–R1.3)</span></a>
+    <a href="https://www.f-uji.net/" target="_blank" rel="noopener"><b>F-UJI</b><span>Automated FAIR assessment of a dataset by DOI</span></a>
+    <a href="https://datasetsearch.research.google.com/" target="_blank" rel="noopener"><b>Google Dataset Search</b><span>See Findable metadata in action</span></a>
+    <a href="https://archive.ics.uci.edu/" target="_blank" rel="noopener"><b>UCI ML Repository</b><span>Classic datasets, each with a DOI</span></a>
+    <a href="https://www.kaggle.com/datasets" target="_blank" rel="noopener"><b>Kaggle Datasets</b><span>Compare their metadata quality</span></a>
+    <a href="https://www.govdata.de/" target="_blank" rel="noopener"><b>GovData.de</b><span>German open government data portal</span></a>
+    <a href="https://www.nfdi.de/" target="_blank" rel="noopener"><b>NFDI</b><span>Germany's National Research Data Infrastructure</span></a>
+    <a href="https://www.snowflake.com/en/data-cloud/workloads/data-warehouse/" target="_blank" rel="noopener"><b>Snowflake</b><span>Cloud data warehouse</span></a>
+    <a href="https://cloud.google.com/bigquery" target="_blank" rel="noopener"><b>Google BigQuery</b><span>Serverless warehouse with free public datasets</span></a>
+    <a href="https://delta.io/" target="_blank" rel="noopener"><b>Delta Lake</b><span>Open table format behind lakehouses</span></a>
+    <a href="https://iceberg.apache.org/" target="_blank" rel="noopener"><b>Apache Iceberg</b><span>Open table format used by Netflix, Apple…</span></a>
+    <a href="https://www.getdbt.com/" target="_blank" rel="noopener"><b>dbt</b><span>The "T" in modern ELT (Chapter 3)</span></a>
+    <a href="https://hl7.org/fhir/" target="_blank" rel="noopener"><b>HL7 FHIR</b><span>Interoperable health records standard</span></a>
+    <a href="https://schema.datacite.org/" target="_blank" rel="noopener"><b>DataCite Schema</b><span>Official metadata schema documentation</span></a>
+    <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener"><b>Course repository</b><span>Notebooks, exercises, datasets</span></a>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="chap" id="quiz" data-title="Self-check quiz">
+  <div class="sec-head"><div><div class="secnum">Section 12</div><h2>Self-check quiz</h2></div></div>
+  <div id="quizBox"></div>
+</section>
+</main></div>
+
+<footer class="foot">Data Management · Prof. Dr. Mehrdad Jalali · SRH University of Applied Sciences Heidelberg · Course repository: <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener">github.com/MehrdadJalali-AI/DataManagement</a></footer>
+<script>// ---------- shared helpers for all chapter pages ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// theme
+(function () {
+  const saved = store.get('dm-theme', null);
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  const b = $('#themeBtn');
+  if (!b) return;
+  const label = () => {
+    const t = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    b.textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
+  };
+  label();
+  b.onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const nxt = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nxt);
+    store.set('dm-theme', nxt); label();
+  };
+})();
+
+// TOC, scroll spy, progress, "mark as understood"
+(function () {
+  const toc = $('#tocList'); const secs = $$('section.chap');
+  const key = 'dm-done-' + (document.body.dataset.chapter || 'x');
+  const done = new Set(store.get(key, []));
+  secs.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + s.id; a.innerHTML = '<span class="dot"></span>' + esc(s.dataset.title || s.id);
+    if (done.has(s.id)) a.classList.add('done');
+    toc && toc.appendChild(a);
+    const head = s.querySelector('.sec-head');
+    if (head) {
+      const b = document.createElement('button'); b.className = 'donebtn';
+      const paint = () => { b.classList.toggle('on', done.has(s.id)); b.textContent = done.has(s.id) ? '✓ Understood' : 'Mark as understood'; a.classList.toggle('done', done.has(s.id)); updCount(); };
+      b.onclick = () => { done.has(s.id) ? done.delete(s.id) : done.add(s.id); store.set(key, [...done]); paint(); };
+      head.appendChild(b); setTimeout(paint);
+    }
+  });
+  function updCount() { const c = $('#doneCount'); if (c) c.textContent = done.size + ' / ' + secs.length + ' sections understood'; }
+  const links = toc ? $$('a', toc) : [];
+  const onScroll = () => {
+    const h = document.documentElement; const p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+    const bar = $('#progress'); if (bar) bar.style.width = (p * 100) + '%';
+    let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) cur = i; });
+    links.forEach((l, i) => l.classList.toggle('active', i === cur));
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+})();
+
+// tabs: <div class="tabs" data-group="x"><button data-tab="a">..</button></div> + <div class="tabpanel" data-group="x" data-tab="a">
+document.addEventListener('click', e => {
+  const b = e.target.closest('.tabs button'); if (!b) return;
+  const g = b.parentElement.dataset.group;
+  $$('.tabs[data-group="' + g + '"] button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.tabpanel[data-group="' + g + '"]').forEach(p => p.classList.toggle('on', p.dataset.tab === b.dataset.tab));
+});
+
+// copy buttons on code
+function addCopy(root = document) {
+  $$('pre', root).forEach(p => {
+    if (p.querySelector('.copy')) return;
+    const b = document.createElement('button'); b.className = 'copy'; b.textContent = 'Copy';
+    b.onclick = () => { const t = p.querySelector('code') ? p.querySelector('code').innerText : p.innerText.replace(/Copy$/, ''); navigator.clipboard && navigator.clipboard.writeText(t); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1200); };
+    p.appendChild(b);
+  });
+}
+addCopy();
+
+// quiz engine: renderQuiz('#el', [{q, opts:[...], a: idx, why}])
+function renderQuiz(sel, items) {
+  const root = $(sel); if (!root) return; root.classList.add('quiz');
+  let right = 0, answered = 0;
+  const sc = document.createElement('p'); sc.className = 'score';
+  const upd = () => sc.textContent = `Score: ${right} / ${items.length}` + (answered === items.length ? (right === items.length ? ' — perfect! 🎉' : ' — review the explanations and try again.') : '');
+  items.forEach((it, qi) => {
+    const d = document.createElement('div'); d.className = 'q';
+    d.innerHTML = `<p>${qi + 1}. ${it.q}</p><div class="opts"></div><div class="why">💡 ${it.why}</div>`;
+    const o = d.querySelector('.opts');
+    it.opts.forEach((t, i) => {
+      const b = document.createElement('button'); b.innerHTML = t;
+      b.onclick = () => {
+        if (d.classList.contains('answered')) return;
+        d.classList.add('answered'); answered++;
+        if (i === it.a) { b.classList.add('right'); right++; } else { b.classList.add('wrong'); o.children[it.a].classList.add('right'); }
+        upd();
+      };
+      o.appendChild(b);
+    });
+    root.appendChild(d);
+  });
+  const r = document.createElement('button'); r.className = 'btn'; r.textContent = '↺ Reset quiz';
+  r.onclick = () => { root.innerHTML = ''; renderQuiz(sel, items); };
+  root.appendChild(sc); root.appendChild(r); upd();
+}
+
+// sorter engine (click a chip, then click a bucket — or drag): makeSorter('#el', cats:[{id,label}], items:[{t, c, why?}])
+function makeSorter(sel, cats, items) {
+  const root = $(sel); if (!root) return;
+  root.innerHTML = `<div class="pool small">Click an item, then click the box it belongs to (or drag it).</div><div class="sorter"></div><div class="btnrow"><button class="btn primary chk">Check answers</button><button class="btn rst">Reset</button></div><div class="feedback"></div>`;
+  const pool = $('.pool', root), sorter = $('.sorter', root), fb = $('.feedback', root);
+  let selected = null;
+  const shuffled = items.map((x, i) => ({ ...x, i })).sort(() => Math.random() - .5);
+  shuffled.forEach(it => {
+    const c = document.createElement('span'); c.className = 'chip'; c.textContent = it.t; c.draggable = true; c.dataset.c = it.c; c.dataset.i = it.i;
+    if (it.why) c.title = it.why;
+    c.onclick = e => { e.stopPropagation(); $$('.chip', root).forEach(x => x.classList.remove('sel')); selected = c; c.classList.add('sel'); };
+    c.ondragstart = ev => { selected = c; ev.dataTransfer.setData('text', it.i); };
+    pool.appendChild(c);
+  });
+  cats.forEach(cat => {
+    const b = document.createElement('div'); b.className = 'bucket'; b.dataset.id = cat.id; b.innerHTML = `<h5>${cat.label}</h5>`;
+    const drop = () => { if (selected) { b.appendChild(selected); selected.classList.remove('sel', 'right', 'wrong'); selected = null; } };
+    b.onclick = drop;
+    b.ondragover = e => { e.preventDefault(); b.classList.add('over'); };
+    b.ondragleave = () => b.classList.remove('over');
+    b.ondrop = e => { e.preventDefault(); b.classList.remove('over'); drop(); };
+    sorter.appendChild(b);
+  });
+  pool.onclick = () => { if (selected) { pool.appendChild(selected); selected.classList.remove('sel'); selected = null; } };
+  $('.chk', root).onclick = () => {
+    let ok = 0, placed = 0;
+    $$('.bucket .chip', root).forEach(c => { placed++; const good = c.parentElement.dataset.id === c.dataset.c; c.classList.toggle('right', good); c.classList.toggle('wrong', !good); if (good) ok++; });
+    fb.className = 'feedback show ' + (ok === items.length ? 'ok' : 'info');
+    fb.textContent = ok === items.length ? `All ${ok} correct — well done!` : `${ok} of ${items.length} correct (${items.length - placed} not placed yet). Red items are in the wrong box — hover them for a hint.`;
+  };
+  $('.rst', root).onclick = () => makeSorter(sel, cats, items);
+}
+
+// tiny syntax highlighter for python / sql / yaml snippets marked data-hl
+function hl(code, lang) {
+  let s = esc(code);
+  if (lang === 'py' || lang === 'sql') {
+    s = s.replace(/(#.*|--.*)$/gm, '<span class="c-c">$1</span>');
+    s = s.replace(/(&quot;.*?&quot;|'[^'\n]*')/g, '<span class="c-s">$1</span>');
+    const kw = lang === 'py' ? 'def|return|import|from|as|for|in|if|else|try|except|with|lambda|True|False|None|print' : 'SELECT|FROM|WHERE|GROUP BY|ORDER BY|JOIN|LEFT JOIN|ON|AS|WITH|SUM|COUNT|AND|OR|MATCH|RETURN|PREFIX';
+    s = s.replace(new RegExp('\\b(' + kw + ')\\b', 'g'), '<span class="c-k">$1</span>');
+  } else if (lang === 'yaml') {
+    s = s.replace(/(#.*)$/gm, '<span class="c-c">$1</span>').replace(/^(\s*-?\s*)([\w_]+):/gm, '$1<span class="c-k">$2</span>:');
+  }
+  return s;
+}
+$$('pre code[data-hl]').forEach(c => { c.innerHTML = hl(c.textContent, c.dataset.hl); });
+</script>
+<script>
+// ---- lifecycle ----
+const LC = [
+  { n: 'Create / collect', s: 'Apps, sensors, forms', side: 'ops' },
+  { n: 'Store', s: 'Database, warehouse, lake, lakehouse', side: 'ops' },
+  { n: 'Process & integrate', s: 'Cleaned and combined via ETL / ELT', side: 'bridge' },
+  { n: 'Analyze & model', s: 'Reporting, dashboards (OLAP), ML', side: 'ana' },
+  { n: 'Share & publish', s: 'Repository, DOI, license', side: 'ana' },
+  { n: 'Preserve & reuse', s: 'Archived, versioned, citable', side: 'ana' }
+];
+const LCX = {
+  shop: ['Customers place orders in the web shop; clickstream events are logged.', 'Orders in PostgreSQL (OLTP); click logs as JSON in an S3 data lake.', 'Nightly ELT joins orders + customers + clicks, removes test orders and duplicates.', 'Dashboard of revenue by region; a recommender model trained on purchase history.', 'Sales KPIs shared with management; an anonymized dataset published for a university partner.', 'Yearly snapshots archived with a version tag so last year’s forecast can be reproduced.'],
+  hosp: ['Admissions, lab results and vital-sign monitors create patient records.', 'Electronic Health Record (EHR) database; imaging in a PACS archive.', 'Records converted to HL7 FHIR, coded with LOINC, de-identified.', 'Yearly patient statistics, readmission risk model.', 'Ethics-approved research cohort published with restricted access + DOI.', 'Retained under legal retention rules; cohort reused by later studies.'],
+  uni: ['Students register for courses; Moodle logs activity; exams are graded.', 'Campus management system (OLTP) + Moodle database.', 'Grades and enrolment data integrated per semester into a warehouse.', 'Pass rates by semester; early-warning model for drop-out risk.', 'Anonymized statistics reported to the ministry / accreditation.', 'Transcripts archived for decades; historical data reused for curriculum planning.']
+};
+const sideTag = { ops: '<span class="tag blue">Mainly operations (OLTP)</span>', bridge: '<span class="tag green">Bridge (ETL/ELT)</span>', ana: '<span class="tag purple">Mainly analysis (OLAP)</span>' };
+let lcSel = 0;
+function drawLC() {
+  const org = $('#lcOrg').value, f = $('#lcFlow'); f.innerHTML = '';
+  LC.forEach((st, i) => {
+    const d = document.createElement('div'); d.className = 'step' + (i === lcSel ? ' on' : '');
+    d.innerHTML = `<b>${i + 1}. ${st.n}</b><small>${st.s}</small>`; d.onclick = () => { lcSel = i; drawLC(); };
+    f.appendChild(d);
+    if (i < LC.length - 1) { const a = document.createElement('span'); a.className = 'arrow'; a.textContent = '→'; f.appendChild(a); }
+  });
+  const a = document.createElement('span'); a.className = 'arrow'; a.textContent = '↺'; a.title = 'Preserved data feeds new cycles'; f.appendChild(a);
+  $('#lcDetail').innerHTML = `<h4>${lcSel + 1}. ${LC[lcSel].n}</h4><p>${LCX[org][lcSel]}</p>${sideTag[LC[lcSel].side]} <span class="small">· Across every stage: metadata · quality checks · provenance &amp; governance</span>`;
+}
+$('#lcOrg').onchange = drawLC; drawLC();
+
+// ---- sorters ----
+makeSorter('#sortOltp', [{ id: 'oltp', label: 'OLTP — run the business' }, { id: 'olap', label: 'OLAP — understand the business' }], [
+  { t: 'ATM cash withdrawal', c: 'oltp' }, { t: 'Fraud patterns over 3 years', c: 'olap' }, { t: 'Booking a doctor appointment', c: 'oltp' },
+  { t: 'Pass rates by semester', c: 'olap' }, { t: 'Adding an item to the cart', c: 'oltp' }, { t: 'Sales trend by region & month', c: 'olap' },
+  { t: 'Registering for a course', c: 'oltp' }, { t: 'Yearly patient statistics dashboard', c: 'olap' }, { t: 'Updating stock after a sale', c: 'oltp' }
+]);
+makeSorter('#sortEtl', [{ id: 'etl', label: 'Closer to ETL' }, { id: 'elt', label: 'Closer to ELT' }], [
+  { t: 'Mask patient names before anything is stored', c: 'etl', why: 'Regulated data: transform before load' },
+  { t: 'Dump raw JSON app events into BigQuery, model them later with SQL/dbt', c: 'elt' },
+  { t: 'Informatica job cleans ERP data, then loads an on-prem warehouse', c: 'etl' },
+  { t: 'Keep all raw IoT sensor readings in a lakehouse; re-run transforms when rules change', c: 'elt' },
+  { t: 'Fivetran copies Salesforce tables into Snowflake as-is', c: 'elt' },
+  { t: 'Bank converts currencies and validates IBANs in a staging server before loading', c: 'etl' }
+]);
+makeSorter('#sortVar', [{ id: 's', label: 'Structured' }, { id: 'm', label: 'Semi-structured' }, { id: 'u', label: 'Unstructured' }], [
+  { t: 'Customer table in PostgreSQL', c: 's' }, { t: 'REST API JSON response', c: 'm' }, { t: 'Product photos', c: 'u' },
+  { t: 'Bank transactions CSV', c: 's' }, { t: 'XML invoice', c: 'm' }, { t: 'Call-center recordings', c: 'u' },
+  { t: 'Web server log lines (key=value)', c: 'm' }, { t: 'Customer support emails', c: 'u' }, { t: 'Excel sheet of exam grades', c: 's' }
+]);
+makeSorter('#sortMeta', [{ id: 'd', label: 'Descriptive' }, { id: 's', label: 'Structural' }, { id: 'a', label: 'Administrative' }], [
+  { t: 'Title', c: 'd' }, { t: 'Abstract', c: 'd' }, { t: 'Keywords', c: 'd' }, { t: 'Column data types', c: 's' }, { t: 'File format (CSV, Parquet)', c: 's' },
+  { t: 'Primary / foreign keys', c: 's' }, { t: 'License', c: 'a' }, { t: 'Access restrictions', c: 'a' }, { t: 'Version number', c: 'a' }, { t: 'Author', c: 'd' }
+]);
+
+// ---- ETL/ELT animation ----
+function drawEtl(mode) {
+  const box = (x, label, sub, col) => `<g><rect x="${x}" y="45" width="150" height="70" rx="12" fill="var(--surface)" stroke="${col}" stroke-width="2"/><text x="${x + 75}" y="76" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">${label}</text><text x="${x + 75}" y="97" text-anchor="middle" font-size="11" fill="var(--muted)">${sub}</text></g>`;
+  const arr = x => `<g><line x1="${x}" y1="80" x2="${x + 48}" y2="80" stroke="var(--muted)" stroke-width="2" marker-end="url(#ah)"/><circle r="5" fill="var(--accent)"><animate attributeName="cx" from="${x}" to="${x + 46}" dur="1.2s" repeatCount="indefinite"/><animate attributeName="cy" values="80;80" dur="1.2s" repeatCount="indefinite"/></circle></g>`;
+  const defs = `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>`;
+  let s;
+  if (mode === 'etl') {
+    s = defs + box(10, 'Sources', 'OLTP, files, APIs', 'var(--muted)') + arr(165) + box(215, 'Transform', 'in an ETL tool', 'var(--blue)') + arr(370) + box(420, 'Warehouse', 'clean data only', 'var(--blue)')
+      + `<text x="380" y="150" text-anchor="middle" font-size="12" font-style="italic" fill="var(--blue)">clean first, then store</text>`;
+    $('#etlText').textContent = 'ETL: data is cleaned in a separate tool before it reaches the warehouse. The warehouse never sees raw data — good for regulated data, but you cannot re-run a transformation on raw data you never kept.';
+  } else {
+    s = defs + box(10, 'Sources', 'OLTP, files, APIs', 'var(--muted)') + arr(165) + `<rect x="210" y="25" width="380" height="110" rx="14" fill="none" stroke="var(--green)" stroke-dasharray="6 5"/><text x="400" y="18" text-anchor="middle" font-size="12" fill="var(--green)" font-weight="700">Warehouse / lakehouse</text>` + box(220, 'Raw data', 'kept as loaded', 'var(--green)') + arr(375) + box(430, 'Transform', 'with SQL (dbt)', 'var(--green)')
+      + `<text x="400" y="158" text-anchor="middle" font-size="12" font-style="italic" fill="var(--green)">store first, then clean</text>`;
+    $('#etlText').textContent = 'ELT: raw data lands in the warehouse/lakehouse first and is transformed there with SQL. Raw data is kept, so transformations can be fixed and re-run at any time.';
+  }
+  $('#etlSvg').innerHTML = s;
+}
+$$('[data-mode]').forEach(b => b.onclick = () => { $$('[data-mode]').forEach(x => x.classList.toggle('sel', x === b)); drawEtl(b.dataset.mode); });
+drawEtl('etl');
+
+// ---- architecture advisor ----
+const ADV = [
+  { q: 'What data do you mostly have?', o: [['Structured tables only', { wh: 2 }], ['Mix of tables, JSON, logs', { lh: 2, lk: 1 }], ['Lots of images/text/video', { lk: 2, lh: 1 }]] },
+  { q: 'Who uses the data?', o: [['Business analysts & BI dashboards', { wh: 2 }], ['Data scientists & ML', { lk: 2, lh: 1 }], ['Both BI and ML', { lh: 3 }]] },
+  { q: 'How important is governance (ACID, access control)?', o: [['Critical (finance, health)', { wh: 2, lh: 2 }], ['Nice to have; exploration first', { lk: 2 }]] },
+  { q: 'Budget for storage at scale?', o: [['Tight — terabytes of raw data', { lk: 2, lh: 2 }], ['Fine — data volume is modest', { wh: 1 }]] }
+];
+const advAns = {};
+function drawAdv() {
+  const r = $('#advisor'); r.innerHTML = '';
+  ADV.forEach((x, qi) => {
+    const d = document.createElement('div'); d.innerHTML = `<b class="small">${qi + 1}. ${x.q}</b>`;
+    const row = document.createElement('div'); row.className = 'btnrow';
+    x.o.forEach((o, oi) => { const b = document.createElement('button'); b.className = 'btn' + (advAns[qi] === oi ? ' sel' : ''); b.textContent = o[0]; b.onclick = () => { advAns[qi] = oi; drawAdv(); }; row.appendChild(b); });
+    d.appendChild(row); r.appendChild(d);
+  });
+  const sc = { wh: 0, lk: 0, lh: 0 };
+  Object.entries(advAns).forEach(([qi, oi]) => Object.entries(ADV[qi].o[oi][1]).forEach(([k, v]) => sc[k] += v));
+  const out = $('#advOut');
+  if (Object.keys(advAns).length < ADV.length) { out.classList.add('show'); out.textContent = `Answer all ${ADV.length} questions (${Object.keys(advAns).length} done).`; return; }
+  const best = Object.entries(sc).sort((a, b) => b[1] - a[1])[0][0];
+  const txt = {
+    wh: '🏛 <b>Data warehouse</b> (e.g. Snowflake, BigQuery, Redshift). Structured data, BI users and strong governance — schema-on-write gives clean, fast, trusted reporting.',
+    lk: '🌊 <b>Data lake</b> (e.g. S3/ADLS + Spark). Cheap storage for raw, varied data for data science. Warning: without a catalog and governance it can turn into a data swamp.',
+    lh: '🏠 <b>Lakehouse</b> (e.g. Databricks / Delta Lake, Apache Iceberg). One low-cost copy of raw + structured data, ACID tables and governance, serving both BI and ML.'
+  };
+  out.classList.add('show'); out.innerHTML = txt[best] + `<br><span class="small">Scores — warehouse ${sc.wh}, lake ${sc.lk}, lakehouse ${sc.lh}</span>`;
+}
+drawAdv();
+
+// ---- FAIR self assessment ----
+const FAIRQ = [
+  ['F', 'Has a persistent identifier (DOI, Handle, ARK)'], ['F', 'Has rich metadata (title, description, keywords, creator)'], ['F', 'Is registered in a searchable catalog / repository'],
+  ['A', 'Retrievable via a standard protocol (HTTPS, API)'], ['A', 'Access conditions are clearly stated (open or restricted)'], ['A', 'Metadata stays available even if data is removed'],
+  ['I', 'Uses an open, standard format (CSV, JSON, Parquet — not a proprietary binary)'], ['I', 'Uses shared vocabularies / codes (ISO country codes, LOINC, units)'], ['I', 'Links to related data via identifiers'],
+  ['R', 'Has a clear license (e.g. CC-BY-4.0)'], ['R', 'Has provenance (source, processing steps)'], ['R', 'Has documentation (README, codebook / data dictionary)']
+];
+const fairState = store.get('dm-fair', FAIRQ.map(() => false));
+function drawFair() {
+  const c = $('#fairChecks'); c.innerHTML = '';
+  FAIRQ.forEach(([p, t], i) => { const l = document.createElement('label'); l.className = 'card'; l.style.padding = '8px 12px'; l.innerHTML = `<input type="checkbox" ${fairState[i] ? 'checked' : ''}> <span class="tag">${p}</span> ${t}`; l.querySelector('input').onchange = e => { fairState[i] = e.target.checked; store.set('dm-fair', fairState); drawFair(); }; c.appendChild(l); });
+  const names = { F: 'Findable', A: 'Accessible', I: 'Interoperable', R: 'Reusable' }; let html = '', weak = [];
+  ['F', 'A', 'I', 'R'].forEach(p => { const idx = FAIRQ.map((q, i) => q[0] === p ? i : -1).filter(i => i >= 0); const v = idx.filter(i => fairState[i]).length / idx.length; if (v < 1) weak.push(...idx.filter(i => !fairState[i])); html += `<div style="display:grid;grid-template-columns:110px 1fr 46px;gap:8px;align-items:center;margin:4px 0"><span>${names[p]}</span><div class="meter"><div style="width:${v * 100}%"></div></div><b>${Math.round(v * 100)}%</b></div>`; });
+  $('#fairBars').innerHTML = html;
+  $('#fairAdvice').innerHTML = weak.length ? '<b>Suggested improvements:</b> ' + weak.slice(0, 3).map(i => FAIRQ[i][1]).join(' · ') : '🎉 Fully FAIR on this checklist!';
+}
+drawFair();
+
+// ---- DOI anatomy ----
+function drawDoi() {
+  const v = $('#doiIn').value.trim(); const m = v.match(/(10\.\d{4,9})\/(\S+)/);
+  if (!m) { $('#doiOut').innerHTML = '<span class="bad" style="padding:2px 6px;border-radius:6px">Not a valid DOI — DOIs start with "10." followed by a registrant number, a slash and a suffix.</span>'; return; }
+  const reg = { '10.5281': 'Zenodo (CERN)', '10.24432': 'UCI Machine Learning Repository', '10.6084': 'Figshare', '10.5061': 'Dryad', '10.7910': 'Harvard Dataverse', '10.1038': 'Nature (Springer Nature)' }[m[1]] || 'look it up at doi.org';
+  $('#doiOut').innerHTML = `<div class="grid3"><div class="card"><span class="tag">Resolver</span><p><code>https://doi.org/</code><br><span class="small">Redirects to wherever the object lives today</span></p></div><div class="card"><span class="tag blue">Prefix</span><p><code>${esc(m[1])}</code><br><span class="small">Registrant: ${reg}</span></p></div><div class="card"><span class="tag green">Suffix</span><p><code>${esc(m[2])}</code><br><span class="small">Chosen by the registrant, unique within the prefix</span></p></div></div><p style="margin-top:8px"><a href="https://doi.org/${encodeURI(m[1] + '/' + m[2])}" target="_blank" rel="noopener">Resolve this DOI ↗</a></p>`;
+}
+$('#doiIn').oninput = drawDoi; drawDoi();
+
+// ---- metadata builder ----
+function drawMd() {
+  const v = {}; $$('#mdForm [data-k]').forEach(i => v[i.dataset.k] = i.value.trim());
+  const kws = v.keywords.split(',').map(s => s.trim()).filter(Boolean);
+  const lic = { 'CC-BY-4.0': 'https://creativecommons.org/licenses/by/4.0/', 'CC0-1.0': 'https://creativecommons.org/publicdomain/zero/1.0/', 'CC-BY-NC-4.0': 'https://creativecommons.org/licenses/by-nc/4.0/' }[v.license] || '';
+  const x = `<resource xmlns="http://datacite.org/schema/kernel-4">
+  <identifier identifierType="DOI">${esc(v.doi)}</identifier>
+  <creators>
+    <creator><creatorName>${esc(v.creator)}</creatorName></creator>
+  </creators>
+  <titles><title>${esc(v.title)}</title></titles>
+  <publisher>${esc(v.publisher)}</publisher>
+  <publicationYear>${esc(v.year)}</publicationYear>
+  <resourceType resourceTypeGeneral="Dataset">Dataset</resourceType>
+  <subjects>
+${kws.map(k => `    <subject>${esc(k)}</subject>`).join('\n')}
+  </subjects>
+  <formats><format>${esc(v.format)}</format></formats>
+  <rightsList><rights${lic ? ` rightsURI="${lic}"` : ''}>${esc(v.license)}</rights></rightsList>
+  <descriptions>
+    <description descriptionType="Abstract">${esc(v.desc)}</description>
+  </descriptions>
+</resource>`;
+  const parts = v.creator.split(',').map(s => s.trim());
+  const j = { '@context': 'https://schema.org', '@type': 'Dataset', name: v.title, description: v.desc, identifier: v.doi ? 'https://doi.org/' + v.doi : undefined, creator: { '@type': 'Person', familyName: parts[0], givenName: parts[1] || '' }, publisher: { '@type': 'Organization', name: v.publisher }, datePublished: v.year, keywords: kws, license: lic || v.license, distribution: { '@type': 'DataDownload', encodingFormat: v.format } };
+  $('#mdXml').textContent = x;
+  $('#mdJson').textContent = '<script type="application/ld+json">\n' + JSON.stringify(j, null, 2) + '\n</' + 'script>';
+  const miss = [['title', 'title'], ['creator', 'creator'], ['publisher', 'publisher'], ['year', 'publicationYear'], ['doi', 'identifier (DOI)']].filter(([k]) => !v[k]).map(x => x[1]);
+  const c = $('#mdCheck'); c.className = 'feedback show ' + (miss.length ? 'no' : 'ok');
+  c.textContent = miss.length ? 'Missing DataCite mandatory fields: ' + miss.join(', ') : '✓ All DataCite mandatory properties present (identifier, creator, title, publisher, publicationYear, resourceType).';
+  addCopy($('#metadata'));
+}
+$$('#mdForm [data-k]').forEach(i => i.oninput = i.onchange = drawMd); drawMd();
+
+// ---- quiz ----
+renderQuiz('#quizBox', [
+  { q: 'An online shop’s checkout inserts an order row, reduces stock by 1 and records the payment. This is…', opts: ['OLAP', 'OLTP', 'ELT', 'A data lake'], a: 1, why: 'Many small, fast writes on current data, in milliseconds — classic OLTP.' },
+  { q: 'Which statement best describes ELT?', opts: ['Data is cleaned in a separate tool and only clean data is stored', 'Raw data is loaded first and transformed inside the warehouse/lakehouse', 'Data is never transformed', 'It is only used for unstructured data'], a: 1, why: 'Extract → Load → Transform: raw data is kept, and transformations (often SQL/dbt) can be re-run.' },
+  { q: 'A company needs BI dashboards AND ML on the same low-cost copy of data with ACID guarantees. Best fit?', opts: ['Data warehouse', 'Data lake', 'Lakehouse', 'Spreadsheet'], a: 2, why: 'A lakehouse adds a metadata/governance layer (Delta Lake, Iceberg) to cheap lake storage, serving BI and ML.' },
+  { q: '“Schema-on-read” is typical of…', opts: ['Data warehouses', 'Data lakes', 'OLTP databases', 'DOIs'], a: 1, why: 'Lakes store raw files and decide the structure later, when the data is read.' },
+  { q: 'Patient data is only available to approved researchers under a data use agreement, but its metadata is public. Can it be FAIR?', opts: ['No — FAIR requires open data', 'Yes — FAIR ≠ open, access rules just need to be clear', 'Only if it has no DOI', 'Only if it is in a data lake'], a: 1, why: 'Accessible means retrievable via a standard protocol under clear conditions — not necessarily open.' },
+  { q: 'Using LOINC codes and HL7 FHIR mainly improves…', opts: ['Findability', 'Accessibility', 'Interoperability', 'Storage cost'], a: 2, why: 'Standard formats and shared vocabularies let different systems combine the data.' },
+  { q: 'A license, provenance steps and a README mainly support…', opts: ['Reusability', 'Findability', 'OLTP speed', 'Schema-on-write'], a: 0, why: 'Reusable = clear license + provenance + quality + documentation.' },
+  { q: '“File format: Parquet; column order_date is DATE” is which kind of metadata?', opts: ['Descriptive', 'Structural', 'Administrative', 'Not metadata'], a: 1, why: 'Structural metadata describes how data is organized: formats, schema, types.' },
+  { q: 'In the DOI 10.5281/zenodo.1234567, “10.5281” is…', opts: ['The suffix', 'The prefix identifying the registrant (Zenodo)', 'A version number', 'The license'], a: 1, why: 'The prefix identifies the registrant; the suffix is chosen by the registrant.' },
+  { q: 'JSON from a REST API is…', opts: ['Structured', 'Semi-structured', 'Unstructured', 'Metadata only'], a: 1, why: 'Flexible, self-describing tags — semi-structured.' }
+]);
+</script>
+</body></html>

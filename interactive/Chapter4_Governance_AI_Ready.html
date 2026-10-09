@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch4 · Governance & AI-Ready Data</title>
+<style>:root{
+  --bg:#f7f5f2; --surface:#ffffff; --surface2:#f1eee9; --ink:#1f1d1a; --muted:#5f5a53; --line:#e3ded6;
+  --accent:#c9471a; --accent-soft:#fbe9e1; --blue:#1f5fa8; --blue-soft:#e6eef8; --green:#21794f; --green-soft:#e2f2ea;
+  --amber:#9a5a0f; --amber-soft:#fbf0de; --purple:#5a43a6; --purple-soft:#ece8f8; --red:#b42318; --red-soft:#fde8e6;
+  --code-bg:#1e1f24; --code-ink:#e8e6e3; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+  --radius:14px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface2);padding:.1em .35em;border-radius:5px}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5em}
+h2{font-size:1.65rem;letter-spacing:-.01em}
+h3{font-size:1.15rem}
+p{margin:0 0 1em}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
+.brand{font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.chapnav{display:flex;gap:6px;overflow-x:auto;flex:1}
+.chapnav a{padding:6px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:.9rem;white-space:nowrap;border:1px solid transparent}
+.chapnav a.on{background:var(--accent-soft);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);font-weight:600}
+.iconbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+.progress{height:3px;background:var(--accent);width:0;transition:width .1s}
+.hero{max-width:1240px;margin:0 auto;padding:48px 20px 24px}
+.hero .kicker{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+.hero h1{font-size:clamp(1.9rem,4vw,2.8rem);letter-spacing:-.02em;margin:.2em 0 .35em}
+.hero p.lead{font-size:1.12rem;color:var(--muted);max-width:760px}
+.objectives{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}
+.objectives div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.93rem}
+.objectives b{display:block;color:var(--accent);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;padding:0 20px 80px}
+.toc{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto;font-size:.9rem}
+.toc h4{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.toc a{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;color:var(--muted);text-decoration:none;border-left:2px solid transparent}
+.toc a.active{color:var(--ink);background:var(--surface);border-left-color:var(--accent)}
+.toc a .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.toc a.done .dot{background:var(--green);border-color:var(--green)}
+section.chap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;margin-bottom:24px;box-shadow:var(--shadow)}
+section.chap > .sec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
+.secnum{color:var(--accent);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.donebtn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.donebtn.on{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.card{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h4{margin-bottom:.3em}
+.card p:last-child{margin-bottom:0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.green{border-color:var(--green);background:var(--green-soft)}
+.callout.blue{border-color:var(--blue);background:var(--blue-soft)}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+.callout b:first-child{display:block;margin-bottom:2px}
+.analogy{display:flex;gap:12px;background:var(--purple-soft);border-radius:12px;padding:14px 16px;margin:16px 0}
+.analogy .ico{font-size:1.5rem;line-height:1}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.tag.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.tag.green{background:var(--green-soft);color:var(--green);border-color:transparent}
+.tag.amber{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.tag.red{background:var(--red-soft);color:var(--red);border-color:transparent}
+.tag.purple{background:var(--purple-soft);color:var(--purple);border-color:transparent}
+.widget{border:1px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:12px;padding:18px;margin:18px 0;background:var(--bg)}
+.widget > .wtitle{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
+.widget > .wtitle::before{content:"▶ TRY IT";font-size:.7rem;letter-spacing:.08em;background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:9px;cursor:pointer;font:inherit;font-size:.92rem}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+textarea{font-family:var(--mono);font-size:.85rem;width:100%}
+label{font-size:.9rem}
+input[type=range]{accent-color:var(--accent);width:100%}
+.tablewrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface2);font-weight:600;white-space:nowrap}
+td.bad,span.bad{background:var(--red-soft);color:var(--red)}
+td.good{background:var(--green-soft);color:var(--green)}
+td.warn{background:var(--amber-soft);color:var(--amber)}
+tr.hl td{background:var(--accent-soft)}
+td[contenteditable]{outline:none;cursor:text}
+td[contenteditable]:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.55 var(--mono);position:relative;margin:10px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .copy{position:absolute;top:8px;right:8px;font-size:.72rem;background:#ffffff1a;color:#ddd;border:1px solid #ffffff30;border-radius:6px;padding:2px 8px;cursor:pointer}
+.c-k{color:#f4a261}.c-s{color:#9ad59a}.c-c{color:#8b8f98;font-style:italic}.c-n{color:#82b8ff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{border:0;background:none;color:var(--muted);padding:9px 14px;cursor:pointer;font:inherit;font-size:.93rem;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabpanel{display:none}.tabpanel.on{display:block}
+details.reveal{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.reveal summary{cursor:pointer;font-weight:600}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.links a{display:block;text-decoration:none;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;transition:border-color .15s,transform .15s}
+.links a:hover{border-color:var(--accent);transform:translateY(-1px)}
+.links a b{display:block;color:var(--accent);font-size:.95rem}
+.links a span{font-size:.84rem;color:var(--muted)}
+.quiz .q{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.quiz .q p{font-weight:600;margin-bottom:8px}
+.quiz .opts{display:grid;gap:6px}
+.quiz .opts button{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:.93rem}
+.quiz .opts button.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.quiz .opts button.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.quiz .why{display:none;margin-top:8px;font-size:.9rem;color:var(--muted)}
+.quiz .q.answered .why{display:block}
+.score{font-weight:700;color:var(--accent)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .step{flex:1 1 130px;background:var(--surface2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;position:relative}
+.flow .step small{display:block;color:var(--muted);font-size:.8rem}
+.flow .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.flow .arrow{align-self:center;color:var(--muted)}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-soft);color:var(--green)}
+.feedback.no{background:var(--red-soft);color:var(--red)}
+.feedback.info{background:var(--blue-soft);color:var(--blue)}
+.meter{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.meter > div{height:100%;background:var(--green);transition:width .3s}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:1.5rem;font-weight:700}
+.kpi .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sorter{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.bucket{min-height:110px;border:2px dashed var(--line);border-radius:10px;padding:8px}
+.bucket h5{margin:0 0 6px;font-size:.85rem}
+.bucket.over{border-color:var(--accent);background:var(--accent-soft)}
+.chip{display:inline-block;margin:3px;padding:5px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;cursor:grab;user-select:none}
+.chip.sel{outline:2px solid var(--accent)}
+.chip.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.chip.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.pool{min-height:50px;padding:8px;border-radius:10px;background:var(--surface2);margin-bottom:10px}
+.small{font-size:.86rem;color:var(--muted)}
+.foot{max-width:1240px;margin:0 auto;padding:20px;color:var(--muted);font-size:.85rem;text-align:center}
+svg text{font-family:inherit}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .toc{display:none}
+  section.chap{padding:18px}
+  .hero{padding:28px 16px 16px}
+  .layout{padding:0 16px 60px}
+  .topbar-inner{padding:8px 16px}
+}
+@media print{.topbar,.toc,.widget,.donebtn{display:none}.layout{display:block}}
+@media (max-width:700px){#doneCount{display:none}.brand{display:none}}
+</style></head>
+<body data-chapter="4">
+<div class="topbar"><div class="topbar-inner"><a class="brand" href="#top">Data Management</a><nav class="chapnav"><a href="Chapter1_Foundations_FAIR.html" class="">Ch 1 · Foundations & FAIR</a><a href="Chapter2_Data_Quality_Preparation.html" class="">Ch 2 · Data Quality & Prep</a><a href="Chapter3_Reproducible_Pipelines.html" class="">Ch 3 · Pipelines</a><a href="Chapter4_Governance_AI_Ready.html" class="on">Ch 4 · Governance & AI</a></nav><span class="small" id="doneCount"></span><button class="iconbtn" id="themeBtn">☾ Dark</button></div><div class="progress" id="progress"></div></div>
+<header class="hero" id="top">
+  <div class="kicker">Chapter 4 · Interactive study guide</div>
+  <h1>Governance, Lineage &amp; AI-Ready Data</h1>
+  <p class="lead">Governance turns one careful analyst's good habits into an <b>organization-wide guarantee</b>: data that is findable, owned, traceable, protected, monitored — and therefore safe to build AI on.</p>
+  <div class="callout" style="max-width:760px">"A model is only as trustworthy as the governance behind the data it was trained on."</div>
+  <div class="objectives">
+    <div><b>You will be able to</b>Use catalogs, lineage and provenance</div>
+    <div><b>You will be able to</b>Write a data contract and monitor data health</div>
+    <div><b>You will be able to</b>Assign roles, classify and protect sensitive data</div>
+    <div><b>You will be able to</b>Assess AI-readiness and model data as a graph</div>
+  </div>
+</header>
+<div class="layout">
+<aside class="toc"><h4>In this chapter</h4><nav id="tocList"></nav></aside>
+<main>
+
+<section class="chap" id="pyramid" data-title="Trusted data → trustworthy AI">
+  <div class="sec-head"><div><div class="secnum">Section 1</div><h2>From trusted data to trustworthy AI</h2></div></div>
+  <div class="grid2" style="align-items:center">
+    <svg viewBox="0 0 360 230" width="100%" role="img" aria-label="Three-layer pyramid">
+      <polygon points="180,10 250,80 110,80" fill="var(--purple-soft)" stroke="var(--purple)" stroke-width="2"/>
+      <text x="180" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Trustworthy AI</text>
+      <polygon points="110,85 250,85 305,150 55,150" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/>
+      <text x="180" y="122" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Trusted datasets</text>
+      <polygon points="55,155 305,155 355,220 5,220" fill="var(--green-soft)" stroke="var(--green)" stroke-width="2"/>
+      <text x="180" y="192" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Governed data</text>
+    </svg>
+    <div>
+      <div class="card" style="margin-bottom:8px"><span class="tag purple">Top</span> <b>Trustworthy AI</b> — explainable, auditable, reproducible</div>
+      <div class="card" style="margin-bottom:8px"><span class="tag blue">Middle</span> <b>Trusted datasets</b> — documented, tested, versioned, traceable (Ch. 2–3)</div>
+      <div class="card"><span class="tag green">Base</span> <b>Governed data</b> — clear owners, access rules, contracts (this chapter)</div>
+    </div>
+  </div>
+</section>
+
+<section class="chap" id="catalog" data-title="Metadata & data catalogs">
+  <div class="sec-head"><div><div class="secnum">Section 2</div><h2>Metadata management &amp; data catalogs</h2></div></div>
+  <p>A <b>data catalog</b> is a searchable inventory of an organization's datasets, built from their metadata. Anyone can discover <b>what data exists, what it means and whether they may use it</b> — without asking around. It combines <span class="tag green">business context</span> (owner, description, glossary terms, sensitivity) and <span class="tag blue">technical context</span> (schema, location, update frequency, quality score).</p>
+  <div class="callout amber"><b>"Dark data"</b>Without a catalog, metadata exists but nobody can find it — teams rebuild datasets that already exist, or use the wrong one.</div>
+  <div class="widget">
+    <div class="wtitle">Search the company data catalog</div>
+    <div class="btnrow"><input type="text" id="catQ" placeholder="Try: revenue, customer, email, sensor…" style="flex:1;min-width:200px"><select id="catS"><option value="">All sensitivity levels</option><option>Public</option><option>Internal</option><option>Confidential</option><option>Restricted</option></select></div>
+    <div id="catOut"></div>
+  </div>
+  <p class="small">Real catalogs: <a href="https://datahubproject.io/" target="_blank" rel="noopener">DataHub</a> (LinkedIn), <a href="https://open-metadata.org/" target="_blank" rel="noopener">OpenMetadata</a>, <a href="https://www.amundsen.io/" target="_blank" rel="noopener">Amundsen</a> (Lyft), <a href="https://www.databricks.com/product/unity-catalog" target="_blank" rel="noopener">Databricks Unity Catalog</a>, <a href="https://learn.microsoft.com/en-us/purview/" target="_blank" rel="noopener">Microsoft Purview</a>, Collibra.</p>
+</section>
+
+<section class="chap" id="lineage" data-title="Lineage & provenance">
+  <div class="sec-head"><div><div class="secnum">Section 3</div><h2>Data lineage &amp; provenance</h2></div></div>
+  <div class="grid2">
+    <div class="card"><span class="tag blue">Lineage</span><p>How data <b>moves</b> through a pipeline: which step reads what, and writes where. Used for <b>impact analysis</b>: "what does this feed?"</p></div>
+    <div class="card"><span class="tag purple">Provenance</span><p>Where each value <b>ultimately came from</b>, and how it was produced. Used for <b>root cause</b>: "where did this number come from?" — increasingly expected by regulators for AI decisions.</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Impact analysis: break something upstream</div>
+    <p class="small">Pick an upstream event. The lineage graph shows every asset at risk, and where to detect it (Practical 1).</p>
+    <div class="btnrow" id="impBtns"></div>
+    <svg id="impDag" viewBox="0 0 900 300" width="100%"></svg>
+    <div class="feedback show info" id="impOut"></div>
+  </div>
+  <details class="reveal"><summary>What an OpenLineage event looks like</summary>
+<pre><code>{
+  "eventType": "COMPLETE",
+  "eventTime": "2026-04-02T09:14:31Z",
+  "job":     { "namespace": "shop_pipeline", "name": "enrich_orders" },
+  "inputs":  [ { "namespace": "file://data", "name": "clean_orders" },
+               { "namespace": "file://data", "name": "clean_customers" } ],
+  "outputs": [ { "namespace": "file://data", "name": "fct_orders" } ],
+  "run":     { "runId": "5f1e2c3a-...-9b" }
+}</code></pre>
+  <p class="small">Each pipeline step emits such an event; a lineage server (e.g. <a href="https://marquezproject.ai/" target="_blank" rel="noopener">Marquez</a>) stitches them into one graph across tools.</p></details>
+</section>
+
+<section class="chap" id="contracts" data-title="Data contracts">
+  <div class="sec-head"><div><div class="secnum">Section 4</div><h2>Data contracts</h2></div></div>
+  <p>A <b>data contract</b> is a formal, <b>versioned</b> agreement between the team <b>producing</b> a dataset and the teams <b>consuming</b> it: schema, meaning and guarantees, written down.</p>
+  <div class="grid3">
+    <div class="card">✓ <b>Schema stability</b><p class="small">Columns and types don't change silently.</p></div>
+    <div class="card">✓ <b>Agreed meaning</b><p class="small">Every field has one documented definition.</p></div>
+    <div class="card">✓ <b>A change process</b><p class="small">Renaming a column becomes a negotiated, versioned change — not a silent break of five dashboards.</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Contract checker</div>
+    <div class="grid2">
+      <div><b class="small">orders.contract.yaml</b>
+<pre><code data-hl="yaml"># orders.contract.yaml (simplified)
+dataset: orders
+version: 1.2.0
+owner: sales-data-team
+schema:
+  - name: order_id
+    type: string
+    required: true
+  - name: amount
+    type: decimal
+    unit: EUR
+    rule: '>= 0'
+  - name: order_date
+    type: date
+    required: true
+freshness: daily by 06:00
+consumers: [sales-dashboard, churn-model]</code></pre></div>
+      <div><b class="small">The producer team ships a new batch with these changes:</b>
+        <div id="ctChanges" style="display:grid;gap:6px;margin:8px 0"></div>
+        <div class="tablewrap"><table id="ctBatch"></table></div>
+        <div id="ctOut"></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout blue"><b>Why it matters for AI</b>ML pipelines break on silent schema drift. With a contract, a producer cannot drop a column a production model uses without updating the contract (a new major version) and notifying consumers first.</div>
+</section>
+
+<section class="chap" id="observability" data-title="Observability">
+  <div class="sec-head"><div><div class="secnum">Section 5</div><h2>Data-quality monitoring &amp; observability</h2></div></div>
+  <p>The Chapter 2 KPIs now run <b>automatically on every new batch</b> (e.g. a Chapter 3 rule stops the pipeline if completeness &lt; 98%). Observability goes further and tracks <b>four signals over time</b> — catching silent decay that no single test flags.</p>
+  <div class="grid2">
+    <div class="card"><b>⏱ Freshness</b> <span class="small">Did the data arrive on time?</span></div>
+    <div class="card"><b>📦 Volume</b> <span class="small">Is the row count normal?</span></div>
+    <div class="card"><b>🧱 Schema</b> <span class="small">Did columns or types change?</span></div>
+    <div class="card"><b>📊 Distribution</b> <span class="small">Do values look as usual?</span></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Monitoring dashboard</div>
+    <div class="grid2">
+      <label>Alert if volume is more than <b id="obThV">25</b>% below the 7-day average<input type="range" id="obTh" min="5" max="60" value="25"></label>
+      <div class="btnrow">
+        <label class="small"><input type="checkbox" id="obLate"> Sunday batch arrives 09:40 (SLA 06:00)</label>
+        <label class="small"><input type="checkbox" id="obSchema"> column <code>amount</code> renamed</label>
+        <label class="small"><input type="checkbox" id="obDist"> avg order value drifts +60%</label>
+      </div>
+    </div>
+    <svg id="obSvg" viewBox="0 0 700 230" width="100%"></svg>
+    <div id="obAlerts"></div>
+  </div>
+  <p class="small">Tools: <a href="https://www.montecarlodata.com/" target="_blank" rel="noopener">Monte Carlo</a>, <a href="https://www.soda.io/" target="_blank" rel="noopener">Soda</a>, <a href="https://www.elementary-data.com/" target="_blank" rel="noopener">Elementary (for dbt)</a>, <a href="https://greatexpectations.io/" target="_blank" rel="noopener">Great Expectations</a>.</p>
+</section>
+
+<section class="chap" id="roles" data-title="Ownership & stewardship">
+  <div class="sec-head"><div><div class="secnum">Section 6</div><h2>Data ownership &amp; stewardship</h2></div></div>
+  <div class="grid3">
+    <div class="card"><span class="tag red">O</span> <b>Data Owner</b><p class="small">Accountable for a dataset's quality, access rules and business meaning. <i>Approves who may query the customer table.</i></p></div>
+    <div class="card"><span class="tag amber">S</span> <b>Data Steward</b><p class="small">Day-to-day custodian of quality and documentation for a domain. <i>Defines what "active customer" means and keeps it documented.</i></p></div>
+    <div class="card"><span class="tag blue">C</span> <b>Data Custodian</b><p class="small">Manages technical storage, security and backups. <i>Configures encryption and the backup schedule.</i></p></div>
+    <div class="card"><span class="tag purple">G</span> <b>Governance Manager</b><p class="small">Sets organization-wide policy, standards and escalation paths. <i>Decides the company-wide retention policy.</i></p></div>
+    <div class="card"><span class="tag green">U</span> <b>Data Consumer</b><p class="small">Analyst or ML engineer: uses data responsibly and reports issues. <i>Flags a suspicious spike in nulls to the steward.</i></p></div>
+  </div>
+  <div class="callout green"><b>The loop</b>Consumers report issues to the steward → the steward fixes and documents → the owner stays accountable.</div>
+  <div class="widget"><div class="wtitle">Who does it?</div><div id="sortRoles"></div></div>
+</section>
+
+<section class="chap" id="classification" data-title="Classification & protection">
+  <div class="sec-head"><div><div class="secnum">Section 7</div><h2>Data classification &amp; protection</h2></div></div>
+  <div class="tablewrap"><table>
+    <tr><th>Level</th><th>Risk</th><th>Examples</th><th>Controls</th></tr>
+    <tr><td><span class="tag red">Restricted / regulated</span></td><td>Critical</td><td>Social security numbers, credit card data</td><td>Tightly controlled access · encryption · continuous monitoring</td></tr>
+    <tr><td><span class="tag amber">Confidential</span></td><td>High</td><td>Medical records, financial data</td><td>Limited access · employee training · data masking</td></tr>
+    <tr><td><span class="tag blue">Internal</span></td><td>Moderate</td><td>Policies, training documents</td><td>Access controls · regular backups</td></tr>
+    <tr><td><span class="tag green">Public</span></td><td>Low</td><td>Press releases, brochures</td><td>Basic permissions</td></tr>
+  </table></div>
+  <p class="small">Higher sensitivity = stronger protection.</p>
+  <div class="widget"><div class="wtitle">Classify these data items</div><div id="sortClass"></div></div>
+  <h3>Six protection measures</h3>
+  <div class="grid3">
+    <div class="card"><b>1 · Encryption</b><p class="small">Unreadable to unauthorized users. <i>Passwords stored hashed.</i></p></div>
+    <div class="card"><b>2 · Access controls</b><p class="small">Only approved users. <i>Only HR opens salary files.</i></p></div>
+    <div class="card"><b>3 · Auditing &amp; monitoring</b><p class="small">Who viewed or changed what. <i>Access logs.</i></p></div>
+    <div class="card"><b>4 · Training &amp; awareness</b><p class="small">People handle data safely. <i>Spotting phishing.</i></p></div>
+    <div class="card"><b>5 · Anonymization</b><p class="small">Remove/hide personal identifiers. <i>Names removed before research sharing.</i></p></div>
+    <div class="card"><b>6 · Data loss prevention</b><p class="small">Stop leaks. <i>Confidential files blocked from outgoing email.</i></p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Anonymization lab — k-anonymity</div>
+    <p class="small">Removing names is <b>not</b> enough: ZIP + birth year + gender can re-identify people. Apply techniques until every person is indistinguishable from at least <b>k</b> others (k-anonymity).</p>
+    <div class="btnrow">
+      <label class="small"><input type="checkbox" class="an" value="name"> Remove name</label>
+      <label class="small"><input type="checkbox" class="an" value="id"> Pseudonymize ID (hash)</label>
+      <label class="small"><input type="checkbox" class="an" value="age"> Generalize age → 10-year band</label>
+      <label class="small"><input type="checkbox" class="an" value="zip"> Truncate ZIP → 2 digits</label>
+    </div>
+    <div class="tablewrap"><table id="anTbl"></table></div>
+    <div class="feedback show" id="anOut"></div>
+  </div>
+</section>
+
+<section class="chap" id="fair" data-title="FAIR in practice">
+  <div class="sec-head"><div><div class="secnum">Section 8</div><h2>FAIR in practice — two settings</h2></div></div>
+  <div class="tabs" data-group="fairx"><button class="on" data-tab="h">🏥 Health data repository</button><button data-tab="e">🏢 Enterprise data platform</button></div>
+  <div class="tabpanel on" data-group="fairx" data-tab="h"><div class="tablewrap"><table>
+    <tr><th></th><th>Challenge</th><th>Solution</th></tr>
+    <tr><td><b>F</b></td><td>Patient records spread across hospital systems</td><td>Common health metadata standards and record descriptors</td></tr>
+    <tr><td><b>A</b></td><td>Strict privacy and consent restrictions</td><td>Clear access rules: roles, consent, secure access conditions</td></tr>
+    <tr><td><b>I</b></td><td>EHR, lab and imaging use different formats</td><td>Harmonize with standards like <a href="https://hl7.org/fhir/" target="_blank" rel="noopener">HL7 FHIR</a></td></tr>
+    <tr><td><b>R</b></td><td>Missing clinical context, provenance or usage notes</td><td>Document provenance, units, clinical meaning, reuse terms</td></tr></table></div>
+    <p class="small">Real-world: the <a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en" target="_blank" rel="noopener">European Health Data Space</a> and Germany's <a href="https://www.medizininformatik-initiative.de/en" target="_blank" rel="noopener">Medical Informatics Initiative</a> apply exactly these ideas.</p></div>
+  <div class="tabpanel" data-group="fairx" data-tab="e"><div class="tablewrap"><table>
+    <tr><th></th><th>Challenge</th><th>Solution</th></tr>
+    <tr><td><b>F</b></td><td>Tables scattered across teams, no shared catalog</td><td>A data catalog: every dataset registered with owner, description, sensitivity</td></tr>
+    <tr><td><b>A</b></td><td>Access requests handled ad hoc</td><td>Role-based access: requests routed through the owner, logged and auditable</td></tr>
+    <tr><td><b>I</b></td><td>Every department has its own naming and formats</td><td>Shared naming conventions: a company-wide style guide</td></tr>
+    <tr><td><b>R</b></td><td>No record of how a table was built or may be used</td><td>Pipeline documentation: README + data dictionary, versioned, visible lineage</td></tr></table></div></div>
+</section>
+
+<section class="chap" id="versioning" data-title="Documentation & versioning">
+  <div class="sec-head"><div><div class="secnum">Section 9</div><h2>Dataset documentation &amp; versioning</h2></div></div>
+  <div class="grid2">
+    <div class="card"><b>D · Document it</b><p class="small">A README / data dictionary: each column, its unit, source and known limitations — for someone who has never seen the data.</p>
+<pre><code data-hl="yaml">column: line_total
+meaning: quantity × catalogue price, in euros
+note: excludes quarantined orders</code></pre></div>
+    <div class="card"><b>V · Version it</b><p class="small">Tag each meaningful version so any past analysis — or model — can be reproduced exactly. Tools: Git tag, <a href="https://dvc.org/" target="_blank" rel="noopener">DVC</a>, <a href="https://lakefs.io/" target="_blank" rel="noopener">lakeFS</a>.</p>
+      <div class="widget" style="margin:8px 0 0"><div class="wtitle">Version timeline</div><div class="flow" id="verFlow"></div><p class="small" id="verOut"></p></div></div>
+  </div>
+  <div class="callout amber"><b>Why both?</b>Documentation without versioning goes stale; versioning without documentation leaves files nobody can interpret.</div>
+</section>
+
+<section class="chap" id="mlquality" data-title="Data quality for ML">
+  <div class="sec-head"><div><div class="secnum">Section 10</div><h2>Data-quality requirements for ML &amp; AI</h2></div></div>
+  <div class="tablewrap"><table>
+    <tr><th>Dimension (Ch. 2)</th><th>Why it matters extra for ML</th><th>Failure mode if ignored</th></tr>
+    <tr><td>Completeness</td><td>Missing values propagate into features and predictions</td><td>Model learns "missing" as its own pattern</td></tr>
+    <tr><td>Consistency</td><td>Training and serving data must be prepared the same way</td><td>Train/serve skew — worse in production than in testing</td></tr>
+    <tr><td>Representativeness</td><td>Data must reflect the population the model will see</td><td>Biased model, fails on under-represented groups</td></tr>
+    <tr><td>Timeliness</td><td>Stale data misses recent patterns and drift</td><td>Model quietly degrades as the world moves on</td></tr>
+    <tr><td>Traceability</td><td>Every training example traceable to its source</td><td>Impossible to debug or explain a wrong prediction</td></tr>
+  </table></div>
+  <div class="widget">
+    <div class="wtitle">Representativeness check</div>
+    <p class="small">A skin-condition classifier is trained on images. Adjust the share of each skin type in the training set and compare it to the patient population it will serve.</p>
+    <div id="repSl"></div>
+    <div id="repOut"></div>
+  </div>
+  <div class="callout"><b>Remember</b>A model does not just use your data — it learns every flaw in it.</div>
+</section>
+
+<section class="chap" id="checklist" data-title="AI-ready checklist">
+  <div class="sec-head"><div><div class="secnum">Section 11</div><h2>AI-ready datasets: the checklist</h2></div></div>
+  <div class="widget">
+    <div class="wtitle">Rate a dataset (home-exercise helper)</div>
+    <div id="aiList" style="display:grid;gap:8px"></div>
+    <div class="feedback show" id="aiRes"></div>
+  </div>
+  <p class="small">Five "yes" answers = ready to train on. Any "no" is your to-do list.</p>
+</section>
+
+<section class="chap" id="news" data-title="What's new 2024–2026">
+  <div class="sec-head"><div><div class="secnum">Section 12</div><h2>What's new: governance for AI (2024–2026)</h2></div></div>
+  <div class="grid2">
+    <div class="card"><span class="tag red">EU law</span><h4>EU AI Act, Article 10</h4><p class="small">Training, validation and test data for high-risk AI must be relevant, representative and, as far as possible, error-free and complete — with documented data-governance practices. Per the lecture: obligations for stand-alone high-risk systems apply from 2 Dec 2027 (moved from Aug 2026 by the Digital Omnibus).</p><a href="https://artificialintelligenceact.eu/article/10/" target="_blank" rel="noopener">Read Article 10 ↗</a></div>
+    <div class="card"><span class="tag blue">Open standard</span><h4>Open Data Contract Standard (ODCS v3)</h4><p class="small">Bitol (Linux Foundation) gives data contracts a shared, vendor-neutral YAML format.</p><a href="https://bitol-io.github.io/open-data-contract-standard/" target="_blank" rel="noopener">ODCS specification ↗</a></div>
+    <div class="card"><span class="tag purple">MLCommons</span><h4>Croissant for ML datasets</h4><p class="small">A metadata format for ML-ready datasets built on schema.org (remember Chapter 1!), with a Responsible-AI extension; used by Hugging Face, Kaggle and OpenML.</p><a href="https://mlcommons.org/working-groups/data/croissant/" target="_blank" rel="noopener">Croissant ↗</a></div>
+    <div class="card"><span class="tag green">Open standard</span><h4>OpenLineage</h4><p class="small">A common format for lineage events, so orchestrators, dbt and catalogs share one lineage graph.</p><a href="https://openlineage.io/" target="_blank" rel="noopener">openlineage.io ↗</a></div>
+  </div>
+  <details class="reveal"><summary>What a Croissant record looks like (simplified)</summary>
+<pre><code>{
+  "@context": { "@vocab": "https://schema.org/", "cr": "http://mlcommons.org/croissant/" },
+  "@type": "Dataset",
+  "name": "shop-orders-2026",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "distribution": [{ "@type": "cr:FileObject", "name": "fct_orders.csv", "encodingFormat": "text/csv" }],
+  "recordSet": [{ "@type": "cr:RecordSet", "name": "orders",
+    "field": [{ "@type": "cr:Field", "name": "line_total", "dataType": "sc:Float",
+                "description": "quantity × catalogue price, EUR" }] }]
+}</code></pre></details>
+</section>
+
+<section class="chap" id="graphs" data-title="Graph-based data">
+  <div class="sec-head"><div><div class="secnum">Section 13</div><h2>Graph-based data representation</h2></div></div>
+  <p>A graph represents data as <b>nodes</b> (entities) connected by <b>edges</b> (relationships), each with <b>properties</b> (key–value details). A natural fit when relationships matter as much as the data — social networks, recommendations, knowledge graphs, fraud rings.</p>
+  <div class="widget">
+    <div class="wtitle">Explore a tiny property graph</div>
+    <div class="btnrow" id="gQs"></div>
+    <div class="grid2">
+      <svg id="gSvg" viewBox="0 0 460 300" width="100%"></svg>
+      <div><div id="gProps" class="card small">Click a node or a question.</div><div class="tabs" data-group="gq"><button class="on" data-tab="cy">Cypher (graph)</button><button data-tab="sql">SQL (relational)</button><button data-tab="sp">SPARQL (RDF)</button></div>
+        <div class="tabpanel on" data-group="gq" data-tab="cy"><pre><code id="gCy"></code></pre></div>
+        <div class="tabpanel" data-group="gq" data-tab="sql"><pre><code id="gSql"></code></pre></div>
+        <div class="tabpanel" data-group="gq" data-tab="sp"><pre><code id="gSp"></code></pre></div></div>
+    </div>
+  </div>
+  <h3>Graph vs. relational databases</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Feature</th><th>Graph database</th><th>Relational database</th></tr>
+    <tr><td>Storage</td><td>Nodes and edges</td><td>Tables and rows</td></tr>
+    <tr><td>Querying</td><td>Graph traversal (Cypher)</td><td>SQL joins</td></tr>
+    <tr><td>Performance</td><td>Fast for deep, relationship-heavy queries</td><td>Slower as joins multiply</td></tr>
+    <tr><td>Best for</td><td>Social networks, fraud, recommendations</td><td>Structured, tabular records (finance)</td></tr>
+    <tr><td>Example</td><td>Neo4j storing a social network</td><td>PostgreSQL storing an orders table</td></tr>
+  </table></div>
+  <h3>Property graphs vs. RDF &amp; knowledge graphs</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Aspect</th><th>Property graph</th><th>RDF / knowledge graph</th></tr>
+    <tr><td>Basic unit</td><td>Node and edge with arbitrary key-value properties</td><td>Triple: subject – predicate – object</td></tr>
+    <tr><td>Schema</td><td>Flexible, informal, per project</td><td>Formal ontologies (RDFS, OWL) define shared meaning</td></tr>
+    <tr><td>Query language</td><td>Cypher, Gremlin</td><td>SPARQL</td></tr>
+    <tr><td>Strength</td><td>Fast traversal for one application</td><td>Linking and integrating data across organizations</td></tr>
+    <tr><td>Example</td><td>A company's Neo4j recommendation graph</td><td><a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a>; a hospital linking patients to a medical ontology</td></tr>
+  </table></div>
+  <div class="callout blue"><b>Rule of thumb</b>Many joins across relationships → graph. Stable tabular records → relational. One application, fast traversal → property graph. Shared meaning across organizations → RDF + ontologies.</div>
+  <p class="small">Try it live: <a href="https://query.wikidata.org/" target="_blank" rel="noopener">Wikidata Query Service</a> (SPARQL) · <a href="https://sandbox.neo4j.com/" target="_blank" rel="noopener">Neo4j Sandbox</a> (Cypher).</p>
+</section>
+
+<section class="chap" id="practice" data-title="Practicals & exercise">
+  <div class="sec-head"><div><div class="secnum">Section 14</div><h2>Practicals &amp; home exercise</h2></div></div>
+  <div class="grid3">
+    <div class="card"><span class="tag">In class · pairs</span><h4>Practical 1: Lineage &amp; risks</h4><p class="small">Trace <code>revenue_by_city.csv</code> back to every raw file, find its consumers, record ≥ 3 upstream risks and propose one control each.</p>
+      <details class="reveal"><summary>Template</summary><div class="tablewrap"><table><tr><th>Risk</th><th>Starts at</th><th>Affects</th><th>Detect / control</th></tr><tr><td>Schema change</td><td>orders_*.csv</td><td>fct_orders → revenue → dashboard</td><td>pandera schema right after load (stop)</td></tr><tr><td>Missing dates</td><td>raw orders</td><td>monthly revenue</td><td>nullable=False → quarantine</td></tr><tr><td>Stale data</td><td>CRM export</td><td>city revenue</td><td>freshness monitor, alert at 06:00</td></tr></table></div></details></div>
+    <div class="card"><span class="tag">In class · groups</span><h4>Practical 2: Roles &amp; contract</h4><p class="small">For <code>fct_orders</code>: assign Owner / Steward / Custodian with reasons, then write a basic contract (purpose, schema, formats/ranges, freshness, version, change-notification, access).</p></div>
+    <div class="card"><span class="tag">Home · individual</span><h4>AI-readiness &amp; graphs</h4><p class="small">Rate a dataset on the 5 criteria with evidence, list gaps + improvements, draw a conceptual graph, argue property graph vs RDF.</p></div>
+  </div>
+</section>
+
+<section class="chap" id="links" data-title="Real-world links">
+  <div class="sec-head"><div><div class="secnum">Section 15</div><h2>Explore real applications</h2></div></div>
+  <div class="links">
+    <a href="https://datahubproject.io/" target="_blank" rel="noopener"><b>DataHub</b><span>Open-source catalog + lineage</span></a>
+    <a href="https://open-metadata.org/" target="_blank" rel="noopener"><b>OpenMetadata</b><span>Catalog, quality, governance</span></a>
+    <a href="https://openlineage.io/" target="_blank" rel="noopener"><b>OpenLineage</b><span>Open lineage standard</span></a>
+    <a href="https://bitol-io.github.io/open-data-contract-standard/" target="_blank" rel="noopener"><b>ODCS</b><span>Open Data Contract Standard</span></a>
+    <a href="https://datacontract.com/" target="_blank" rel="noopener"><b>datacontract.com / CLI</b><span>Test data contracts in CI</span></a>
+    <a href="https://mlcommons.org/working-groups/data/croissant/" target="_blank" rel="noopener"><b>Croissant</b><span>Metadata for ML datasets</span></a>
+    <a href="https://huggingface.co/docs/hub/datasets-cards" target="_blank" rel="noopener"><b>Hugging Face dataset cards</b><span>Documentation for ML data</span></a>
+    <a href="https://arxiv.org/abs/1803.09010" target="_blank" rel="noopener"><b>Datasheets for Datasets</b><span>Gebru et al. — classic paper</span></a>
+    <a href="https://artificialintelligenceact.eu/" target="_blank" rel="noopener"><b>EU AI Act explorer</b><span>Full text, article by article</span></a>
+    <a href="https://gdpr-info.eu/" target="_blank" rel="noopener"><b>GDPR text</b><span>The rules behind privacy controls</span></a>
+    <a href="https://www.dama.org/cpages/body-of-knowledge" target="_blank" rel="noopener"><b>DAMA-DMBOK</b><span>The data-management body of knowledge</span></a>
+    <a href="https://neo4j.com/docs/getting-started/" target="_blank" rel="noopener"><b>Neo4j — getting started</b><span>Property graphs &amp; Cypher</span></a>
+    <a href="https://query.wikidata.org/" target="_blank" rel="noopener"><b>Wikidata Query Service</b><span>SPARQL on a global knowledge graph</span></a>
+    <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener"><b>Course repository</b><span>Lineage handout &amp; pipeline</span></a>
+  </div>
+</section>
+
+<section class="chap" id="quiz" data-title="Self-check quiz">
+  <div class="sec-head"><div><div class="secnum">Section 16</div><h2>Self-check quiz</h2></div></div>
+  <div id="quizBox"></div>
+</section>
+</main></div>
+
+<footer class="foot">Data Management · Prof. Dr. Mehrdad Jalali · SRH University of Applied Sciences Heidelberg · Course repository: <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener">github.com/MehrdadJalali-AI/DataManagement</a></footer>
+<script>// ---------- shared helpers for all chapter pages ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// theme
+(function () {
+  const saved = store.get('dm-theme', null);
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  const b = $('#themeBtn');
+  if (!b) return;
+  const label = () => {
+    const t = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    b.textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
+  };
+  label();
+  b.onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const nxt = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nxt);
+    store.set('dm-theme', nxt); label();
+  };
+})();
+
+// TOC, scroll spy, progress, "mark as understood"
+(function () {
+  const toc = $('#tocList'); const secs = $$('section.chap');
+  const key = 'dm-done-' + (document.body.dataset.chapter || 'x');
+  const done = new Set(store.get(key, []));
+  secs.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + s.id; a.innerHTML = '<span class="dot"></span>' + esc(s.dataset.title || s.id);
+    if (done.has(s.id)) a.classList.add('done');
+    toc && toc.appendChild(a);
+    const head = s.querySelector('.sec-head');
+    if (head) {
+      const b = document.createElement('button'); b.className = 'donebtn';
+      const paint = () => { b.classList.toggle('on', done.has(s.id)); b.textContent = done.has(s.id) ? '✓ Understood' : 'Mark as understood'; a.classList.toggle('done', done.has(s.id)); updCount(); };
+      b.onclick = () => { done.has(s.id) ? done.delete(s.id) : done.add(s.id); store.set(key, [...done]); paint(); };
+      head.appendChild(b); setTimeout(paint);
+    }
+  });
+  function updCount() { const c = $('#doneCount'); if (c) c.textContent = done.size + ' / ' + secs.length + ' sections understood'; }
+  const links = toc ? $$('a', toc) : [];
+  const onScroll = () => {
+    const h = document.documentElement; const p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+    const bar = $('#progress'); if (bar) bar.style.width = (p * 100) + '%';
+    let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) cur = i; });
+    links.forEach((l, i) => l.classList.toggle('active', i === cur));
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+})();
+
+// tabs: <div class="tabs" data-group="x"><button data-tab="a">..</button></div> + <div class="tabpanel" data-group="x" data-tab="a">
+document.addEventListener('click', e => {
+  const b = e.target.closest('.tabs button'); if (!b) return;
+  const g = b.parentElement.dataset.group;
+  $$('.tabs[data-group="' + g + '"] button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.tabpanel[data-group="' + g + '"]').forEach(p => p.classList.toggle('on', p.dataset.tab === b.dataset.tab));
+});
+
+// copy buttons on code
+function addCopy(root = document) {
+  $$('pre', root).forEach(p => {
+    if (p.querySelector('.copy')) return;
+    const b = document.createElement('button'); b.className = 'copy'; b.textContent = 'Copy';
+    b.onclick = () => { const t = p.querySelector('code') ? p.querySelector('code').innerText : p.innerText.replace(/Copy$/, ''); navigator.clipboard && navigator.clipboard.writeText(t); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1200); };
+    p.appendChild(b);
+  });
+}
+addCopy();
+
+// quiz engine: renderQuiz('#el', [{q, opts:[...], a: idx, why}])
+function renderQuiz(sel, items) {
+  const root = $(sel); if (!root) return; root.classList.add('quiz');
+  let right = 0, answered = 0;
+  const sc = document.createElement('p'); sc.className = 'score';
+  const upd = () => sc.textContent = `Score: ${right} / ${items.length}` + (answered === items.length ? (right === items.length ? ' — perfect! 🎉' : ' — review the explanations and try again.') : '');
+  items.forEach((it, qi) => {
+    const d = document.createElement('div'); d.className = 'q';
+    d.innerHTML = `<p>${qi + 1}. ${it.q}</p><div class="opts"></div><div class="why">💡 ${it.why}</div>`;
+    const o = d.querySelector('.opts');
+    it.opts.forEach((t, i) => {
+      const b = document.createElement('button'); b.innerHTML = t;
+      b.onclick = () => {
+        if (d.classList.contains('answered')) return;
+        d.classList.add('answered'); answered++;
+        if (i === it.a) { b.classList.add('right'); right++; } else { b.classList.add('wrong'); o.children[it.a].classList.add('right'); }
+        upd();
+      };
+      o.appendChild(b);
+    });
+    root.appendChild(d);
+  });
+  const r = document.createElement('button'); r.className = 'btn'; r.textContent = '↺ Reset quiz';
+  r.onclick = () => { root.innerHTML = ''; renderQuiz(sel, items); };
+  root.appendChild(sc); root.appendChild(r); upd();
+}
+
+// sorter engine (click a chip, then click a bucket — or drag): makeSorter('#el', cats:[{id,label}], items:[{t, c, why?}])
+function makeSorter(sel, cats, items) {
+  const root = $(sel); if (!root) return;
+  root.innerHTML = `<div class="pool small">Click an item, then click the box it belongs to (or drag it).</div><div class="sorter"></div><div class="btnrow"><button class="btn primary chk">Check answers</button><button class="btn rst">Reset</button></div><div class="feedback"></div>`;
+  const pool = $('.pool', root), sorter = $('.sorter', root), fb = $('.feedback', root);
+  let selected = null;
+  const shuffled = items.map((x, i) => ({ ...x, i })).sort(() => Math.random() - .5);
+  shuffled.forEach(it => {
+    const c = document.createElement('span'); c.className = 'chip'; c.textContent = it.t; c.draggable = true; c.dataset.c = it.c; c.dataset.i = it.i;
+    if (it.why) c.title = it.why;
+    c.onclick = e => { e.stopPropagation(); $$('.chip', root).forEach(x => x.classList.remove('sel')); selected = c; c.classList.add('sel'); };
+    c.ondragstart = ev => { selected = c; ev.dataTransfer.setData('text', it.i); };
+    pool.appendChild(c);
+  });
+  cats.forEach(cat => {
+    const b = document.createElement('div'); b.className = 'bucket'; b.dataset.id = cat.id; b.innerHTML = `<h5>${cat.label}</h5>`;
+    const drop = () => { if (selected) { b.appendChild(selected); selected.classList.remove('sel', 'right', 'wrong'); selected = null; } };
+    b.onclick = drop;
+    b.ondragover = e => { e.preventDefault(); b.classList.add('over'); };
+    b.ondragleave = () => b.classList.remove('over');
+    b.ondrop = e => { e.preventDefault(); b.classList.remove('over'); drop(); };
+    sorter.appendChild(b);
+  });
+  pool.onclick = () => { if (selected) { pool.appendChild(selected); selected.classList.remove('sel'); selected = null; } };
+  $('.chk', root).onclick = () => {
+    let ok = 0, placed = 0;
+    $$('.bucket .chip', root).forEach(c => { placed++; const good = c.parentElement.dataset.id === c.dataset.c; c.classList.toggle('right', good); c.classList.toggle('wrong', !good); if (good) ok++; });
+    fb.className = 'feedback show ' + (ok === items.length ? 'ok' : 'info');
+    fb.textContent = ok === items.length ? `All ${ok} correct — well done!` : `${ok} of ${items.length} correct (${items.length - placed} not placed yet). Red items are in the wrong box — hover them for a hint.`;
+  };
+  $('.rst', root).onclick = () => makeSorter(sel, cats, items);
+}
+
+// tiny syntax highlighter for python / sql / yaml snippets marked data-hl
+function hl(code, lang) {
+  let s = esc(code);
+  if (lang === 'py' || lang === 'sql') {
+    s = s.replace(/(#.*|--.*)$/gm, '<span class="c-c">$1</span>');
+    s = s.replace(/(&quot;.*?&quot;|'[^'\n]*')/g, '<span class="c-s">$1</span>');
+    const kw = lang === 'py' ? 'def|return|import|from|as|for|in|if|else|try|except|with|lambda|True|False|None|print' : 'SELECT|FROM|WHERE|GROUP BY|ORDER BY|JOIN|LEFT JOIN|ON|AS|WITH|SUM|COUNT|AND|OR|MATCH|RETURN|PREFIX';
+    s = s.replace(new RegExp('\\b(' + kw + ')\\b', 'g'), '<span class="c-k">$1</span>');
+  } else if (lang === 'yaml') {
+    s = s.replace(/(#.*)$/gm, '<span class="c-c">$1</span>').replace(/^(\s*-?\s*)([\w_]+):/gm, '$1<span class="c-k">$2</span>:');
+  }
+  return s;
+}
+$$('pre code[data-hl]').forEach(c => { c.innerHTML = hl(c.textContent, c.dataset.hl); });
+</script>
+<script>
+const tbl = (head, rows, cls) => '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>' + rows.map((r, i) => '<tr>' + r.map((c, j) => `<td class="${cls ? cls(i, j, c) || '' : ''}">${c === null || c === '' ? '<span class="small">∅</span>' : esc(c)}</td>`).join('') + '</tr>').join('');
+
+// ---- catalog ----
+const CAT = [
+  { n: 'fct_orders', d: 'Trusted orders, one row per order, with line_total in EUR', o: 'Sales data team', s: 'Internal', g: ['order', 'revenue', 'line total'], sch: 'order_id, order_date, quantity, unit_price, line_total, city', loc: 'warehouse.sales.fct_orders', f: 'daily 06:00', q: 98 },
+  { n: 'revenue_by_city', d: 'Monthly revenue aggregated per customer city', o: 'Sales data team', s: 'Internal', g: ['revenue', 'KPI'], sch: 'city, month, revenue_eur', loc: 'warehouse.sales.revenue_by_city', f: 'daily 06:30', q: 99 },
+  { n: 'customers', d: 'Customer master data incl. name, email, address', o: 'CRM team', s: 'Confidential', g: ['customer', 'active customer', 'email'], sch: 'customer_id, name, email, city, country, created_at', loc: 'crm.public.customers', f: 'hourly', q: 91 },
+  { n: 'payments_cards', d: 'Card payment tokens and last-4 digits', o: 'Finance', s: 'Restricted', g: ['payment', 'card'], sch: 'payment_id, order_id, card_token, last4', loc: 'vault.finance.payments', f: 'real-time', q: 100 },
+  { n: 'web_events', d: 'Raw clickstream events from the web shop (JSON)', o: 'Digital team', s: 'Internal', g: ['clickstream', 'session'], sch: 'event_id, ts, user_id, page, payload(json)', loc: 's3://lake/raw/web_events/', f: 'streaming', q: 82 },
+  { n: 'iot_sensor_readings', d: 'Warehouse temperature sensor readings', o: 'Logistics', s: 'Internal', g: ['sensor', 'temperature'], sch: 'sensor_id, ts, temp_c', loc: 's3://lake/raw/sensors/', f: 'every minute', q: 88 },
+  { n: 'press_releases', d: 'Published press releases archive', o: 'Communications', s: 'Public', g: ['press'], sch: 'id, title, published_at, body', loc: 'cms.public.press', f: 'ad hoc', q: 100 },
+  { n: 'hr_salaries', d: 'Employee salary history', o: 'HR', s: 'Restricted', g: ['salary', 'employee'], sch: 'employee_id, valid_from, base_salary, bonus', loc: 'vault.hr.salaries', f: 'monthly', q: 97 }
+];
+const sTag = { Public: 'green', Internal: 'blue', Confidential: 'amber', Restricted: 'red' };
+function drawCat() {
+  const q = $('#catQ').value.toLowerCase().trim(), s = $('#catS').value;
+  const hits = CAT.filter(c => (!s || c.s === s) && (!q || [c.n, c.d, c.o, c.sch, ...c.g].join(' ').toLowerCase().includes(q)));
+  $('#catOut').innerHTML = `<p class="small">${hits.length} dataset(s)</p>` + hits.map((c, i) => `<div class="card" style="margin:8px 0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b><code>${c.n}</code></b><span><span class="tag ${sTag[c.s]}">${c.s}</span> <span class="tag">quality ${c.q}%</span></span></div><p class="small" style="margin:4px 0">${c.d}</p><div class="grid2 small"><div><b>Business:</b> owner ${c.o} · glossary: ${c.g.join(', ')}</div><div><b>Technical:</b> <code>${c.loc}</code> · updated ${c.f}<br>schema: ${c.sch}</div></div><button class="btn" style="margin-top:6px" data-req="${c.n}">Request access</button><span class="small" id="req-${c.n}"></span></div>`).join('');
+  $$('[data-req]').forEach(b => b.onclick = () => { const c = CAT.find(x => x.n === b.dataset.req); $('#req-' + c.n).innerHTML = c.s === 'Public' ? ' ✅ Public — no request needed.' : c.s === 'Internal' ? ` ✅ Auto-approved for employees (logged).` : ` ⏳ Request routed to data owner <b>${c.o}</b>; ${c.s === 'Restricted' ? 'requires justification, training record and time-limited access.' : 'requires purpose statement; access will be logged and audited.'}`; });
+}
+$('#catQ').oninput = drawCat; $('#catS').onchange = drawCat; drawCat();
+
+// ---- impact dag ----
+const N = { o: [20, 40, 'orders_*.csv', 'raw'], c: [20, 130, 'customers.csv (CRM)', 'raw'], p: [20, 220, 'products.csv', 'raw'], en: [215, 130, 'enrich_orders', 'step'], f: [405, 130, 'fct_orders', 'out'], r: [590, 60, 'revenue_by_city', 'out'], m: [590, 210, 'Churn model (ML)', 'use'], d: [770, 20, 'Sales dashboard', 'use'], cfo: [770, 110, 'CFO report', 'use'] };
+const E = [['o', 'en'], ['c', 'en'], ['p', 'en'], ['en', 'f'], ['f', 'r'], ['r', 'd'], ['f', 'm'], ['r', 'cfo']];
+const EVENTS = [
+  { id: 'o', l: 'orders: column renamed', risk: 'Schema change in orders_*.csv', det: 'pandera schema check right after load → STOP; contract (major version) + notification' },
+  { id: 'c', l: 'CRM export is 2 days late', risk: 'Stale customer data → wrong city attribution', det: 'Freshness monitor on customers.csv; alert at 06:00 SLA' },
+  { id: 'p', l: 'products: price typo 8990', risk: 'Inflated line_total and revenue', det: 'Range check on price + distribution monitor; quarantine outliers' },
+  { id: 'en', l: 'join logic bug', risk: 'Duplicate keys multiply rows', det: 'Uniqueness test on fct_orders.order_id; row-count reconciliation' }
+];
+let evSel = 0;
+function down(n) { const s = new Set(); const st = [n]; while (st.length) { const x = st.pop(); E.forEach(([a, b]) => { if (a === x && !s.has(b)) { s.add(b); st.push(b); } }); } return s; }
+function drawImp() {
+  $('#impBtns').innerHTML = EVENTS.map((e, i) => `<button class="btn ${i === evSel ? 'sel' : ''}" data-e="${i}">⚡ ${e.l}</button>`).join('');
+  $$('#impBtns button').forEach(b => b.onclick = () => { evSel = +b.dataset.e; drawImp(); });
+  const ev = EVENTS[evSel], hit = down(ev.id), W = 125, H = 36;
+  const col = { raw: 'var(--muted)', step: 'var(--blue)', out: 'var(--green)', use: 'var(--purple)' };
+  let s = '<defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>';
+  E.forEach(([a, b]) => { const A = N[a], B = N[b]; const on = (a === ev.id || hit.has(a)) && hit.has(b); const x1 = A[0] + W, y1 = A[1] + H / 2, x2 = B[0], y2 = B[1] + H / 2; s += `<path d="M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}" fill="none" stroke="${on ? 'var(--red)' : 'var(--line)'}" stroke-width="${on ? 2.5 : 1.5}" marker-end="url(#a2)"/>`; });
+  Object.entries(N).forEach(([id, [x, y, l, t]]) => { const src = id === ev.id, h = hit.has(id); s += `<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="8" fill="${src ? 'var(--accent-soft)' : h ? 'var(--red-soft)' : 'var(--surface)'}" stroke="${src ? 'var(--accent)' : h ? 'var(--red)' : col[t]}" stroke-width="${src || h ? 2.2 : 1.4}"/><text x="${x + W / 2}" y="${y + 22}" text-anchor="middle" font-size="10.5" fill="var(--ink)">${src ? '⚡ ' : h ? '⚠ ' : ''}${l}</text>`; });
+  $('#impDag').setAttribute('viewBox', '0 0 900 300'); $('#impDag').innerHTML = s;
+  $('#impOut').innerHTML = `<b>Risk:</b> ${ev.risk}<br><b>Affected downstream (${hit.size}):</b> ${[...hit].map(x => N[x][2]).join(' → ')}<br><b>Detect / control:</b> ${ev.det}`;
+}
+drawImp();
+
+// ---- contract checker ----
+const CH = [
+  { k: 'rename', l: 'Rename <code>amount</code> → <code>total_amount</code>' }, { k: 'neg', l: 'One order with amount −15.00 (a refund)' },
+  { k: 'null', l: 'One order without order_id' }, { k: 'late', l: 'Batch delivered at 09:40' }, { k: 'add', l: 'Add a new optional column <code>coupon_code</code>' }
+];
+const ctOn = {};
+$('#ctChanges').innerHTML = CH.map(c => `<label class="small card" style="padding:6px 10px"><input type="checkbox" data-c="${c.k}"> ${c.l}</label>`).join('');
+$$('#ctChanges input').forEach(i => i.onchange = () => { ctOn[i.dataset.c] = i.checked; drawCt(); });
+function drawCt() {
+  const amt = ctOn.rename ? 'total_amount' : 'amount';
+  const head = ['order_id', amt, 'order_date', ...(ctOn.add ? ['coupon_code'] : [])];
+  const rows = [['O0101', '59.90', '2026-04-02'], [ctOn.null ? '' : 'O0102', '120.00', '2026-04-02'], ['O0103', ctOn.neg ? '-15.00' : '35.00', '2026-04-02']].map(r => ctOn.add ? [...r, r[0] === 'O0101' ? 'SPRING10' : ''] : r);
+  $('#ctBatch').innerHTML = tbl(head, rows, (i, j, c) => (j === 1 && ctOn.rename) ? 'bad' : (j === 0 && c === '') ? 'bad' : (j === 1 && +c < 0) ? 'bad' : (j === 3) ? 'good' : '');
+  const v = [];
+  if (ctOn.rename) v.push(['breaking', 'Required column <code>amount</code> is missing (renamed). Breaking change → must be a <b>major</b> version (2.0.0) with advance notice to sales-dashboard and churn-model.']);
+  if (ctOn.null) v.push(['row', '<code>order_id</code> is required but empty in 1 row → reject/quarantine row.']);
+  if (ctOn.neg) v.push(['row', 'Rule <code>amount >= 0</code> violated (−15.00). Refunds need their own agreed field or a new contract rule — discuss with consumers.']);
+  if (ctOn.late) v.push(['sla', 'Freshness SLA "daily by 06:00" missed (09:40) → alert consumers; dashboard shows "data delayed".']);
+  if (ctOn.add) v.push(['ok', 'New optional column is backward-compatible → <b>minor</b> version (1.3.0); document it in the contract.']);
+  const bad = v.filter(x => x[0] !== 'ok').length;
+  $('#ctOut').innerHTML = (v.length ? v.map(([t, m]) => `<div class="feedback show ${t === 'ok' ? 'ok' : t === 'breaking' ? 'no' : 'info'}" style="margin-top:6px">${t === 'ok' ? '✓' : t === 'breaking' ? '✗ BREAKING' : '⚠'} ${m}</div>`).join('') : '<div class="feedback show ok">✓ Batch conforms to contract v1.2.0.</div>') + (bad ? `<p class="small" style="margin-top:6px"><b>${bad} contract violation(s).</b> Without a contract, these would silently reach the dashboard and the model.</p>` : '');
+}
+drawCt();
+
+// ---- observability ----
+function drawOb() {
+  const th = +$('#obTh').value; $('#obThV').textContent = th;
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], vals = [102, 98, 101, 105, 99, 103, 61];
+  const avg = vals.slice(0, 6).reduce((a, b) => a + b) / 6, lim = avg * (1 - th / 100);
+  const X = i => 70 + i * 88, Y = v => 200 - v / 120 * 170;
+  let s = `<line x1="40" x2="680" y1="${Y(lim)}" y2="${Y(lim)}" stroke="var(--red)" stroke-dasharray="5 4"/><text x="680" y="${Y(lim) - 5}" text-anchor="end" font-size="11" fill="var(--red)">alert threshold ${lim.toFixed(0)}k</text>`;
+  s += `<line x1="40" x2="680" y1="${Y(avg)}" y2="${Y(avg)}" stroke="var(--muted)" stroke-dasharray="2 4"/><text x="44" y="${Y(avg) - 5}" font-size="11" fill="var(--muted)">avg ${avg.toFixed(0)}k</text>`;
+  vals.forEach((v, i) => { const al = v < lim; s += `<rect x="${X(i) - 24}" y="${Y(v)}" width="48" height="${200 - Y(v)}" rx="5" fill="${al ? 'var(--red)' : 'var(--blue)'}" opacity="${al ? 1 : .75}"><title>${days[i]}: ${v}k rows</title></rect><text x="${X(i)}" y="${Y(v) - 6}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">${v}</text><text x="${X(i)}" y="218" text-anchor="middle" font-size="11" fill="var(--muted)">${days[i]}</text>`; });
+  $('#obSvg').innerHTML = s;
+  const A = [];
+  const drop = (1 - vals[6] / avg) * 100;
+  A.push(vals[6] < lim ? ['no', `📦 VOLUME — Sunday ${vals[6]}k rows is ${drop.toFixed(0)}% below the 6-day average — even though no single test failed.`] : ['ok', `📦 Volume — Sunday drop (${drop.toFixed(0)}%) is within your ${th}% tolerance. Too lenient? This is how silent decay slips through.`]);
+  if ($('#obLate').checked) A.push(['no', '⏱ FRESHNESS — Sunday batch arrived 09:40, SLA is 06:00.']);
+  if ($('#obSchema').checked) A.push(['no', '🧱 SCHEMA — column <code>amount</code> missing, <code>total_amount</code> appeared.']);
+  if ($('#obDist').checked) A.push(['no', '📊 DISTRIBUTION — average order value €87 vs. 30-day baseline €54 (+60%). Price bug or real event?']);
+  if (th < 8) A.push(['info', 'ℹ With a very tight threshold you will get alert fatigue from normal day-to-day variation.']);
+  $('#obAlerts').innerHTML = A.map(([t, m]) => `<div class="feedback show ${t}" style="margin-top:6px">${m}</div>`).join('');
+}
+['obTh', 'obLate', 'obSchema', 'obDist'].forEach(id => $('#' + id).oninput = $('#' + id).onchange = drawOb); drawOb();
+
+// ---- sorters ----
+makeSorter('#sortRoles', [{ id: 'o', label: 'Data Owner' }, { id: 's', label: 'Data Steward' }, { id: 'c', label: 'Data Custodian' }, { id: 'g', label: 'Governance Manager' }, { id: 'u', label: 'Data Consumer' }], [
+  { t: 'Approves an analyst’s access to the customer table', c: 'o' }, { t: 'Defines what “active customer” means', c: 's' }, { t: 'Configures encryption at rest', c: 'c' },
+  { t: 'Sets the company-wide retention policy', c: 'g' }, { t: 'Reports a spike in nulls', c: 'u' }, { t: 'Fixes and documents a data-dictionary entry', c: 's' },
+  { t: 'Runs nightly backups', c: 'c' }, { t: 'Is accountable when the dataset is wrong', c: 'o' }, { t: 'Trains a churn model on fct_orders', c: 'u' }, { t: 'Defines the escalation path for data incidents', c: 'g' }
+]);
+makeSorter('#sortClass', [{ id: 'p', label: 'Public' }, { id: 'i', label: 'Internal' }, { id: 'c', label: 'Confidential' }, { id: 'r', label: 'Restricted / regulated' }], [
+  { t: 'Product brochure', c: 'p' }, { t: 'Credit card numbers', c: 'r' }, { t: 'Patient diagnoses', c: 'c' }, { t: 'Internal travel policy', c: 'i' },
+  { t: 'Social security / tax ID numbers', c: 'r' }, { t: 'Quarterly financial forecast (unpublished)', c: 'c' }, { t: 'Published annual report', c: 'p' }, { t: 'Onboarding training slides', c: 'i' }
+]);
+
+// ---- anonymization ----
+const AN = [['P01', 'Lena Wolf', 34, '69115', 'F', 'Asthma'], ['P02', 'Max Bauer', 37, '69117', 'M', 'Diabetes'], ['P03', 'Mia Koch', 31, '69120', 'F', 'Flu'], ['P04', 'Paul Klein', 52, '68159', 'M', 'Hypertension'], ['P05', 'Emil Wolf', 58, '68161', 'M', 'Diabetes'], ['P06', 'Noah Weber', 55, '68163', 'M', 'Asthma'], ['P07', 'Lea Fischer', 36, '69118', 'F', 'Flu'], ['P08', 'Ben Hoff', 33, '69121', 'M', 'Hypertension']];
+function hash(s) { let h = 0; for (const c of s + 'salt') h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(16).slice(0, 8); }
+function drawAn() {
+  const on = new Set($$('.an:checked').map(c => c.value));
+  const rows = AN.map(r => [on.has('id') ? hash(r[0]) : r[0], on.has('name') ? '—' : r[1], on.has('age') ? `${Math.floor(r[2] / 10) * 10}–${Math.floor(r[2] / 10) * 10 + 9}` : r[2], on.has('zip') ? r[3].slice(0, 2) + '***' : r[3], r[4], r[5]]);
+  const qi = r => [on.has('name') ? '' : r[1], r[2], r[3], r[4]].join('|');
+  const cnt = {}; rows.forEach(r => cnt[qi(r)] = (cnt[qi(r)] || 0) + 1);
+  const k = Math.min(...rows.map(r => cnt[qi(r)]));
+  $('#anTbl').innerHTML = tbl(['ID', 'Name', 'Age', 'ZIP', 'Gender', 'Diagnosis (sensitive)'], rows, (i, j) => j >= 1 && j <= 4 ? (cnt[qi(rows[i])] === 1 ? 'bad' : 'good') : '');
+  const o = $('#anOut'); o.className = 'feedback show ' + (k >= 2 ? 'ok' : 'no');
+  o.innerHTML = `<b>k = ${k}</b> — ${k === 1 ? 'at least one person is unique on name/age/ZIP/gender and can be re-identified (red rows).' : `every person shares their quasi-identifiers with at least ${k - 1} other(s).`} ${on.has('id') && !on.has('name') ? 'Note: hashing the ID is <i>pseudonymization</i> — still personal data under the GDPR.' : ''}${k >= 2 ? ' The trade-off: less precise age/location for analysis. Note: if everyone in a group has the same diagnosis, it still leaks (→ l-diversity).' : ''}`;
+}
+$$('.an').forEach(c => c.onchange = drawAn); drawAn();
+
+// ---- versions ----
+const VER = [['v1.0', 'Jan 2026 — first release, 3 monthly files, no price correction.', false], ['v2.0', 'Mar 2026 — BREAKING: unit_price now from catalogue; line_total recomputed. 🤖 Churn model trained on this version.', true], ['v2.1', 'Apr 2026 — adds coupon_code (optional); fixes German date parsing.', false]];
+let vSel = 1;
+function drawVer() { $('#verFlow').innerHTML = VER.map((v, i) => `<div class="step ${i === vSel ? 'on' : ''}" data-v="${i}"><b>${v[0]}</b>${v[2] ? '<small>🤖 model</small>' : ''}</div>`).join('<span class="arrow">→</span>'); $$('#verFlow .step').forEach(s => s.onclick = () => { vSel = +s.dataset.v; drawVer(); }); $('#verOut').innerHTML = VER[vSel][1] + `<br><code>git checkout ${VER[vSel][0]} &amp;&amp; dvc checkout</code> restores exactly this data.`; }
+drawVer();
+
+// ---- representativeness ----
+const POP = { 'Type I–II (light)': 35, 'Type III–IV (medium)': 40, 'Type V–VI (dark)': 25 };
+const TR = { 'Type I–II (light)': 80, 'Type III–IV (medium)': 17, 'Type V–VI (dark)': 3 };
+function drawRep() {
+  $('#repSl').innerHTML = Object.keys(TR).map(k => `<label class="small" style="display:block">${k}: training <b data-l="${k}">${TR[k]}%</b> vs population ${POP[k]}%<input type="range" min="0" max="100" value="${TR[k]}" data-k="${k}"></label>`).join('');
+  $$('#repSl input').forEach(i => i.oninput = () => { TR[i.dataset.k] = +i.value; drawRepOut(); $(`[data-l="${i.dataset.k}"]`).textContent = TR[i.dataset.k] + '%'; });
+  drawRepOut();
+}
+function drawRepOut() {
+  const tot = Object.values(TR).reduce((a, b) => a + b, 0) || 1;
+  let worst = 0, wk = '';
+  const html = Object.keys(TR).map(k => { const share = TR[k] / tot * 100, ratio = share / POP[k]; if (1 - Math.min(ratio, 1) > worst) { worst = 1 - Math.min(ratio, 1); wk = k; } return `<div style="display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center;font-size:.85rem;margin:3px 0"><span>${k}</span><div><div class="meter" title="training"><div style="width:${share}%;background:${ratio < .5 ? 'var(--red)' : 'var(--blue)'}"></div></div><div class="meter" title="population" style="margin-top:2px"><div style="width:${POP[k]}%;background:var(--muted)"></div></div></div></div>`; }).join('');
+  $('#repOut').innerHTML = `<p class="small">Top bar: training share (normalized). Grey bar: patient population.</p>${html}<div class="feedback show ${worst > .5 ? 'no' : worst > .2 ? 'info' : 'ok'}">${worst > .5 ? `⚠ ${wk} is severely under-represented — expect much lower accuracy for these patients. The EU AI Act (Art. 10) requires representative training data for high-risk AI.` : worst > .2 ? `${wk} is somewhat under-represented — measure accuracy per group.` : '✓ Training data roughly reflects the population.'}</div>`;
+}
+drawRep();
+
+// ---- AI checklist ----
+const AIQ = [['Documented', 'Does every field have a clear description and owner?', 'Ch. 1 metadata · Ch. 4 catalogs'], ['Tested', 'Are completeness, validity and uniqueness checked automatically?', 'Ch. 2 KPIs · Ch. 3 validation rules'], ['Versioned', 'Can you reproduce the exact data a model was trained on?', 'Ch. 3 Git · Ch. 4 versioning'], ['Traceable', 'Can you trace any row back to its raw source?', 'Ch. 3 lineage · Ch. 4 provenance'], ['Governed', 'Is there a clear owner, and are access and privacy rules enforced?', 'Ch. 4 roles, contracts, access']];
+const aiA = {};
+function drawAi() {
+  $('#aiList').innerHTML = AIQ.map((q, i) => `<div class="card" style="padding:10px 12px"><b>${q[0]}</b> — ${q[1]} <span class="small">(${q[2]})</span><div class="btnrow" style="margin:6px 0 0"><button class="btn ${aiA[i] === 'y' ? 'sel' : ''}" data-i="${i}" data-a="y">Yes</button><button class="btn ${aiA[i] === 'n' ? 'sel' : ''}" data-i="${i}" data-a="n">No</button><input type="text" placeholder="evidence / link…" style="flex:1;min-width:160px"></div></div>`).join('');
+  $$('#aiList [data-a]').forEach(b => b.onclick = () => { aiA[b.dataset.i] = b.dataset.a; const ev = $$('#aiList input').map(x => x.value); drawAi(); $$('#aiList input').forEach((x, i) => x.value = ev[i]); });
+  const y = Object.values(aiA).filter(x => x === 'y').length, n = Object.values(aiA).filter(x => x === 'n').length;
+  const r = $('#aiRes'); r.className = 'feedback show ' + (y === 5 ? 'ok' : n ? 'no' : 'info');
+  r.innerHTML = y === 5 ? '✅ Five "yes" — ready to train on.' : n ? '<b>To-do list:</b> ' + AIQ.filter((_, i) => aiA[i] === 'n').map(q => q[0]).join(', ') : `Answer all five (${y + n}/5).`;
+}
+drawAi();
+
+// ---- graph ----
+const GN = { alice: [80, 60, 'Alice', 'Person', { age: 29, city: 'Heidelberg' }], bob: [300, 60, 'Bob', 'Person', { age: 34, city: 'Mannheim' }], cem: [380, 170, 'Cem', 'Person', { age: 41, city: 'Karlsruhe' }], o42: [80, 230, 'Order #42', 'Order', { date: '2026-03-01', total_eur: 899 }], laptop: [300, 250, 'Laptop', 'Product', { price_eur: 899, category: 'Electronics' }], mouse: [190, 160, 'Mouse', 'Product', { price_eur: 25, category: 'Accessories' }] };
+const GE = [['alice', 'bob', 'FOLLOWS'], ['bob', 'cem', 'FOLLOWS'], ['alice', 'o42', 'PLACED'], ['o42', 'laptop', 'CONTAINS'], ['alice', 'laptop', 'VIEWED'], ['bob', 'mouse', 'VIEWED'], ['cem', 'laptop', 'VIEWED']];
+const GQ = [
+  { l: 'Whom does Alice follow?', ans: 'Bob', hl: ['alice', 'bob'], e: [0], cy: "MATCH (a:Person {name:'Alice'})-[:FOLLOWS]->(p:Person)\nRETURN p.name", sql: "SELECT p.name\nFROM follows f JOIN person p ON p.id = f.followee_id\nWHERE f.follower_id = (SELECT id FROM person WHERE name='Alice');", sp: "PREFIX ex: <http://example.org/>\nSELECT ?name WHERE {\n  ex:Alice ex:follows ?p .\n  ?p ex:name ?name .\n}" },
+  { l: 'Friends-of-friends of Alice', ans: 'Cem', hl: ['alice', 'bob', 'cem'], e: [0, 1], cy: "MATCH (a:Person {name:'Alice'})-[:FOLLOWS*2]->(fof)\nRETURN fof.name", sql: "SELECT p.name FROM follows f1\nJOIN follows f2 ON f2.follower_id = f1.followee_id\nJOIN person p   ON p.id = f2.followee_id\nWHERE f1.follower_id = 1;   -- one more JOIN per hop", sp: "SELECT ?name WHERE {\n  ex:Alice ex:follows/ex:follows ?p .\n  ?p ex:name ?name .\n}" },
+  { l: 'Recommend: what did people Alice follows view?', ans: 'Mouse', hl: ['alice', 'bob', 'mouse'], e: [0, 5], cy: "MATCH (a:Person {name:'Alice'})-[:FOLLOWS]->()-[:VIEWED]->(p:Product)\nWHERE NOT (a)-[:VIEWED]->(p)\nRETURN p.name", sql: "SELECT pr.name FROM follows f\nJOIN viewed v   ON v.person_id = f.followee_id\nJOIN product pr ON pr.id = v.product_id\nWHERE f.follower_id = 1\n  AND pr.id NOT IN (SELECT product_id FROM viewed WHERE person_id = 1);", sp: "SELECT ?prod WHERE {\n  ex:Alice ex:follows ?f . ?f ex:viewed ?prod .\n  FILTER NOT EXISTS { ex:Alice ex:viewed ?prod }\n}" },
+  { l: 'Who else viewed the laptop Alice bought?', ans: 'Cem', hl: ['alice', 'o42', 'laptop', 'cem'], e: [2, 3, 6], cy: "MATCH (a:Person {name:'Alice'})-[:PLACED]->(:Order)-[:CONTAINS]->(p)<-[:VIEWED]-(other)\nWHERE other <> a\nRETURN other.name", sql: "-- orders, order_items, viewed, person: 4 joins", sp: "SELECT ?other WHERE {\n  ex:Alice ex:placed/ex:contains ?p .\n  ?other ex:viewed ?p . FILTER(?other != ex:Alice)\n}" }
+];
+let gSel = null, gNode = null;
+function drawG() {
+  const q = gSel !== null ? GQ[gSel] : null; const hl = new Set(q ? q.hl : gNode ? [gNode] : []); const he = new Set(q ? q.e : []);
+  const col = { Person: 'var(--blue)', Order: 'var(--amber)', Product: 'var(--green)' };
+  let s = '<defs><marker id="ga" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>';
+  GE.forEach(([a, b, l], i) => { const A = GN[a], B = GN[b]; const dx = B[0] - A[0], dy = B[1] - A[1], d = Math.hypot(dx, dy), r = 30; const x1 = A[0] + dx / d * r, y1 = A[1] + dy / d * r, x2 = B[0] - dx / d * (r + 3), y2 = B[1] - dy / d * (r + 3); const on = he.has(i); s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on ? 'var(--accent)' : 'var(--muted)'}" stroke-width="${on ? 3 : 1.3}" marker-end="url(#ga)"/><text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 - 4}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${on ? 'var(--accent)' : 'var(--muted)'}">${l}</text>`; });
+  Object.entries(GN).forEach(([id, [x, y, l, t]]) => { const on = hl.has(id); s += `<g data-g="${id}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="30" fill="${on ? 'var(--accent-soft)' : 'var(--surface)'}" stroke="${on ? 'var(--accent)' : col[t]}" stroke-width="${on ? 3 : 2}"/><text x="${x}" y="${y + 1}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${l}</text><text x="${x}" y="${y + 14}" text-anchor="middle" font-size="8.5" fill="var(--muted)">:${t}</text></g>`; });
+  $('#gSvg').innerHTML = s;
+  $$('#gSvg [data-g]').forEach(g => g.onclick = () => { gNode = g.dataset.g; gSel = null; drawG(); });
+  $('#gQs').innerHTML = GQ.map((x, i) => `<button class="btn ${i === gSel ? 'sel' : ''}" data-q="${i}">${x.l}</button>`).join('');
+  $$('#gQs button').forEach(b => b.onclick = () => { gSel = +b.dataset.q; gNode = null; drawG(); });
+  if (q) { $('#gProps').innerHTML = `<b>${q.l}</b><br>Answer: <b>${q.ans}</b> — follow the highlighted path. Compare how the SQL version needs one more JOIN per hop.`; $('#gCy').innerHTML = hl(q.cy, 'sql'); $('#gSql').innerHTML = hl(q.sql, 'sql'); $('#gSp').innerHTML = hl(q.sp, 'sql'); }
+  else if (gNode) { const n = GN[gNode]; $('#gProps').innerHTML = `<b>${n[2]}</b> <span class="tag">:${n[3]}</span><br>Properties: <code>${esc(JSON.stringify(n[4]))}</code><br>Edges: ${GE.filter(e => e[0] === gNode || e[1] === gNode).map(e => `${GN[e[0]][2]} -[:${e[2]}]→ ${GN[e[1]][2]}`).join('; ')}`; }
+  addCopy($('#graphs'));
+}
+gSel = 0; drawG();
+
+renderQuiz('#quizBox', [
+  { q: 'What is a data catalog?', opts: ['A backup of all tables', 'A searchable inventory of datasets built from their metadata', 'A data warehouse', 'A list of employees'], a: 1, why: 'It lets anyone discover what data exists, what it means and whether they may use it.' },
+  { q: '“Where did this number on the dashboard come from?” is a question about…', opts: ['Impact analysis', 'Provenance / root cause', 'Classification', 'Encryption'], a: 1, why: 'Tracing backwards to the source is root-cause analysis using provenance/lineage.' },
+  { q: 'A producer wants to rename a column consumers rely on. With a data contract this is…', opts: ['Allowed silently', 'A negotiated, versioned (major) change with notice to consumers', 'Impossible forever', 'A minor patch'], a: 1, why: 'Breaking changes require a new major version and consumer notification.' },
+  { q: 'Row counts drop 40% on Sunday, but all validation tests pass. Which observability signal catches it?', opts: ['Schema', 'Volume', 'Freshness', 'Distribution'], a: 1, why: 'Volume monitoring compares row counts to normal levels over time.' },
+  { q: 'Who defines what “active customer” means and keeps it documented?', opts: ['Data Owner', 'Data Steward', 'Data Custodian', 'Data Consumer'], a: 1, why: 'The steward handles day-to-day quality and documentation for a domain.' },
+  { q: 'Credit card numbers belong in which class?', opts: ['Public', 'Internal', 'Confidential', 'Restricted / regulated'], a: 3, why: 'Critical risk → strictest protection (PCI-DSS regulated).' },
+  { q: 'Replacing patient IDs with a hash is…', opts: ['Full anonymization', 'Pseudonymization — still personal data under GDPR', 'Encryption at rest', 'Data loss prevention'], a: 1, why: 'Hashes can be linked back (e.g. via other attributes or the salt) — it is pseudonymization.' },
+  { q: 'A model performs well in testing but worse in production because features were prepared differently. This is…', opts: ['Train/serve skew (consistency)', 'Representativeness bias', 'Volume drift', 'A data contract'], a: 0, why: 'Training and serving data must be prepared the same way.' },
+  { q: 'Croissant is…', opts: ['A graph database', 'A metadata format for ML datasets built on schema.org', 'An EU law', 'A lineage server'], a: 1, why: 'MLCommons Croissant, used by Hugging Face, Kaggle and OpenML.' },
+  { q: 'You need to integrate data across organizations with shared, formal meaning. Best fit?', opts: ['Property graph', 'RDF + ontologies (knowledge graph)', 'Spreadsheet', 'Data lake only'], a: 1, why: 'RDF triples + RDFS/OWL ontologies are designed for linking data across organizations; queried with SPARQL.' }
+]);
+</script>
+</body></html>

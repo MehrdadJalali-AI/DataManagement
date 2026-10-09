@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch2 · Data Quality & Preparation</title>
+<style>:root{
+  --bg:#f7f5f2; --surface:#ffffff; --surface2:#f1eee9; --ink:#1f1d1a; --muted:#5f5a53; --line:#e3ded6;
+  --accent:#c9471a; --accent-soft:#fbe9e1; --blue:#1f5fa8; --blue-soft:#e6eef8; --green:#21794f; --green-soft:#e2f2ea;
+  --amber:#9a5a0f; --amber-soft:#fbf0de; --purple:#5a43a6; --purple-soft:#ece8f8; --red:#b42318; --red-soft:#fde8e6;
+  --code-bg:#1e1f24; --code-ink:#e8e6e3; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+  --radius:14px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface2);padding:.1em .35em;border-radius:5px}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5em}
+h2{font-size:1.65rem;letter-spacing:-.01em}
+h3{font-size:1.15rem}
+p{margin:0 0 1em}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
+.brand{font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.chapnav{display:flex;gap:6px;overflow-x:auto;flex:1}
+.chapnav a{padding:6px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:.9rem;white-space:nowrap;border:1px solid transparent}
+.chapnav a.on{background:var(--accent-soft);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);font-weight:600}
+.iconbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+.progress{height:3px;background:var(--accent);width:0;transition:width .1s}
+.hero{max-width:1240px;margin:0 auto;padding:48px 20px 24px}
+.hero .kicker{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+.hero h1{font-size:clamp(1.9rem,4vw,2.8rem);letter-spacing:-.02em;margin:.2em 0 .35em}
+.hero p.lead{font-size:1.12rem;color:var(--muted);max-width:760px}
+.objectives{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}
+.objectives div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.93rem}
+.objectives b{display:block;color:var(--accent);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;padding:0 20px 80px}
+.toc{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto;font-size:.9rem}
+.toc h4{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.toc a{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;color:var(--muted);text-decoration:none;border-left:2px solid transparent}
+.toc a.active{color:var(--ink);background:var(--surface);border-left-color:var(--accent)}
+.toc a .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.toc a.done .dot{background:var(--green);border-color:var(--green)}
+section.chap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;margin-bottom:24px;box-shadow:var(--shadow)}
+section.chap > .sec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
+.secnum{color:var(--accent);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.donebtn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.donebtn.on{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.card{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h4{margin-bottom:.3em}
+.card p:last-child{margin-bottom:0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.green{border-color:var(--green);background:var(--green-soft)}
+.callout.blue{border-color:var(--blue);background:var(--blue-soft)}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+.callout b:first-child{display:block;margin-bottom:2px}
+.analogy{display:flex;gap:12px;background:var(--purple-soft);border-radius:12px;padding:14px 16px;margin:16px 0}
+.analogy .ico{font-size:1.5rem;line-height:1}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.tag.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.tag.green{background:var(--green-soft);color:var(--green);border-color:transparent}
+.tag.amber{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.tag.red{background:var(--red-soft);color:var(--red);border-color:transparent}
+.tag.purple{background:var(--purple-soft);color:var(--purple);border-color:transparent}
+.widget{border:1px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:12px;padding:18px;margin:18px 0;background:var(--bg)}
+.widget > .wtitle{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
+.widget > .wtitle::before{content:"▶ TRY IT";font-size:.7rem;letter-spacing:.08em;background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:9px;cursor:pointer;font:inherit;font-size:.92rem}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+textarea{font-family:var(--mono);font-size:.85rem;width:100%}
+label{font-size:.9rem}
+input[type=range]{accent-color:var(--accent);width:100%}
+.tablewrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface2);font-weight:600;white-space:nowrap}
+td.bad,span.bad{background:var(--red-soft);color:var(--red)}
+td.good{background:var(--green-soft);color:var(--green)}
+td.warn{background:var(--amber-soft);color:var(--amber)}
+tr.hl td{background:var(--accent-soft)}
+td[contenteditable]{outline:none;cursor:text}
+td[contenteditable]:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.55 var(--mono);position:relative;margin:10px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .copy{position:absolute;top:8px;right:8px;font-size:.72rem;background:#ffffff1a;color:#ddd;border:1px solid #ffffff30;border-radius:6px;padding:2px 8px;cursor:pointer}
+.c-k{color:#f4a261}.c-s{color:#9ad59a}.c-c{color:#8b8f98;font-style:italic}.c-n{color:#82b8ff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{border:0;background:none;color:var(--muted);padding:9px 14px;cursor:pointer;font:inherit;font-size:.93rem;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabpanel{display:none}.tabpanel.on{display:block}
+details.reveal{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.reveal summary{cursor:pointer;font-weight:600}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.links a{display:block;text-decoration:none;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;transition:border-color .15s,transform .15s}
+.links a:hover{border-color:var(--accent);transform:translateY(-1px)}
+.links a b{display:block;color:var(--accent);font-size:.95rem}
+.links a span{font-size:.84rem;color:var(--muted)}
+.quiz .q{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.quiz .q p{font-weight:600;margin-bottom:8px}
+.quiz .opts{display:grid;gap:6px}
+.quiz .opts button{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:.93rem}
+.quiz .opts button.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.quiz .opts button.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.quiz .why{display:none;margin-top:8px;font-size:.9rem;color:var(--muted)}
+.quiz .q.answered .why{display:block}
+.score{font-weight:700;color:var(--accent)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .step{flex:1 1 130px;background:var(--surface2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;position:relative}
+.flow .step small{display:block;color:var(--muted);font-size:.8rem}
+.flow .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.flow .arrow{align-self:center;color:var(--muted)}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-soft);color:var(--green)}
+.feedback.no{background:var(--red-soft);color:var(--red)}
+.feedback.info{background:var(--blue-soft);color:var(--blue)}
+.meter{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.meter > div{height:100%;background:var(--green);transition:width .3s}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:1.5rem;font-weight:700}
+.kpi .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sorter{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.bucket{min-height:110px;border:2px dashed var(--line);border-radius:10px;padding:8px}
+.bucket h5{margin:0 0 6px;font-size:.85rem}
+.bucket.over{border-color:var(--accent);background:var(--accent-soft)}
+.chip{display:inline-block;margin:3px;padding:5px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;cursor:grab;user-select:none}
+.chip.sel{outline:2px solid var(--accent)}
+.chip.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.chip.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.pool{min-height:50px;padding:8px;border-radius:10px;background:var(--surface2);margin-bottom:10px}
+.small{font-size:.86rem;color:var(--muted)}
+.foot{max-width:1240px;margin:0 auto;padding:20px;color:var(--muted);font-size:.85rem;text-align:center}
+svg text{font-family:inherit}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .toc{display:none}
+  section.chap{padding:18px}
+  .hero{padding:28px 16px 16px}
+  .layout{padding:0 16px 60px}
+  .topbar-inner{padding:8px 16px}
+}
+@media print{.topbar,.toc,.widget,.donebtn{display:none}.layout{display:block}}
+@media (max-width:700px){#doneCount{display:none}.brand{display:none}}
+</style></head>
+<body data-chapter="2">
+<div class="topbar"><div class="topbar-inner"><a class="brand" href="#top">Data Management</a><nav class="chapnav"><a href="Chapter1_Foundations_FAIR.html" class="">Ch 1 · Foundations & FAIR</a><a href="Chapter2_Data_Quality_Preparation.html" class="on">Ch 2 · Data Quality & Prep</a><a href="Chapter3_Reproducible_Pipelines.html" class="">Ch 3 · Pipelines</a><a href="Chapter4_Governance_AI_Ready.html" class="">Ch 4 · Governance & AI</a></nav><span class="small" id="doneCount"></span><button class="iconbtn" id="themeBtn">☾ Dark</button></div><div class="progress" id="progress"></div></div>
+<header class="hero" id="top">
+  <div class="kicker">Chapter 2 · Interactive study guide</div>
+  <h1>Data Quality, Profiling &amp; Visual Data Preparation</h1>
+  <p class="lead">Data quality is the <b>fitness of data for its intended use</b>. In this chapter you measure it (dimensions &amp; KPIs), diagnose it (profiling), and fix it (cleaning, standardizing, transforming, joining) — visually in Tableau Prep or in code with Python/Pandas.</p>
+  <div class="objectives">
+    <div><b>You will be able to</b>Name the 6 quality dimensions and compute quality KPIs</div>
+    <div><b>You will be able to</b>Profile columns and structure to find anomalies</div>
+    <div><b>You will be able to</b>Handle missing values, duplicates, noise and outliers</div>
+    <div><b>You will be able to</b>Scale, encode, standardize, join and union data</div>
+  </div>
+</header>
+<div class="layout">
+<aside class="toc"><h4>In this chapter</h4><nav id="tocList"></nav></aside>
+<main>
+
+<section class="chap" id="dq" data-title="What is data quality?">
+  <div class="sec-head"><div><div class="secnum">Section 1</div><h2>What is data quality?</h2></div></div>
+  <p>Data quality is <b>how reliable, accurate and usable</b> data is for decision-making. "Good" always depends on the use: a customer address that's fine for a newsletter may be useless for delivering a parcel.</p>
+  <div class="grid3">
+    <div class="card"><h4>Why it matters</h4><p>Reliable analysis, better decisions, lower organizational risk.</p></div>
+    <div class="card"><h4>Common challenges</h4><p>Missing values, duplicates, inconsistent formats, outdated data, data silos.</p></div>
+    <div class="card"><h4>Improved through</h4><p>Clear standards, regular validation, automated checks, periodic audits, staff awareness.</p></div>
+  </div>
+  <div class="callout"><b>Real-world example</b>Incomplete sales data hides trends → a retailer under-orders a bestseller and over-orders a slow product. Same software, same staff — just worse data.</div>
+</section>
+
+<section class="chap" id="dims" data-title="6 quality dimensions">
+  <div class="sec-head"><div><div class="secnum">Section 2</div><h2>The six dimensions of data quality</h2></div></div>
+  <div class="tabs" data-group="dim">
+    <button class="on" data-tab="acc">Accuracy</button><button data-tab="com">Completeness</button><button data-tab="con">Consistency</button><button data-tab="tim">Timeliness</button><button data-tab="uni">Uniqueness</button><button data-tab="val">Validity</button>
+  </div>
+  <div class="tabpanel on" data-group="dim" data-tab="acc">
+    <p><b>Data correctly reflects the real-world object, event or condition.</b> A customer record says Heidelberg, but the person lives in Karlsruhe. In healthcare, inaccuracy can be life-threatening:</p>
+    <div class="tablewrap"><table><tr><th>Patient</th><th>Incorrect data</th><th>Potential risk</th></tr>
+      <tr><td>P001</td><td class="bad">Allergy: None (actual: Penicillin)</td><td>Severe allergic reaction if prescribed penicillin</td></tr>
+      <tr><td>P002</td><td class="bad">Blood type: A+ (actual: O−)</td><td>Incorrect blood transfusion</td></tr>
+      <tr><td>P003</td><td class="bad">Medication: Aspirin (actual: Paracetamol)</td><td>Wrong medication</td></tr>
+      <tr><td>P005</td><td class="bad">Surgery date 12/03/2023 (actual 03/12/2023)</td><td>Scheduling error</td></tr></table></div>
+    <p class="small">Accuracy is the hardest dimension to check automatically — you often need a trusted reference (an ID registry, a second source, a human).</p>
+  </div>
+  <div class="tabpanel" data-group="dim" data-tab="com">
+    <p><b>All required data is present.</b> In e-commerce a missing price blocks a purchase; in finance incomplete records mean compliance failures.</p>
+    <div class="tablewrap"><table><tr><th>Txn</th><th>Account holder</th><th>Date</th><th>Amount (EUR)</th><th>Type</th></tr>
+      <tr><td>T001</td><td>Alice Brown</td><td>2/10/24</td><td>500</td><td>Credit</td></tr>
+      <tr><td>T002</td><td class="bad">∅</td><td>2/12/24</td><td>1200</td><td>Debit</td></tr>
+      <tr><td>T003</td><td>David Wilson</td><td class="bad">∅</td><td>750</td><td>Credit</td></tr>
+      <tr><td>T004</td><td>Emma Johnson</td><td>2/15/24</td><td class="bad">∅</td><td>Debit</td></tr>
+      <tr><td>T005</td><td>Michael Lee</td><td>2/16/24</td><td>300.5</td><td class="bad">∅</td></tr></table></div>
+    <p class="small">Best practice: validation rules that guarantee every <i>required</i> field is filled (optional fields may legitimately be empty).</p>
+  </div>
+  <div class="tabpanel" data-group="dim" data-tab="con">
+    <p><b>Data doesn't conflict across systems.</b> "John Smith" vs "Jon Smith"; one plant reports °C/kPa/L·min⁻¹, another °F/psi/m³·h⁻¹ for the <i>same</i> sensors.</p>
+    <div class="widget"><div class="wtitle">Convert System B to System A units</div>
+      <div class="tablewrap"><table id="sensTbl"></table></div>
+      <button class="btn primary" id="sensBtn">Convert °F→°C, psi→kPa, m³/h→L/min</button></div>
+  </div>
+  <div class="tabpanel" data-group="dim" data-tab="tim">
+    <p><b>Data is up to date and available when needed.</b> System B updates with a delay:</p>
+    <div class="tablewrap"><table><tr><th>Patient</th><th>Last updated</th><th>System A (real-time)</th><th>System B (delayed)</th></tr>
+      <tr><td>P001</td><td>2/14/24 08:30</td><td>Stable</td><td class="good">Stable</td></tr>
+      <tr><td>P002</td><td>2/13/24 22:00</td><td>Critical</td><td class="bad">Stable</td></tr>
+      <tr><td>P003</td><td>2/12/24 14:15</td><td>Needs surgery</td><td class="bad">Under observation</td></tr>
+      <tr><td>P004</td><td>2/10/24 10:45</td><td>Discharged</td><td class="bad">Admitted</td></tr></table></div>
+    <p class="small">Best practice: automated updates, real-time pipelines, well-defined refresh cycles (and a "last updated" timestamp users can see).</p>
+  </div>
+  <div class="tabpanel" data-group="dim" data-tab="uni">
+    <p><b>Each record appears only once.</b> "Sara Müller" vs "Sarah Mueller" registered as two patients → split medical history. Duplicate transactions inflate balances (T003 and T005 below appear twice). See the <a href="#dupes">deduplication lab</a>.</p>
+    <div class="tablewrap"><table><tr><th>Txn</th><th>Holder</th><th>Amount</th></tr><tr><td>T003</td><td>Emma Davis</td><td>750</td></tr><tr class="hl"><td>T003</td><td>Emma Davis</td><td>750</td></tr><tr><td>T005</td><td>David Wilson</td><td>1000</td></tr><tr class="hl"><td>T005</td><td>David Wilson</td><td>1000</td></tr></table></div>
+  </div>
+  <div class="tabpanel" data-group="dim" data-tab="val">
+    <p><b>Data follows defined formats, allowed values, ranges and business rules.</b> A record can be complete and unique and still invalid.</p>
+    <div class="widget"><div class="wtitle">Validity checker</div>
+      <div class="grid3">
+        <label>Email<br><input type="text" id="vEmail" value="alice.johnson#email"></label>
+        <label>Age (0–120)<br><input type="text" id="vAge" value="134"></label>
+        <label>Country (ISO-2: DE, FR, IT, US…)<br><input type="text" id="vCty" value="Germany"></label>
+        <label>Date (YYYY-MM-DD)<br><input type="text" id="vDate" value="2024-02-30"></label>
+      </div>
+      <div id="vOut" style="margin-top:10px"></div>
+      <p class="small">Validity rate = valid values ÷ checked values × 100</p>
+    </div>
+  </div>
+  <div class="widget"><div class="wtitle">Name the dimension</div><div id="sortDim"></div></div>
+</section>
+
+<section class="chap" id="kpi" data-title="Quality KPIs">
+  <div class="sec-head"><div><div class="secnum">Section 3</div><h2>Measuring quality: KPIs</h2></div></div>
+  <div class="grid3">
+    <div class="card"><b>Completeness rate</b><p class="small">% of required fields filled</p></div>
+    <div class="card"><b>Error rate</b><p class="small">% of fields incorrect / invalid / inconsistent</p></div>
+    <div class="card"><b>Duplication rate</b><p class="small">% of duplicate records</p></div>
+    <div class="card"><b>Validity rate</b><p class="small">valid ÷ checked × 100</p></div>
+    <div class="card"><b>Timeliness</b><p class="small">% of data up to date when needed</p></div>
+    <div class="card"><b>Data quality score</b><p class="small">composite of the above</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Live KPI calculator — edit the cells!</div>
+    <p class="small">This is the patient table from the lecture. Click any cell to edit it (e.g. fill P004's DOB, fix "Diabetees", delete the duplicate P009) and watch the KPIs update. Empty cell = missing.</p>
+    <div class="kpis" id="kpiBox"></div>
+    <div class="tablewrap"><table id="kpiTbl"></table></div>
+    <div class="btnrow"><button class="btn" id="kpiReset">↺ Reset table</button><button class="btn" id="kpiDel">Remove exact duplicate rows</button></div>
+    <details class="reveal"><summary>How are these computed?</summary>
+      <p class="small">60 fields = 10 rows × 6 columns. <b>Completeness</b> = non-empty / all. <b>Error rate</b> = fields that break a rule (discharge before admission, diagnosis not in {Flu, Asthma, Diabetes, Hypertension}, invalid date) / all. <b>Duplication</b> = rows identical to an earlier row / rows. <b>Timeliness</b> = rows with an admission date / rows. <b>Score</b> = average of completeness, (100 − error), (100 − duplication), timeliness.</p>
+<pre><code data-hl="py">completeness = df.notna().sum().sum() / df.size * 100
+duplication  = df.duplicated().mean() * 100
+bad_dx       = ~df['Diagnosis'].isin(['Flu','Asthma','Diabetes','Hypertension'])
+bad_dates    = pd.to_datetime(df['Discharge']) &lt; pd.to_datetime(df['Admission'])</code></pre>
+    </details>
+  </div>
+</section>
+
+<section class="chap" id="challenges" data-title="Challenges & strategies">
+  <div class="sec-head"><div><div class="secnum">Section 4</div><h2>Challenges &amp; improvement strategies</h2></div></div>
+  <div class="grid3">
+    <div class="card"><span class="tag red">Challenge</span><h4>Data silos</h4><p>Sales in one system, customer service in another — no complete view of the customer. <b>Fix:</b> shared platforms, interoperable systems, a central warehouse.</p></div>
+    <div class="card"><span class="tag red">Challenge</span><h4>Inconsistent formats</h4><p>MM/DD/YYYY vs DD/MM/YYYY; km vs miles. <b>Fix:</b> standardize formats, units and conventions.</p></div>
+    <div class="card"><span class="tag red">Challenge</span><h4>Resource constraints</h4><p>Too few people, tools or budget. <b>Fix:</b> automate routine checks, prioritize critical issues.</p></div>
+    <div class="card"><span class="tag green">Strategy</span><h4>Automated validation</h4><p>Checks run as data is entered/processed — e.g. checkout validates addresses; banks validate transactions in real time (fraud detection).</p></div>
+    <div class="card"><span class="tag green">Strategy</span><h4>Data quality audits</h4><p>Scheduled structured reviews — e.g. an insurer audits customer data for regulatory compliance; findings drive continuous improvement.</p></div>
+  </div>
+  <div class="widget"><div class="wtitle">The date-format trap</div>
+    <label>Type a date: <input type="text" id="dtIn" value="03/12/2023"></label>
+    <div id="dtOut" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<section class="chap" id="profiling" data-title="Data profiling">
+  <div class="sec-head"><div><div class="secnum">Section 5</div><h2>Data profiling — the diagnosis before the cure</h2></div></div>
+  <p>Profiling analyses a dataset to understand its <b>structure, patterns, anomalies and quality issues</b> before cleaning or ETL. It splits into two investigations:</p>
+  <div class="grid2">
+    <div class="card"><span class="tag blue">Column analysis</span><p>Each field on its own: <b>cardinality</b>, <b>data types &amp; patterns</b>, <b>domains</b>, <b>value distributions</b>.</p></div>
+    <div class="card"><span class="tag purple">Structure analysis</span><p>Relationships between fields: <b>functional dependencies</b>, <b>unique column combinations</b>, <b>inclusion dependencies</b>.</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Column profiler</div>
+    <p class="small">Click a column header to profile it. The table contains a duplicate row, a suspicious amount and an invalid email — can you find them with the profiler?</p>
+    <div class="tablewrap"><table id="profTbl"></table></div>
+    <div id="profOut"></div>
+  </div>
+  <h3>Structure analysis</h3>
+  <div class="tabs" data-group="struct"><button class="on" data-tab="fd">Functional dependency</button><button data-tab="ucc">Unique combinations</button><button data-tab="ind">Inclusion dependency</button></div>
+  <div class="tabpanel on" data-group="struct" data-tab="fd">
+    <p><b>A → B</b>: every row with the same A must have the same B (e.g. <code>Customer ID → Name</code>, <code>Price × Quantity → Total</code>). A violation means the same key gives different answers — the data can't be trusted.</p>
+    <div class="widget"><div class="wtitle">Check Customer ID → Name</div>
+      <div class="btnrow"><button class="btn" id="fdBreak">Introduce a violation</button><button class="btn" id="fdFix">Restore</button></div>
+      <div class="tablewrap"><table id="fdTbl"></table></div><div class="feedback show" id="fdOut"></div></div>
+  </div>
+  <div class="tabpanel" data-group="struct" data-tab="ucc">
+    <p>When no single column identifies a row, a <b>combination</b> may (a composite key).</p>
+    <div class="widget"><div class="wtitle">Find a composite key</div>
+      <div class="btnrow" id="uccCols"></div>
+      <div class="tablewrap"><table id="uccTbl"></table></div><div class="feedback show" id="uccOut"></div></div>
+  </div>
+  <div class="tabpanel" data-group="struct" data-tab="ind">
+    <p>Every <code>Product Code</code> in Sales must exist in Products — otherwise you have <b>orphaned records</b> (a foreign-key violation).</p>
+    <div class="grid2">
+      <div><b class="small">Products (source)</b><div class="tablewrap"><table><tr><th>Code</th><th>Name</th></tr><tr><td>P001</td><td>Wireless Mouse</td></tr><tr><td>P002</td><td>Mechanical Keyboard</td></tr><tr><td>P003</td><td>Monitor</td></tr><tr><td>P004</td><td>Laptop</td></tr></table></div></div>
+      <div><b class="small">Sales (dependent)</b><div class="tablewrap"><table><tr><th>Txn</th><th>Code</th><th>Amount</th></tr><tr><td>TXN001</td><td class="good">P001</td><td>40.00</td></tr><tr><td>TXN002</td><td class="good">P003</td><td>150.00</td></tr><tr><td>TXN003</td><td class="good">P002</td><td>120.00</td></tr><tr><td>TXN004</td><td class="bad">P005 ✗</td><td>300.00</td></tr></table></div></div>
+    </div>
+<pre><code data-hl="py">orphans = sales[~sales['product_code'].isin(products['product_code'])]
+print(orphans)   # TXN004 / P005 → quarantine or fix</code></pre>
+  </div>
+  <h3>Where profiling fits in a pipeline</h3>
+  <div class="grid2">
+    <div class="card"><b>ETL</b><p>Extract → <b>Profile</b> → Clean/Transform → Load</p></div>
+    <div class="card"><b>ELT</b><p>Extract → Load raw → <b>Profile</b> → Transform</p></div>
+  </div>
+  <p class="small">Profiling answers: What's wrong with the source? Which columns need cleaning? Which rules should guide transformation? Is it ready to load?</p>
+<pre><code data-hl="py"># One-line profiling in Python
+import pandas as pd
+df = pd.read_csv("customers.csv")
+df.info()                 # types + non-null counts (completeness)
+df.describe(include="all")# distributions, min/max, unique, top
+df.nunique()              # cardinality per column
+df.duplicated().sum()     # exact duplicate rows
+# full HTML report:  from ydata_profiling import ProfileReport; ProfileReport(df).to_file("report.html")</code></pre>
+</section>
+
+<section class="chap" id="missing" data-title="Missing values">
+  <div class="sec-head"><div><div class="secnum">Section 6</div><h2>Cleaning I — missing values</h2></div></div>
+  <p>The cleaning process: <b>Profile → Transform → Validate → Output</b>. For gaps you have three options:</p>
+  <div class="grid3">
+    <div class="card"><h4>Imputation</h4><p>Fill with mean / median / mode, or predict with a model (Decision Tree, Random Forest, KNN).</p></div>
+    <div class="card"><h4>Deletion</h4><p>Drop records when the field isn't critical or too much is missing to impute reliably.</p></div>
+    <div class="card"><h4>Flagging</h4><p>Keep the row, add a <code>was_missing</code> flag and treat it separately in analysis.</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Imputation playground</div>
+    <p class="small">Feature 1 has 3 missing values. Choose a strategy and compare how it changes the mean and the spread (standard deviation).</p>
+    <div class="btnrow" id="impBtns"></div>
+    <div class="grid2"><div class="tablewrap"><table id="impTbl"></table></div><div><div class="kpis" id="impKpi"></div><svg id="impSvg" viewBox="0 0 320 120" width="100%"></svg><p class="small" id="impNote"></p></div></div>
+    <pre><code id="impCode"></code></pre>
+  </div>
+</section>
+
+<section class="chap" id="dupes" data-title="Duplicates">
+  <div class="sec-head"><div><div class="secnum">Section 7</div><h2>Cleaning II — duplicates</h2></div></div>
+  <p>Duplicates cause redundancy, skew results and slow processing. <b>Exact</b> duplicates are easy (<code>df.drop_duplicates()</code>). <b>Near</b>-duplicates ("Sara Müller" vs "Sarah Mueller") need normalization and fuzzy matching.</p>
+  <div class="widget">
+    <div class="wtitle">Deduplication lab</div>
+    <div class="btnrow">
+      <label><input type="checkbox" id="dLower"> lowercase + trim</label>
+      <label><input type="checkbox" id="dUml"> ü→ue, ö→oe, ä→ae, ß→ss</label>
+      <label style="flex:1;min-width:220px">fuzzy similarity threshold: <b id="dThV">100%</b><input type="range" id="dTh" min="60" max="100" value="100"></label>
+    </div>
+    <div class="tablewrap"><table id="dTbl"></table></div>
+    <div class="feedback show info" id="dOut"></div>
+  </div>
+</section>
+
+<section class="chap" id="outliers" data-title="Noise & outliers">
+  <div class="sec-head"><div><div class="secnum">Section 8</div><h2>Cleaning III — noise vs. outliers</h2></div></div>
+  <div class="grid2">
+    <div class="card"><h4>Noise</h4><p>Random variation or error with no meaningful pattern — sensor jitter, typos, measurement error. Handle with <b>smoothing</b>, deletion of nonsense rows ("abcxyz"), or unit transformation.</p></div>
+    <div class="card"><h4>Outlier</h4><p>A point far from the rest. It may be an error (a typo of 3000 instead of 300) <b>or</b> the most interesting fact in the data (fraud!). Use <b>domain knowledge</b> before removing — consider imputation, segmentation, visualization.</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Hourly temperature sensor</div>
+    <div class="grid2">
+      <label>Moving-average window: <b id="smWv">1 (no smoothing)</b><input type="range" id="smW" min="1" max="9" step="2" value="1"></label>
+      <label>Outlier threshold |z| &gt; <b id="zTv">2.5</b><input type="range" id="zT" min="1.5" max="4" step="0.1" value="2.5"></label>
+    </div>
+    <svg id="smSvg" viewBox="0 0 700 220" width="100%"></svg>
+    <p class="small" id="smOut"></p>
+<pre><code data-hl="py">smooth = temp.rolling(window=5, center=True).mean()      # mean smoothing
+z = (temp - temp.mean()) / temp.std()
+outliers = temp[z.abs() &gt; 2.5]
+# IQR rule (robust):  q1, q3 = temp.quantile([.25, .75]); iqr = q3 - q1
+# outliers = temp[(temp &lt; q1 - 1.5*iqr) | (temp &gt; q3 + 1.5*iqr)]</code></pre>
+  </div>
+</section>
+
+<section class="chap" id="transform" data-title="Scaling & encoding">
+  <div class="sec-head"><div><div class="secnum">Section 9</div><h2>Transformation — scaling, encoding, binning, features</h2></div></div>
+  <div class="grid2">
+    <div class="card"><b>Scaling</b> — same range for all features (min-max, z-score)</div>
+    <div class="card"><b>Encoding</b> — categories → numbers (one-hot)</div>
+    <div class="card"><b>Binning</b> — continuous → intervals (age groups)</div>
+    <div class="card"><b>Feature generation</b> — ratios, interactions (income / age)</div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Feature scaling</div>
+    <p class="small">Standardization (z-score): <code>Z = (X − μ) / σ</code> → mean 0, sd 1. Normalization (min-max): <code>X' = (X − min) / (max − min)</code> → [0, 1]. Without scaling, income (tens of thousands) dominates credit score and age in distance- or gradient-based models.</p>
+    <div class="btnrow"><button class="btn sel" data-sc="raw">Raw</button><button class="btn" data-sc="z">Standardized (z)</button><button class="btn" data-sc="mm">Min-max [0,1]</button></div>
+    <div class="tablewrap"><table id="scTbl"></table></div>
+    <p class="small">Edit a raw value: <select id="scRow"></select> <select id="scCol"><option value="0">Credit Score</option><option value="1">Annual Income</option><option value="2">Age</option></select> <input type="number" id="scVal" style="width:110px"> <button class="btn" id="scSet">Set</button> — try an extreme income of 500000 and see how min-max squashes everyone else.</p>
+  </div>
+  <div class="widget">
+    <div class="wtitle">One-hot encoding</div>
+    <div class="grid2"><div><p class="small">Add employees (department):</p><div class="btnrow" id="ohBtns"></div><div class="tablewrap"><table id="ohIn"></table></div></div><div><p class="small">Encoded (<code>pd.get_dummies(df, columns=['Department'])</code>):</p><div class="tablewrap"><table id="ohOut"></table></div></div></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Binning</div>
+    <label>Bin edges for age: <input type="text" id="binE" value="0, 25, 40, 60, 120" style="width:220px"></label>
+    <div id="binOut" style="margin-top:8px"></div>
+<pre><code data-hl="py">df['age_group'] = pd.cut(df['Age'], bins=[0, 25, 40, 60, 120],
+                         labels=['≤25', '26–40', '41–60', '60+'])</code></pre>
+  </div>
+</section>
+
+<section class="chap" id="standard" data-title="Standardize & correct">
+  <div class="sec-head"><div><div class="secnum">Section 10</div><h2>Format standardization &amp; correcting inaccuracies</h2></div></div>
+  <p>All dates → <code>YYYY-MM-DD</code>; weights → kg; lengths → m; city names → one canonical spelling. Fix misspellings by <b>manual review</b> or <b>automated correction</b> (lookup tables, pattern / fuzzy matching).</p>
+  <div class="widget">
+    <div class="wtitle">Apply cleaning rules</div>
+    <div class="btnrow"><button class="btn primary" id="stApply">Apply rules</button><button class="btn" id="stReset">Reset</button></div>
+    <div class="tablewrap"><table id="stTbl"></table></div>
+<pre><code data-hl="py">city_map  = {'Chcago': 'Chicago', 'NYC': 'New York City', 'New York': 'New York City'}
+state_map = {'Texass': 'Texas', 'NY': 'New York'}
+df['City']  = df['City'].replace(city_map)
+df['State'] = df['State'].replace(state_map)
+df['Date']  = pd.to_datetime(df['Date'], errors='coerce', format='mixed')  # bad dates → NaT, flag them
+df['date_flag'] = df['Date'].isna()</code></pre>
+  </div>
+</section>
+
+<section class="chap" id="joins" data-title="Joins & unions">
+  <div class="sec-head"><div><div class="secnum">Section 11</div><h2>Joins &amp; unions</h2></div></div>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Join</th><th>Union</th></tr>
+    <tr><td>What</td><td>Combines <b>columns</b> side-by-side, matched on a key</td><td>Stacks <b>rows</b> of datasets with the same structure</td></tr>
+    <tr><td>Typical use</td><td>Add customer details to orders via customer_id</td><td>Combine 12 monthly export files into one year</td></tr>
+    <tr><td>Quality risk</td><td>Mismatched keys drop rows; duplicate keys silently <b>multiply</b> rows</td><td>Schema drift — columns renamed, reordered or missing</td></tr>
+  </table></div>
+  <div class="widget">
+    <div class="wtitle">Join visualizer</div>
+    <div class="btnrow" id="jBtns"></div>
+    <label class="small"><input type="checkbox" id="jDup"> Add a duplicate customer key (C2 appears twice in Customers)</label>
+    <div class="grid3" style="margin-top:8px"><div><b class="small">Orders</b><div class="tablewrap"><table id="jL"></table></div></div><div><b class="small">Customers</b><div class="tablewrap"><table id="jR"></table></div></div><div><b class="small">Result</b><div class="tablewrap"><table id="jOut"></table></div></div></div>
+    <div class="feedback show info" id="jMsg"></div>
+    <pre><code id="jCode"></code></pre>
+  </div>
+</section>
+
+<section class="chap" id="tools" data-title="Tableau Prep vs. Pandas">
+  <div class="sec-head"><div><div class="secnum">Section 12</div><h2>Visual prep (Tableau Prep) vs. code (Python/Pandas)</h2></div></div>
+  <p>The same cleaning steps, two ways. Visual tools are great for exploring; code is repeatable, reviewable and version-controlled (→ Chapter 3).</p>
+  <div class="tablewrap"><table>
+    <tr><th>Task</th><th>Tableau Prep (click)</th><th>Pandas (code)</th></tr>
+    <tr><td>Load data</td><td>Connections → Text file → drag onto canvas (Input step)</td><td><code>pd.read_csv('orders.csv')</code></td></tr>
+    <tr><td>Profile</td><td>Profile pane shows histogram + counts per field automatically</td><td><code>df.describe()</code>, <code>df.nunique()</code></td></tr>
+    <tr><td>Remove duplicates</td><td>Clean step → Aggregate / "Remove duplicates"</td><td><code>df.drop_duplicates()</code></td></tr>
+    <tr><td>Fix spelling</td><td>Group values → <i>Pronunciation / Common characters / Spelling</i></td><td><code>df['City'].replace(map)</code></td></tr>
+    <tr><td>Missing values</td><td>Filter Null values, or Edit value / calculated field</td><td><code>df['x'].fillna(df['x'].median())</code></td></tr>
+    <tr><td>Split / standardize</td><td>Clean → Split values, Change data type, Make uppercase</td><td><code>df['d'] = pd.to_datetime(df['d'])</code></td></tr>
+    <tr><td>Join</td><td>Join step — Venn diagram shows matched / unmatched rows</td><td><code>orders.merge(cust, on='customer_id', how='left')</code></td></tr>
+    <tr><td>Union</td><td>Union step, or wildcard union on input</td><td><code>pd.concat([jan, feb, mar])</code></td></tr>
+    <tr><td>Output</td><td>Output step → .hyper / .csv / database</td><td><code>df.to_csv('clean.csv', index=False)</code></td></tr>
+  </table></div>
+  <div class="grid3" style="margin-top:12px">
+    <div class="card"><b>Tableau Prep</b><p class="small">Intuitive, visual; many formats. Missing data, duplicates, transformations.</p></div>
+    <div class="card"><b>DataPrep (GCP)</b><p class="small">Cloud-scale cleaning integrated with Google Cloud Storage; ML pipelines.</p></div>
+    <div class="card"><b>RapidMiner</b><p class="small">Visual workflows with machine learning integration.</p></div>
+    <div class="card"><b>Pandas</b><p class="small">Open-source, script-based, most flexible — feature engineering included.</p></div>
+    <div class="card"><b>OpenRefine</b><p class="small">Free tool for messy text; clustering for near-duplicate names.</p></div>
+  </div>
+</section>
+
+<section class="chap" id="links" data-title="Real-world links">
+  <div class="sec-head"><div><div class="secnum">Section 13</div><h2>Explore real tools &amp; resources</h2></div></div>
+  <div class="links">
+    <a href="https://pandas.pydata.org/docs/user_guide/missing_data.html" target="_blank" rel="noopener"><b>pandas — missing data</b><span>Official guide: isna, fillna, dropna</span></a>
+    <a href="https://pandas.pydata.org/docs/user_guide/merging.html" target="_blank" rel="noopener"><b>pandas — merge, join, concat</b><span>Joins and unions in code</span></a>
+    <a href="https://www.tableau.com/products/prep" target="_blank" rel="noopener"><b>Tableau Prep</b><span>Visual data preparation (free for students)</span></a>
+    <a href="https://www.tableau.com/academic/students" target="_blank" rel="noopener"><b>Tableau for Students</b><span>Free academic licence</span></a>
+    <a href="https://docs.profiling.ydata.ai/" target="_blank" rel="noopener"><b>ydata-profiling</b><span>One-line HTML profiling report</span></a>
+    <a href="https://scikit-learn.org/stable/modules/impute.html" target="_blank" rel="noopener"><b>scikit-learn imputation</b><span>SimpleImputer, KNNImputer, IterativeImputer</span></a>
+    <a href="https://scikit-learn.org/stable/modules/preprocessing.html" target="_blank" rel="noopener"><b>scikit-learn preprocessing</b><span>StandardScaler, MinMaxScaler, OneHotEncoder</span></a>
+    <a href="https://openrefine.org/" target="_blank" rel="noopener"><b>OpenRefine</b><span>Cluster &amp; fix messy values</span></a>
+    <a href="https://greatexpectations.io/" target="_blank" rel="noopener"><b>Great Expectations</b><span>Automated validation in production</span></a>
+    <a href="https://www.kaggle.com/datasets?tags=13302-Data+Cleaning" target="_blank" rel="noopener"><b>Kaggle — data cleaning datasets</b><span>Practice on real messy data</span></a>
+    <a href="https://www.kaggle.com/learn/data-cleaning" target="_blank" rel="noopener"><b>Kaggle Learn: Data Cleaning</b><span>Short free hands-on course</span></a>
+    <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener"><b>Course repository</b><span>Notebooks &amp; exercise datasets</span></a>
+  </div>
+</section>
+
+<section class="chap" id="quiz" data-title="Self-check quiz">
+  <div class="sec-head"><div><div class="secnum">Section 14</div><h2>Self-check quiz</h2></div></div>
+  <div id="quizBox"></div>
+</section>
+</main></div>
+
+<footer class="foot">Data Management · Prof. Dr. Mehrdad Jalali · SRH University of Applied Sciences Heidelberg · Course repository: <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener">github.com/MehrdadJalali-AI/DataManagement</a></footer>
+<script>// ---------- shared helpers for all chapter pages ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// theme
+(function () {
+  const saved = store.get('dm-theme', null);
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  const b = $('#themeBtn');
+  if (!b) return;
+  const label = () => {
+    const t = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    b.textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
+  };
+  label();
+  b.onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const nxt = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nxt);
+    store.set('dm-theme', nxt); label();
+  };
+})();
+
+// TOC, scroll spy, progress, "mark as understood"
+(function () {
+  const toc = $('#tocList'); const secs = $$('section.chap');
+  const key = 'dm-done-' + (document.body.dataset.chapter || 'x');
+  const done = new Set(store.get(key, []));
+  secs.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + s.id; a.innerHTML = '<span class="dot"></span>' + esc(s.dataset.title || s.id);
+    if (done.has(s.id)) a.classList.add('done');
+    toc && toc.appendChild(a);
+    const head = s.querySelector('.sec-head');
+    if (head) {
+      const b = document.createElement('button'); b.className = 'donebtn';
+      const paint = () => { b.classList.toggle('on', done.has(s.id)); b.textContent = done.has(s.id) ? '✓ Understood' : 'Mark as understood'; a.classList.toggle('done', done.has(s.id)); updCount(); };
+      b.onclick = () => { done.has(s.id) ? done.delete(s.id) : done.add(s.id); store.set(key, [...done]); paint(); };
+      head.appendChild(b); setTimeout(paint);
+    }
+  });
+  function updCount() { const c = $('#doneCount'); if (c) c.textContent = done.size + ' / ' + secs.length + ' sections understood'; }
+  const links = toc ? $$('a', toc) : [];
+  const onScroll = () => {
+    const h = document.documentElement; const p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+    const bar = $('#progress'); if (bar) bar.style.width = (p * 100) + '%';
+    let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) cur = i; });
+    links.forEach((l, i) => l.classList.toggle('active', i === cur));
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+})();
+
+// tabs: <div class="tabs" data-group="x"><button data-tab="a">..</button></div> + <div class="tabpanel" data-group="x" data-tab="a">
+document.addEventListener('click', e => {
+  const b = e.target.closest('.tabs button'); if (!b) return;
+  const g = b.parentElement.dataset.group;
+  $$('.tabs[data-group="' + g + '"] button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.tabpanel[data-group="' + g + '"]').forEach(p => p.classList.toggle('on', p.dataset.tab === b.dataset.tab));
+});
+
+// copy buttons on code
+function addCopy(root = document) {
+  $$('pre', root).forEach(p => {
+    if (p.querySelector('.copy')) return;
+    const b = document.createElement('button'); b.className = 'copy'; b.textContent = 'Copy';
+    b.onclick = () => { const t = p.querySelector('code') ? p.querySelector('code').innerText : p.innerText.replace(/Copy$/, ''); navigator.clipboard && navigator.clipboard.writeText(t); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1200); };
+    p.appendChild(b);
+  });
+}
+addCopy();
+
+// quiz engine: renderQuiz('#el', [{q, opts:[...], a: idx, why}])
+function renderQuiz(sel, items) {
+  const root = $(sel); if (!root) return; root.classList.add('quiz');
+  let right = 0, answered = 0;
+  const sc = document.createElement('p'); sc.className = 'score';
+  const upd = () => sc.textContent = `Score: ${right} / ${items.length}` + (answered === items.length ? (right === items.length ? ' — perfect! 🎉' : ' — review the explanations and try again.') : '');
+  items.forEach((it, qi) => {
+    const d = document.createElement('div'); d.className = 'q';
+    d.innerHTML = `<p>${qi + 1}. ${it.q}</p><div class="opts"></div><div class="why">💡 ${it.why}</div>`;
+    const o = d.querySelector('.opts');
+    it.opts.forEach((t, i) => {
+      const b = document.createElement('button'); b.innerHTML = t;
+      b.onclick = () => {
+        if (d.classList.contains('answered')) return;
+        d.classList.add('answered'); answered++;
+        if (i === it.a) { b.classList.add('right'); right++; } else { b.classList.add('wrong'); o.children[it.a].classList.add('right'); }
+        upd();
+      };
+      o.appendChild(b);
+    });
+    root.appendChild(d);
+  });
+  const r = document.createElement('button'); r.className = 'btn'; r.textContent = '↺ Reset quiz';
+  r.onclick = () => { root.innerHTML = ''; renderQuiz(sel, items); };
+  root.appendChild(sc); root.appendChild(r); upd();
+}
+
+// sorter engine (click a chip, then click a bucket — or drag): makeSorter('#el', cats:[{id,label}], items:[{t, c, why?}])
+function makeSorter(sel, cats, items) {
+  const root = $(sel); if (!root) return;
+  root.innerHTML = `<div class="pool small">Click an item, then click the box it belongs to (or drag it).</div><div class="sorter"></div><div class="btnrow"><button class="btn primary chk">Check answers</button><button class="btn rst">Reset</button></div><div class="feedback"></div>`;
+  const pool = $('.pool', root), sorter = $('.sorter', root), fb = $('.feedback', root);
+  let selected = null;
+  const shuffled = items.map((x, i) => ({ ...x, i })).sort(() => Math.random() - .5);
+  shuffled.forEach(it => {
+    const c = document.createElement('span'); c.className = 'chip'; c.textContent = it.t; c.draggable = true; c.dataset.c = it.c; c.dataset.i = it.i;
+    if (it.why) c.title = it.why;
+    c.onclick = e => { e.stopPropagation(); $$('.chip', root).forEach(x => x.classList.remove('sel')); selected = c; c.classList.add('sel'); };
+    c.ondragstart = ev => { selected = c; ev.dataTransfer.setData('text', it.i); };
+    pool.appendChild(c);
+  });
+  cats.forEach(cat => {
+    const b = document.createElement('div'); b.className = 'bucket'; b.dataset.id = cat.id; b.innerHTML = `<h5>${cat.label}</h5>`;
+    const drop = () => { if (selected) { b.appendChild(selected); selected.classList.remove('sel', 'right', 'wrong'); selected = null; } };
+    b.onclick = drop;
+    b.ondragover = e => { e.preventDefault(); b.classList.add('over'); };
+    b.ondragleave = () => b.classList.remove('over');
+    b.ondrop = e => { e.preventDefault(); b.classList.remove('over'); drop(); };
+    sorter.appendChild(b);
+  });
+  pool.onclick = () => { if (selected) { pool.appendChild(selected); selected.classList.remove('sel'); selected = null; } };
+  $('.chk', root).onclick = () => {
+    let ok = 0, placed = 0;
+    $$('.bucket .chip', root).forEach(c => { placed++; const good = c.parentElement.dataset.id === c.dataset.c; c.classList.toggle('right', good); c.classList.toggle('wrong', !good); if (good) ok++; });
+    fb.className = 'feedback show ' + (ok === items.length ? 'ok' : 'info');
+    fb.textContent = ok === items.length ? `All ${ok} correct — well done!` : `${ok} of ${items.length} correct (${items.length - placed} not placed yet). Red items are in the wrong box — hover them for a hint.`;
+  };
+  $('.rst', root).onclick = () => makeSorter(sel, cats, items);
+}
+
+// tiny syntax highlighter for python / sql / yaml snippets marked data-hl
+function hl(code, lang) {
+  let s = esc(code);
+  if (lang === 'py' || lang === 'sql') {
+    s = s.replace(/(#.*|--.*)$/gm, '<span class="c-c">$1</span>');
+    s = s.replace(/(&quot;.*?&quot;|'[^'\n]*')/g, '<span class="c-s">$1</span>');
+    const kw = lang === 'py' ? 'def|return|import|from|as|for|in|if|else|try|except|with|lambda|True|False|None|print' : 'SELECT|FROM|WHERE|GROUP BY|ORDER BY|JOIN|LEFT JOIN|ON|AS|WITH|SUM|COUNT|AND|OR|MATCH|RETURN|PREFIX';
+    s = s.replace(new RegExp('\\b(' + kw + ')\\b', 'g'), '<span class="c-k">$1</span>');
+  } else if (lang === 'yaml') {
+    s = s.replace(/(#.*)$/gm, '<span class="c-c">$1</span>').replace(/^(\s*-?\s*)([\w_]+):/gm, '$1<span class="c-k">$2</span>:');
+  }
+  return s;
+}
+$$('pre code[data-hl]').forEach(c => { c.innerHTML = hl(c.textContent, c.dataset.hl); });
+</script>
+<script>
+const fmt = (x, d = 2) => (x === null || x === undefined || isNaN(x)) ? '—' : (+x).toFixed(d);
+const mean = a => a.reduce((s, x) => s + x, 0) / a.length;
+const sd = a => { const m = mean(a); return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1)); };
+const median = a => { const s = [...a].sort((x, y) => x - y), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
+const tbl = (head, rows, cls) => '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>' + rows.map((r, i) => '<tr>' + r.map((c, j) => `<td class="${cls ? cls(i, j, c) || '' : ''}">${c === null || c === '' ? '<span class="small">∅</span>' : esc(c)}</td>`).join('') + '</tr>').join('');
+
+// consistency sensors
+const SA = [['S001', 25, 101.3, 15], ['S002', 30.5, 98.7, 12.5], ['S003', 22.8, 105.2, 14.2], ['S004', 28.3, 100, 13.8]];
+const SB = [['S001', 77, 14.7, 0.9], ['S002', 86.9, 14.3, 0.75], ['S003', 73, 15.2, 0.85], ['S004', 82.9, 14.5, 0.83]];
+let sConv = false;
+function drawSens() {
+  const rows = SA.map((a, i) => { const b = SB[i]; const bb = sConv ? [b[0], ((b[1] - 32) * 5 / 9).toFixed(1), (b[2] * 6.89476).toFixed(1), (b[3] * 1000 / 60).toFixed(1)] : b; return [a[0], a[1], a[2], a[3], bb[1], bb[2], bb[3]]; });
+  $('#sensTbl').innerHTML = tbl(['Sensor', 'A: Temp °C', 'A: kPa', 'A: L/min', sConv ? 'B→ °C' : 'B: Temp °F', sConv ? 'B→ kPa' : 'B: psi', sConv ? 'B→ L/min' : 'B: m³/h'], rows, (i, j) => j >= 4 ? (sConv ? 'good' : 'warn') : '');
+}
+$('#sensBtn').onclick = () => { sConv = !sConv; $('#sensBtn').textContent = sConv ? 'Show original System B units' : 'Convert °F→°C, psi→kPa, m³/h→L/min'; drawSens(); }; drawSens();
+
+// validity checker
+function drawVal() {
+  const isDate = s => { const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return false; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3]; };
+  const checks = [
+    ['Email matches name@domain.tld', /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test($('#vEmail').value)],
+    ['Age is an integer in 0–120', /^\d+$/.test($('#vAge').value) && +$('#vAge').value <= 120],
+    ['Country in allowed ISO-2 list', ['DE', 'FR', 'IT', 'US', 'GB', 'ES', 'NL', 'AT', 'CH'].includes($('#vCty').value.trim())],
+    ['Date is a real YYYY-MM-DD date', isDate($('#vDate').value.trim())]
+  ];
+  const ok = checks.filter(c => c[1]).length;
+  $('#vOut').innerHTML = checks.map(c => `<div>${c[1] ? '✅' : '❌'} ${c[0]}</div>`).join('') + `<p><b>Validity rate: ${ok}/${checks.length} = ${Math.round(ok / checks.length * 100)}%</b></p>`;
+}
+['vEmail', 'vAge', 'vCty', 'vDate'].forEach(id => $('#' + id).oninput = drawVal); drawVal();
+
+makeSorter('#sortDim', [{ id: 'acc', label: 'Accuracy' }, { id: 'com', label: 'Completeness' }, { id: 'con', label: 'Consistency' }, { id: 'tim', label: 'Timeliness' }, { id: 'uni', label: 'Uniqueness' }, { id: 'val', label: 'Validity' }], [
+  { t: 'Customer’s phone number field is empty', c: 'com' }, { t: 'Order date “2024-13-45”', c: 'val' }, { t: 'Same customer stored twice with different IDs', c: 'uni' },
+  { t: 'Stock price feed is 20 minutes old', c: 'tim' }, { t: 'CRM says “Berlin”, billing system says “Munich” for the same customer', c: 'con' },
+  { t: 'Recorded weight 72 kg, real weight 82 kg', c: 'acc' }, { t: 'Gender field contains “banana”', c: 'val' }, { t: 'One plant reports °C, another °F in the same column', c: 'con' },
+  { t: 'Dashboard still shows last month’s inventory', c: 'tim' }, { t: 'Email address missing on 30% of sign-ups', c: 'com' }
+]);
+
+// KPI calculator
+const KPI0 = [
+  ['P001', 'John Doe', '1980-05-12', 'Flu', '2024-02-10', '2024-02-15'], ['P002', 'Jane Smith', '1992-08-24', 'Asthma', '2024-02-12', '2024-02-18'],
+  ['P003', 'Emily Davis', '1975-10-10', 'Diabetes', '2024-02-13', '2024-02-20'], ['P004', 'Michael Lee', '', 'Hypertension', '2024-02-14', '2024-02-22'],
+  ['P005', 'Anna White', '1988-11-22', 'Asthma', '2024-02-15', ''], ['P006', 'Chris Brown', '1990-03-18', 'Flu', '2024-02-16', '2024-02-10'],
+  ['P007', 'David Clark', '2000-06-30', 'Hypertension', '2024-02-17', '2024-02-27'], ['P008', 'James Bond', '1995-07-15', 'Diabetees', '2024-02-19', '2024-02-29'],
+  ['P009', 'Sophia Adams', '1985-12-05', 'Diabetes', '2024-02-20', '2024-02-28'], ['P009', 'Sophia Adams', '1985-12-05', 'Diabetes', '2024-02-20', '2024-02-28']
+];
+let KD = KPI0.map(r => [...r]);
+const DX = ['Flu', 'Asthma', 'Diabetes', 'Hypertension'];
+const okDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
+function kpiErrors() {
+  const e = new Set();
+  KD.forEach((r, i) => {
+    if (r[3] && !DX.includes(r[3])) e.add(i + ':3');
+    [2, 4, 5].forEach(j => { if (r[j] && !okDate(r[j])) e.add(i + ':' + j); });
+    if (okDate(r[4]) && okDate(r[5]) && r[5] < r[4]) e.add(i + ':5');
+  });
+  return e;
+}
+function drawKpi() {
+  const err = kpiErrors(); const seen = new Set(); const dupRows = new Set();
+  KD.forEach((r, i) => { const k = r.join('|'); if (seen.has(k)) dupRows.add(i); seen.add(k); });
+  const total = KD.length * 6, filled = KD.flat().filter(x => x !== '').length;
+  const comp = filled / total * 100, er = err.size / total * 100, dup = dupRows.size / KD.length * 100, tim = KD.filter(r => r[4]).length / KD.length * 100;
+  const score = (comp + (100 - er) + (100 - dup) + tim) / 4;
+  const k = (l, v, d) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v.toFixed(1)}%</div><div class="small">${d}</div></div>`;
+  $('#kpiBox').innerHTML = k('Completeness', comp, `${filled}/${total} fields`) + k('Error rate', er, `${err.size}/${total} fields`) + k('Duplication', dup, `${dupRows.size}/${KD.length} rows`) + k('Timeliness', tim, 'rows with admission') + k('Quality score', score, 'average');
+  const t = $('#kpiTbl'); t.innerHTML = '<tr><th>ID</th><th>Name</th><th>DOB</th><th>Diagnosis</th><th>Admission</th><th>Discharge</th></tr>';
+  KD.forEach((r, i) => {
+    const tr = document.createElement('tr'); if (dupRows.has(i)) tr.className = 'hl';
+    r.forEach((c, j) => { const td = document.createElement('td'); td.contentEditable = true; td.textContent = c; if (c === '') td.className = 'warn'; if (err.has(i + ':' + j)) td.className = 'bad'; td.onblur = () => { KD[i][j] = td.textContent.trim(); drawKpi(); }; td.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); td.blur(); } }; tr.appendChild(td); });
+    t.appendChild(tr);
+  });
+}
+$('#kpiReset').onclick = () => { KD = KPI0.map(r => [...r]); drawKpi(); };
+$('#kpiDel').onclick = () => { const s = new Set(); KD = KD.filter(r => { const k = r.join('|'); if (s.has(k)) return false; s.add(k); return true; }); drawKpi(); };
+drawKpi();
+
+// date trap
+function drawDt() {
+  const m = $('#dtIn').value.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+  if (!m) { $('#dtOut').innerHTML = '<span class="small">Use a format like 03/12/2023</span>'; return; }
+  const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const us = +m[1] <= 12 ? `${m[2]} ${mo[+m[1] - 1]} ${m[3]}` : 'impossible (month > 12)';
+  const eu = +m[2] <= 12 ? `${m[1]} ${mo[+m[2] - 1]} ${m[3]}` : 'impossible (month > 12)';
+  $('#dtOut').innerHTML = `<div class="grid2"><div class="card">🇺🇸 MM/DD/YYYY → <b>${us}</b></div><div class="card">🇩🇪 DD/MM/YYYY → <b>${eu}</b></div></div><p class="small">${us === eu ? 'Same day — but only by luck.' : 'Two different days! Store dates as ISO 8601 (YYYY-MM-DD) to remove the ambiguity.'}</p>`;
+}
+$('#dtIn').oninput = drawDt; drawDt();
+
+// column profiler
+const PH = ['Customer ID', 'Name', 'City', 'Purchase Amount', 'Email', 'Transaction ID'];
+const PD = [[1001, 'John Doe', 'New York', 150, 'john.doe@email.com', 'TXN001'], [1002, 'Jane Smith', 'Los Angeles', 200, 'jane.smith@email.com', 'TXN002'], [1003, 'Alice Johnson', 'New York', 175, 'alice.johnson#email', 'TXN003'], [1001, 'John Doe', 'New York', 150, 'john.doe@email.com', 'TXN001'], [1004, 'Bob Brown', 'Chicago', 3000, 'bob.brown@email.com', 'TXN004'], [1005, 'John Doe', 'New York', 150, 'john.d@email.com', 'TXN005']];
+let profCol = 3;
+function drawProf() {
+  $('#profTbl').innerHTML = '<tr>' + PH.map((h, j) => `<th style="cursor:pointer;${j === profCol ? 'background:var(--accent-soft);color:var(--accent)' : ''}" data-j="${j}">${h} ⌄</th>`).join('') + '</tr>' + PD.map(r => '<tr>' + r.map((c, j) => `<td style="${j === profCol ? 'background:var(--accent-soft)' : ''}">${esc(c)}</td>`).join('') + '</tr>').join('');
+  $$('#profTbl th').forEach(th => th.onclick = () => { profCol = +th.dataset.j; drawProf(); });
+  const v = PD.map(r => r[profCol]); const num = v.every(x => typeof x === 'number');
+  const freq = {}; v.forEach(x => freq[x] = (freq[x] || 0) + 1);
+  const card = new Set(v).size;
+  let html = `<div class="kpis"><div class="kpi"><div class="l">Data type</div><div class="v" style="font-size:1.1rem">${num ? (v.every(Number.isInteger) ? 'Integer' : 'Float') : 'String'}</div></div><div class="kpi"><div class="l">Cardinality</div><div class="v">${card} / ${v.length}</div><div class="small">${card === v.length ? 'all unique → candidate key' : 'repeats → not a key'}</div></div><div class="kpi"><div class="l">Missing</div><div class="v">0</div></div>`;
+  if (num) { const m = mean(v), s = sd(v), md = median(v); html += `<div class="kpi"><div class="l">Min / Max</div><div class="v" style="font-size:1.1rem">${Math.min(...v)} / ${Math.max(...v)}</div></div><div class="kpi"><div class="l">Mean / Median</div><div class="v" style="font-size:1.1rem">${fmt(m, 1)} / ${md}</div><div class="small">${m > md * 1.5 ? 'mean ≫ median → skew/outlier' : ''}</div></div>`; }
+  html += '</div>';
+  const pats = { 'Email': [/^[^@\s]+@[^@\s]+\.\w+$/, 'name@domain.tld'], 'Transaction ID': [/^TXN\d{3}$/, 'TXN###'], 'Customer ID': [/^\d{4}$/, '4 digits'] };
+  if (pats[PH[profCol]]) { const [re, lbl] = pats[PH[profCol]]; const bad = v.filter(x => !re.test(String(x))); html += `<p><b>Pattern check</b> (${lbl}): ${bad.length ? `<span class="bad" style="padding:1px 6px;border-radius:5px">${bad.length} violation(s): ${bad.map(esc).join(', ')}</span>` : '✅ all match'}</p>`; }
+  if (PH[profCol] === 'City') html += `<p><b>Domain check</b> (allowed: New York, Los Angeles, Chicago): ✅ all valid</p>`;
+  const max = Math.max(...Object.values(freq));
+  html += '<p><b>Value distribution</b></p>' + Object.entries(freq).sort((a, b) => b[1] - a[1]).map(([k, c]) => `<div style="display:grid;grid-template-columns:150px 1fr 30px;gap:8px;align-items:center;font-size:.85rem"><span>${esc(k)}</span><div class="meter"><div style="width:${c / max * 100}%;background:${c > 1 && card < v.length ? 'var(--amber)' : 'var(--blue)'}"></div></div><span>${c}</span></div>`).join('');
+  const insight = { 0: '1001 appears twice → duplicate row (rows 1 and 4 are identical).', 1: '“John Doe” appears 3× — two with ID 1001, one with 1005: same person or a namesake? Check with the email.', 2: 'New York dominates (4 of 6) → possible data imbalance.', 3: '3000 is far above the median 162.5 — outlier: typo for 300, or a genuine big purchase? Ask the business.', 4: 'alice.johnson#email breaks the email pattern → validity issue.', 5: 'TXN001 appears twice → exact duplicate transaction.' }[profCol];
+  html += `<div class="callout blue"><b>Insight</b>${insight}</div>`;
+  $('#profOut').innerHTML = html;
+}
+drawProf();
+
+// FD
+let fdBroken = false;
+function drawFd() {
+  const rows = [['1001', 'John Doe', 'TXN001', '150.00'], ['1002', 'Jane Smith', 'TXN002', '200.00'], ['1003', 'Alice Johnson', 'TXN003', '175.00'], ['1001', fdBroken ? 'Jon Doe' : 'John Doe', 'TXN006', '80.00'], ['1004', 'Bob Brown', 'TXN004', '300.00']];
+  const map = {}; let viol = null; rows.forEach(r => { if (map[r[0]] && map[r[0]] !== r[1]) viol = r[0]; map[r[0]] = map[r[0]] || r[1]; });
+  $('#fdTbl').innerHTML = tbl(['Customer ID', 'Name', 'Transaction ID', 'Amount'], rows, (i, j, c) => viol && rows[i][0] === viol && j < 2 ? 'bad' : '');
+  const o = $('#fdOut'); o.className = 'feedback show ' + (viol ? 'no' : 'ok');
+  o.textContent = viol ? `✗ Violation: Customer ID ${viol} maps to two different names. Which one is right? The FD Customer ID → Name does not hold.` : '✓ Customer ID → Name holds: every ID always has the same name.';
+}
+$('#fdBreak').onclick = () => { fdBroken = true; drawFd(); }; $('#fdFix').onclick = () => { fdBroken = false; drawFd(); }; drawFd();
+
+// UCC
+const UH = ['First Name', 'Last Name', 'Department', 'Salary'];
+const UD = [['John', 'Doe', 'HR', '50,000'], ['Jane', 'Doe', 'Finance', '60,000'], ['John', 'Smith', 'IT', '70,000'], ['Alice', 'Johnson', 'HR', '55,000'], ['John', 'Doe', 'Finance', '65,000']];
+const uSel = new Set([0, 1]);
+function drawUcc() {
+  $('#uccCols').innerHTML = UH.map((h, j) => `<button class="btn ${uSel.has(j) ? 'sel' : ''}" data-j="${j}">${h}</button>`).join('');
+  $$('#uccCols button').forEach(b => b.onclick = () => { const j = +b.dataset.j; uSel.has(j) ? uSel.delete(j) : uSel.add(j); drawUcc(); });
+  const cols = [...uSel].sort(); const keys = UD.map(r => cols.map(j => r[j]).join('|')); const cnt = {}; keys.forEach(k => cnt[k] = (cnt[k] || 0) + 1);
+  $('#uccTbl').innerHTML = tbl(UH, UD, (i, j) => uSel.has(j) ? (cnt[keys[i]] > 1 ? 'bad' : 'good') : '');
+  const ok = cols.length && Object.values(cnt).every(c => c === 1);
+  const o = $('#uccOut'); o.className = 'feedback show ' + (ok ? 'ok' : 'no');
+  o.textContent = !cols.length ? 'Select one or more columns.' : ok ? `✓ (${cols.map(j => UH[j]).join(' + ')}) uniquely identifies every row — a composite key candidate.${cols.length > 1 && cols.includes(3) ? ' (Salary works here by chance — a key should be stable, salaries change!)' : ''}` : `✗ (${cols.map(j => UH[j]).join(' + ')}) has duplicates — not unique.`;
+}
+drawUcc();
+
+// imputation
+const F = [[5.5, 3.2, 1.4], [6.1, 4.75, 1.1], [null, 4.5, 1.3], [7.3, 5, 1.5], [null, 5.7, 1.7], [8.8, 6.1, 1.75], [9, 6.4, 2], [10.5, 7.2, 2.25], [null, 8, 2.5], [12.3, 7.2, 2.8]];
+let impM = 'none';
+const IMP = { none: 'Original (NA)', mean: 'Mean', median: 'Median', mode: 'Mode', knn: 'KNN (k=2)', del: 'Delete rows', flag: 'Flag' };
+function impute(m) {
+  const known = F.filter(r => r[0] !== null).map(r => r[0]);
+  if (m === 'del') return F.filter(r => r[0] !== null).map(r => ({ v: r[0], f2: r[1], f3: r[2] }));
+  return F.map(r => {
+    if (r[0] !== null) return { v: r[0], f2: r[1], f3: r[2] };
+    let v = null;
+    if (m === 'mean') v = mean(known); if (m === 'median') v = median(known); if (m === 'mode') v = known[0];
+    if (m === 'knn') { const nb = F.filter(x => x[0] !== null).map(x => ({ d: Math.hypot(x[1] - r[1], x[2] - r[2]), v: x[0] })).sort((a, b) => a.d - b.d).slice(0, 2); v = mean(nb.map(n => n.v)); }
+    return { v, f2: r[1], f3: r[2], imp: m !== 'none' && m !== 'flag', flag: m === 'flag' };
+  });
+}
+function drawImp() {
+  $('#impBtns').innerHTML = Object.entries(IMP).map(([k, l]) => `<button class="btn ${k === impM ? 'sel' : ''}" data-m="${k}">${l}</button>`).join('');
+  $$('#impBtns button').forEach(b => b.onclick = () => { impM = b.dataset.m; drawImp(); });
+  const rows = impute(impM);
+  $('#impTbl').innerHTML = `<tr><th>Feature 1</th><th>Feature 2</th><th>Feature 3</th>${impM === 'flag' ? '<th>f1_missing</th>' : ''}</tr>` + rows.map(r => `<tr><td class="${r.imp ? 'good' : r.v === null ? 'warn' : ''}">${r.v === null ? 'NA' : fmt(r.v, 2)}</td><td>${r.f2}</td><td>${r.f3}</td>${impM === 'flag' ? `<td>${r.flag ? 1 : 0}</td>` : ''}</tr>`).join('');
+  const vals = rows.map(r => r.v).filter(v => v !== null);
+  $('#impKpi').innerHTML = `<div class="kpi"><div class="l">n used</div><div class="v">${vals.length}</div></div><div class="kpi"><div class="l">Mean</div><div class="v">${fmt(mean(vals))}</div></div><div class="kpi"><div class="l">Std dev</div><div class="v">${fmt(sd(vals))}</div></div>`;
+  // dot plot
+  let s = '<line x1="10" y1="80" x2="310" y2="80" stroke="var(--line)"/>';
+  for (let t = 4; t <= 13; t++) s += `<text x="${10 + (t - 4) / 9 * 300}" y="100" font-size="9" text-anchor="middle" fill="var(--muted)">${t}</text>`;
+  const stack = {}; rows.forEach(r => { if (r.v === null) return; const x = 10 + (r.v - 4) / 9 * 300; const key = Math.round(x / 6); stack[key] = (stack[key] || 0) + 1; s += `<circle cx="${x}" cy="${80 - stack[key] * 11}" r="5" fill="${r.imp ? 'var(--accent)' : 'var(--blue)'}"/>`; });
+  $('#impSvg').innerHTML = s;
+  const notes = { none: 'Original data: 7 known values, 3 missing. Original std ≈ 2.37.', mean: 'All 3 gaps get 8.50 → the spread shrinks (std drops). Sensitive to outliers.', median: 'All 3 gaps get 8.80 → robust to outliers, but variance still shrinks.', mode: 'All values are unique, so "mode" just picks the first (5.5) — mode is meant for categorical data.', knn: 'Each gap gets the average F1 of its 2 nearest rows (by F2, F3) → values follow the trend in the data and spread is better preserved.', del: 'Only 7 rows remain — you lost 30% of your data (and their F2/F3 values).', flag: 'Nothing is invented: a flag column lets the analysis treat missing rows separately.' };
+  $('#impNote').textContent = notes[impM];
+  const code = { none: "df['F1'].isna().sum()   # 3", mean: "df['F1'] = df['F1'].fillna(df['F1'].mean())", median: "df['F1'] = df['F1'].fillna(df['F1'].median())", mode: "df['F1'] = df['F1'].fillna(df['F1'].mode()[0])", knn: "from sklearn.impute import KNNImputer\ndf[['F1','F2','F3']] = KNNImputer(n_neighbors=2).fit_transform(df[['F1','F2','F3']])", del: "df = df.dropna(subset=['F1'])", flag: "df['f1_missing'] = df['F1'].isna().astype(int)" }[impM];
+  $('#impCode').innerHTML = hl(code, 'py'); addCopy($('#missing'));
+}
+drawImp();
+
+// dedupe
+const DUP = ['Sara Müller', 'Sarah Mueller', 'sara müller ', 'Jonas Weber', 'Jonas  Weber', 'Lena Schmidt', 'Lena Schmitt', 'Tom Becker'];
+function lev(a, b) { const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) d[0][j] = j; for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; }
+function drawDup() {
+  const th = +$('#dTh').value; $('#dThV').textContent = th + '%';
+  const norm = s => { let x = s; if ($('#dLower').checked) x = x.toLowerCase().trim().replace(/\s+/g, ' '); if ($('#dUml').checked) x = x.replace(/ü/g, 'ue').replace(/ö/g, 'oe').replace(/ä/g, 'ae').replace(/ß/g, 'ss').replace(/Ü/g, 'Ue'); return x; };
+  const N = DUP.map(norm); const cl = DUP.map((_, i) => i);
+  for (let i = 0; i < N.length; i++) for (let j = 0; j < i; j++) { const sim = 100 * (1 - lev(N[i], N[j]) / Math.max(N[i].length, N[j].length)); if (sim >= th && cl[i] === i) cl[i] = cl[j]; }
+  const pal = ['var(--blue-soft)', 'var(--green-soft)', 'var(--amber-soft)', 'var(--purple-soft)', 'var(--red-soft)', 'var(--accent-soft)', 'var(--surface2)', 'var(--bg)'];
+  const ids = [...new Set(cl)];
+  $('#dTbl').innerHTML = '<tr><th>Raw name</th><th>Normalized</th><th>Cluster</th></tr>' + DUP.map((d, i) => `<tr><td style="background:${pal[ids.indexOf(cl[i]) % 8]}"><code>"${esc(d)}"</code></td><td><code>"${esc(N[i])}"</code></td><td>#${ids.indexOf(cl[i]) + 1}</td></tr>`).join('');
+  $('#dOut').innerHTML = `<b>${DUP.length} records → ${ids.length} unique people.</b> ${th < 80 ? '⚠ Threshold is low: “Lena Schmidt” and “Lena Schmitt” may be merged — are they really the same person? Over-merging is as dangerous as missing duplicates.' : th === 100 && !$('#dLower').checked ? 'Exact matching finds nothing: every string differs by case, spaces or spelling. Try normalizing.' : 'Real systems confirm candidate matches with extra fields (birth date, email) before merging.'}`;
+}
+['dLower', 'dUml', 'dTh'].forEach(id => $('#' + id).oninput = drawDup); drawDup();
+
+// smoothing + outliers
+const TEMP = []; { let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280; for (let h = 0; h < 48; h++) TEMP.push(+(18 + 6 * Math.sin((h - 9) / 24 * 2 * Math.PI) + (rnd() - .5) * 2.4).toFixed(2)); TEMP[14] = 41.5; TEMP[31] = -3.2; }
+function drawSm() {
+  const w = +$('#smW').value, zt = +$('#zT').value; $('#smWv').textContent = w === 1 ? '1 (no smoothing)' : w + ' hours'; $('#zTv').textContent = zt.toFixed(1);
+  const m = mean(TEMP), s = sd(TEMP); const out = TEMP.map(v => Math.abs((v - m) / s) > zt);
+  const sm = TEMP.map((_, i) => { const a = TEMP.slice(Math.max(0, i - (w - 1) / 2), i + (w - 1) / 2 + 1); return mean(a); });
+  const X = i => 40 + i / 47 * 640, Y = v => 190 - (v + 5) / 50 * 170;
+  let g = ''; for (let t = 0; t <= 40; t += 10) g += `<line x1="40" x2="680" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="34" y="${Y(t) + 4}" font-size="10" text-anchor="end" fill="var(--muted)">${t}°</text>`;
+  g += `<polyline fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" points="${TEMP.map((v, i) => X(i) + ',' + Y(v)).join(' ')}"/>`;
+  if (w > 1) g += `<polyline fill="none" stroke="var(--blue)" stroke-width="2.5" points="${sm.map((v, i) => X(i) + ',' + Y(v)).join(' ')}"/>`;
+  TEMP.forEach((v, i) => g += `<circle cx="${X(i)}" cy="${Y(v)}" r="${out[i] ? 6 : 2.5}" fill="${out[i] ? 'var(--red)' : 'var(--muted)'}"><title>hour ${i}: ${v}°C, z=${((v - m) / s).toFixed(2)}</title></circle>`);
+  g += `<text x="40" y="212" font-size="10" fill="var(--muted)">hour 0</text><text x="680" y="212" font-size="10" text-anchor="end" fill="var(--muted)">hour 47</text>`;
+  $('#smSvg').innerHTML = g;
+  $('#smOut').innerHTML = `Mean ${m.toFixed(1)}°C, sd ${s.toFixed(1)}°C. <b style="color:var(--red)">${out.filter(Boolean).length} outlier(s)</b> at |z| &gt; ${zt.toFixed(1)}. ${w > 1 ? 'Note how a spike also pulls the moving average up — remove/handle outliers <i>before</i> smoothing.' : 'Increase the window to smooth the random noise.'} Lower the threshold and normal daily peaks start being flagged too.`;
+}
+['smW', 'zT'].forEach(id => $('#' + id).oninput = drawSm); drawSm();
+
+// scaling
+const SC = [[720, 60000, 25], [650, 45000, 35], [780, 75000, 45], [600, 30000, 23], [700, 80000, 50], [680, 55000, 30]];
+let scM = 'raw';
+function drawSc() {
+  const cols = [0, 1, 2].map(j => SC.map(r => r[j]));
+  const z = cols.map(c => { const m = mean(c), s = sd(c); return c.map(v => (v - m) / s); });
+  const mm = cols.map(c => { const lo = Math.min(...c), hi = Math.max(...c); return c.map(v => (v - lo) / (hi - lo)); });
+  const rows = SC.map((r, i) => scM === 'raw' ? r : [0, 1, 2].map(j => (scM === 'z' ? z : mm)[j][i].toFixed(3)));
+  $('#scTbl').innerHTML = tbl(['Credit Score', 'Annual Income', 'Age'], rows);
+  $('#scRow').innerHTML = SC.map((_, i) => `<option value="${i}">Row ${i + 1}</option>`).join('');
+}
+$$('[data-sc]').forEach(b => b.onclick = () => { scM = b.dataset.sc; $$('[data-sc]').forEach(x => x.classList.toggle('sel', x === b)); drawSc(); });
+$('#scSet').onclick = () => { const v = parseFloat($('#scVal').value); if (!isNaN(v)) { SC[+$('#scRow').value][+$('#scCol').value] = v; drawSc(); } };
+drawSc();
+
+// one-hot
+const OH = [[25, 'HR'], [32, 'Engineering'], [47, 'HR'], [19, 'Sales'], [30, 'Engineering']];
+function drawOh() {
+  const cats = [...new Set(OH.map(r => r[1]))].sort();
+  $('#ohIn').innerHTML = tbl(['Age', 'Department'], OH);
+  $('#ohOut').innerHTML = tbl(['Age', ...cats.map(c => 'Dept_' + c)], OH.map(r => [r[0], ...cats.map(c => r[1] === c ? 1 : 0)]), (i, j, c) => j > 0 && c === 1 ? 'good' : '');
+}
+$('#ohBtns').innerHTML = ['HR', 'Engineering', 'Sales', 'Marketing', 'Legal'].map(d => `<button class="btn" data-d="${d}">+ ${d}</button>`).join('') + '<button class="btn" id="ohRst">Reset</button>';
+$$('#ohBtns [data-d]').forEach(b => b.onclick = () => { OH.push([20 + Math.floor(Math.random() * 40), b.dataset.d]); drawOh(); });
+$('#ohRst').onclick = () => { OH.splice(5); drawOh(); };
+drawOh();
+
+// binning
+function drawBin() {
+  const ages = [25, 32, 47, 19, 30, 61, 38, 55, 22, 70];
+  const e = $('#binE').value.split(',').map(Number).filter(x => !isNaN(x)).sort((a, b) => a - b);
+  if (e.length < 2) { $('#binOut').textContent = 'Enter at least two edges.'; return; }
+  const bins = e.slice(0, -1).map((lo, i) => ({ l: `(${lo}, ${e[i + 1]}]`, n: ages.filter(a => a > lo && a <= e[i + 1]).length }));
+  const max = Math.max(1, ...bins.map(b => b.n));
+  $('#binOut').innerHTML = `<p class="small">Ages: ${ages.join(', ')}</p>` + bins.map(b => `<div style="display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center"><code>${b.l}</code><div class="meter"><div style="width:${b.n / max * 100}%;background:var(--purple)"></div></div><b>${b.n}</b></div>`).join('');
+}
+$('#binE').oninput = drawBin; drawBin();
+
+// standardize
+const ST0 = [['1', 'Chcago', 'Illinois', '2023-01-23'], ['2', 'Houston', 'Texass', '2023-03-15'], ['3', 'New York', 'NY', '23-Jan-202'], ['4', 'NYC', 'New York', '2023-05-10']];
+function drawSt(applied) {
+  const cm = { Chcago: 'Chicago', NYC: 'New York City', 'New York': 'New York City' }, sm = { Texass: 'Texas', NY: 'New York' };
+  const rows = ST0.map(r => applied ? [r[0], cm[r[1]] || r[1], sm[r[2]] || r[2], /^\d{4}-\d{2}-\d{2}$/.test(r[3]) ? r[3] : 'NaT ⚑ flagged'] : r);
+  $('#stTbl').innerHTML = tbl(['ID', 'City', 'State', 'Date'], rows, (i, j) => { const ch = applied && rows[i][j] !== ST0[i][j]; return ch ? (j === 3 ? 'warn' : 'good') : (!applied && ((j === 1 && ['Chcago', 'NYC', 'New York'].includes(ST0[i][1])) || (j === 2 && ['Texass', 'NY'].includes(ST0[i][2])) || (j === 3 && i === 2)) ? 'bad' : ''); });
+}
+$('#stApply').onclick = () => drawSt(true); $('#stReset').onclick = () => drawSt(false); drawSt(false);
+
+// joins
+const JL = [['O1', 'C1', 50], ['O2', 'C2', 80], ['O3', 'C2', 20], ['O4', 'C9', 35]];
+const JR0 = [['C1', 'Anna', 'Heidelberg'], ['C2', 'Ben', 'Mannheim'], ['C3', 'Cem', 'Karlsruhe']];
+let jM = 'inner';
+function drawJ() {
+  const JR = $('#jDup').checked ? [...JR0, ['C2', 'Benjamin', 'Mannheim']] : JR0;
+  $('#jBtns').innerHTML = ['inner', 'left', 'right', 'outer', 'union'].map(m => `<button class="btn ${m === jM ? 'sel' : ''}" data-j="${m}">${m === 'union' ? 'UNION (concat)' : m.toUpperCase() + ' JOIN'}</button>`).join('');
+  $$('#jBtns button').forEach(b => b.onclick = () => { jM = b.dataset.j; drawJ(); });
+  $('#jL').innerHTML = tbl(['order', 'cust', '€'], JL); $('#jR').innerHTML = tbl(['cust', 'name', 'city'], JR, (i) => i === 3 ? 'warn' : '');
+  let out = [], head = ['order', 'cust', '€', 'name', 'city'];
+  if (jM === 'union') {
+    head = ['order', 'cust', '€', 'source']; const feb = [['O5', 'C3', 60], ['O6', 'C1', 15]];
+    out = [...JL.map(r => [...r, 'jan.csv']), ...feb.map(r => [...r, 'feb.csv'])];
+    $('#jL').innerHTML = '<tr><th colspan=3>jan.csv</th></tr>' + tbl(['order', 'cust', '€'], JL); $('#jR').innerHTML = '<tr><th colspan=3>feb.csv</th></tr>' + tbl(['order', 'cust', '€'], feb);
+  } else {
+    JL.forEach(l => { const m = JR.filter(r => r[0] === l[1]); if (m.length) m.forEach(r => out.push([l[0], l[1], l[2], r[1], r[2]])); else if (jM === 'left' || jM === 'outer') out.push([l[0], l[1], l[2], null, null]); });
+    if (jM === 'right' || jM === 'outer') JR.forEach(r => { if (!JL.some(l => l[1] === r[0])) out.push([null, r[0], null, r[1], r[2]]); });
+    if (jM === 'right') out = out.filter(r => r[3] !== null);
+  }
+  $('#jOut').innerHTML = tbl(head, out, (i, j, c) => c === null ? 'warn' : '');
+  const sum = out.reduce((s, r) => s + (+r[2] || 0), 0);
+  const msg = { inner: 'Only matching keys survive: O4 (customer C9 unknown) silently disappears.', left: 'All orders kept; O4 gets empty customer fields (∅) — useful to detect orphan keys.', right: 'All customers kept; C3 has no orders → empty order fields.', outer: 'Everything kept from both sides; gaps on either side become ∅.', union: 'Rows are stacked: 4 + 2 = 6 rows. Columns must match — a renamed column (schema drift) would create gaps.' }[jM];
+  $('#jMsg').innerHTML = `<b>${out.length} rows, order total €${sum}</b> (true total of orders: €${jM === 'union' ? 260 : 185}). ${msg} ${$('#jDup').checked && jM !== 'union' ? '<br>⚠ The duplicate C2 key <b>multiplies</b> O2 and O3 → revenue is double-counted!' : ''}`;
+  $('#jCode').innerHTML = hl(jM === 'union' ? "year = pd.concat([jan, feb], ignore_index=True)" : `result = orders.merge(customers, on='cust', how='${jM}',\n                      validate='many_to_one')  # raises if customer keys are duplicated`, 'py');
+  addCopy($('#joins'));
+}
+$('#jDup').onchange = drawJ; drawJ();
+
+renderQuiz('#quizBox', [
+  { q: 'A record is complete and unique, but the age field says 134. Which dimension fails?', opts: ['Completeness', 'Validity', 'Timeliness', 'Uniqueness'], a: 1, why: 'Validity checks formats, ranges and allowed values. 134 is outside the allowed 0–120 range.' },
+  { q: '58 of 60 required fields are filled. Completeness rate?', opts: ['58%', '96.7%', '3.3%', '100%'], a: 1, why: '58 / 60 × 100 = 96.7%.' },
+  { q: 'A column has 1,000 rows and 1,000 distinct values. This high cardinality suggests…', opts: ['Many duplicates', 'A candidate primary key', 'A categorical column', 'Missing values'], a: 1, why: 'Nearly all unique → potential identifier/primary key.' },
+  { q: 'Sales contains product code P005 that doesn’t exist in Products. Which profiling check finds this?', opts: ['Functional dependency', 'Inclusion dependency', 'Value distribution', 'Cardinality'], a: 1, why: 'Inclusion dependency: every value in the dependent column must exist in the referenced table — otherwise orphaned records.' },
+  { q: 'What is the main side-effect of mean imputation?', opts: ['It increases variance', 'It reduces variability / spread', 'It deletes rows', 'It changes the column type'], a: 1, why: 'Every gap gets the same value, so the natural spread is artificially flattened.' },
+  { q: 'An outlier of €3000 in purchase amounts should…', opts: ['Always be deleted', 'Always be kept', 'Be investigated with domain knowledge first', 'Be replaced with 0'], a: 2, why: 'It might be a typo — or real (a big customer, or fraud). Decide with domain knowledge.' },
+  { q: 'Which scaling maps values to the range [0, 1]?', opts: ['Z-score standardization', 'Min-max normalization', 'One-hot encoding', 'Log transformation'], a: 1, why: 'X\' = (X − min) / (max − min).' },
+  { q: 'Joining orders to customers suddenly doubles revenue. Most likely cause?', opts: ['A union instead of a join', 'Duplicate keys in the customer table', 'Too many NULLs', 'Wrong date format'], a: 1, why: 'Duplicate keys on the "one" side multiply matching rows. Use merge(..., validate="many_to_one").' },
+  { q: 'Combining 12 monthly CSV exports with identical columns into one table is a…', opts: ['Inner join', 'Left join', 'Union', 'Functional dependency'], a: 2, why: 'Union stacks rows of datasets with the same structure (pd.concat).' },
+  { q: 'Where does profiling happen in ELT?', opts: ['Before extract', 'After loading raw data, before transforming', 'Only after the dashboard is built', 'Never'], a: 1, why: 'ELT: Extract → Load raw → Profile → Transform.' }
+]);
+</script>
+</body></html>

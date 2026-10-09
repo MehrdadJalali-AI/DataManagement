@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch3 · Reproducible Pipelines</title>
+<style>:root{
+  --bg:#f7f5f2; --surface:#ffffff; --surface2:#f1eee9; --ink:#1f1d1a; --muted:#5f5a53; --line:#e3ded6;
+  --accent:#c9471a; --accent-soft:#fbe9e1; --blue:#1f5fa8; --blue-soft:#e6eef8; --green:#21794f; --green-soft:#e2f2ea;
+  --amber:#9a5a0f; --amber-soft:#fbf0de; --purple:#5a43a6; --purple-soft:#ece8f8; --red:#b42318; --red-soft:#fde8e6;
+  --code-bg:#1e1f24; --code-ink:#e8e6e3; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+  --radius:14px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --bg:#141312; --surface:#1d1c1a; --surface2:#262421; --ink:#eeebe6; --muted:#a8a29a; --line:#35322e;
+  --accent:#f07a4a; --accent-soft:#3a2219; --blue:#7fb0ec; --blue-soft:#1a2738; --green:#6fcf9f; --green-soft:#173027;
+  --amber:#e8b062; --amber-soft:#33281a; --purple:#b3a3f0; --purple-soft:#26213a; --red:#f2877d; --red-soft:#3a1d1a;
+  --code-bg:#0f0f11; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface2);padding:.1em .35em;border-radius:5px}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5em}
+h2{font-size:1.65rem;letter-spacing:-.01em}
+h3{font-size:1.15rem}
+p{margin:0 0 1em}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
+.brand{font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.chapnav{display:flex;gap:6px;overflow-x:auto;flex:1}
+.chapnav a{padding:6px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:.9rem;white-space:nowrap;border:1px solid transparent}
+.chapnav a.on{background:var(--accent-soft);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);font-weight:600}
+.iconbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+.progress{height:3px;background:var(--accent);width:0;transition:width .1s}
+.hero{max-width:1240px;margin:0 auto;padding:48px 20px 24px}
+.hero .kicker{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+.hero h1{font-size:clamp(1.9rem,4vw,2.8rem);letter-spacing:-.02em;margin:.2em 0 .35em}
+.hero p.lead{font-size:1.12rem;color:var(--muted);max-width:760px}
+.objectives{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:20px}
+.objectives div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.93rem}
+.objectives b{display:block;color:var(--accent);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;padding:0 20px 80px}
+.toc{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto;font-size:.9rem}
+.toc h4{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.toc a{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;color:var(--muted);text-decoration:none;border-left:2px solid transparent}
+.toc a.active{color:var(--ink);background:var(--surface);border-left-color:var(--accent)}
+.toc a .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.toc a.done .dot{background:var(--green);border-color:var(--green)}
+section.chap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;margin-bottom:24px;box-shadow:var(--shadow)}
+section.chap > .sec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
+.secnum{color:var(--accent);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.donebtn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.donebtn.on{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.card{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h4{margin-bottom:.3em}
+.card p:last-child{margin-bottom:0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.green{border-color:var(--green);background:var(--green-soft)}
+.callout.blue{border-color:var(--blue);background:var(--blue-soft)}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+.callout b:first-child{display:block;margin-bottom:2px}
+.analogy{display:flex;gap:12px;background:var(--purple-soft);border-radius:12px;padding:14px 16px;margin:16px 0}
+.analogy .ico{font-size:1.5rem;line-height:1}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.tag.blue{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.tag.green{background:var(--green-soft);color:var(--green);border-color:transparent}
+.tag.amber{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.tag.red{background:var(--red-soft);color:var(--red);border-color:transparent}
+.tag.purple{background:var(--purple-soft);color:var(--purple);border-color:transparent}
+.widget{border:1px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:12px;padding:18px;margin:18px 0;background:var(--bg)}
+.widget > .wtitle{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
+.widget > .wtitle::before{content:"▶ TRY IT";font-size:.7rem;letter-spacing:.08em;background:var(--accent);color:#fff;padding:2px 8px;border-radius:999px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:9px;cursor:pointer;font:inherit;font-size:.92rem}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+textarea{font-family:var(--mono);font-size:.85rem;width:100%}
+label{font-size:.9rem}
+input[type=range]{accent-color:var(--accent);width:100%}
+.tablewrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface2);font-weight:600;white-space:nowrap}
+td.bad,span.bad{background:var(--red-soft);color:var(--red)}
+td.good{background:var(--green-soft);color:var(--green)}
+td.warn{background:var(--amber-soft);color:var(--amber)}
+tr.hl td{background:var(--accent-soft)}
+td[contenteditable]{outline:none;cursor:text}
+td[contenteditable]:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow:auto;font:13px/1.55 var(--mono);position:relative;margin:10px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .copy{position:absolute;top:8px;right:8px;font-size:.72rem;background:#ffffff1a;color:#ddd;border:1px solid #ffffff30;border-radius:6px;padding:2px 8px;cursor:pointer}
+.c-k{color:#f4a261}.c-s{color:#9ad59a}.c-c{color:#8b8f98;font-style:italic}.c-n{color:#82b8ff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.tabs button{border:0;background:none;color:var(--muted);padding:9px 14px;cursor:pointer;font:inherit;font-size:.93rem;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabpanel{display:none}.tabpanel.on{display:block}
+details.reveal{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.reveal summary{cursor:pointer;font-weight:600}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.links a{display:block;text-decoration:none;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;transition:border-color .15s,transform .15s}
+.links a:hover{border-color:var(--accent);transform:translateY(-1px)}
+.links a b{display:block;color:var(--accent);font-size:.95rem}
+.links a span{font-size:.84rem;color:var(--muted)}
+.quiz .q{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.quiz .q p{font-weight:600;margin-bottom:8px}
+.quiz .opts{display:grid;gap:6px}
+.quiz .opts button{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:.93rem}
+.quiz .opts button.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.quiz .opts button.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.quiz .why{display:none;margin-top:8px;font-size:.9rem;color:var(--muted)}
+.quiz .q.answered .why{display:block}
+.score{font-weight:700;color:var(--accent)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .step{flex:1 1 130px;background:var(--surface2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;position:relative}
+.flow .step small{display:block;color:var(--muted);font-size:.8rem}
+.flow .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.flow .arrow{align-self:center;color:var(--muted)}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:.92rem;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-soft);color:var(--green)}
+.feedback.no{background:var(--red-soft);color:var(--red)}
+.feedback.info{background:var(--blue-soft);color:var(--blue)}
+.meter{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.meter > div{height:100%;background:var(--green);transition:width .3s}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:1.5rem;font-weight:700}
+.kpi .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sorter{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.bucket{min-height:110px;border:2px dashed var(--line);border-radius:10px;padding:8px}
+.bucket h5{margin:0 0 6px;font-size:.85rem}
+.bucket.over{border-color:var(--accent);background:var(--accent-soft)}
+.chip{display:inline-block;margin:3px;padding:5px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;cursor:grab;user-select:none}
+.chip.sel{outline:2px solid var(--accent)}
+.chip.right{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.chip.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.pool{min-height:50px;padding:8px;border-radius:10px;background:var(--surface2);margin-bottom:10px}
+.small{font-size:.86rem;color:var(--muted)}
+.foot{max-width:1240px;margin:0 auto;padding:20px;color:var(--muted);font-size:.85rem;text-align:center}
+svg text{font-family:inherit}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .toc{display:none}
+  section.chap{padding:18px}
+  .hero{padding:28px 16px 16px}
+  .layout{padding:0 16px 60px}
+  .topbar-inner{padding:8px 16px}
+}
+@media print{.topbar,.toc,.widget,.donebtn{display:none}.layout{display:block}}
+@media (max-width:700px){#doneCount{display:none}.brand{display:none}}
+</style></head>
+<body data-chapter="3">
+<div class="topbar"><div class="topbar-inner"><a class="brand" href="#top">Data Management</a><nav class="chapnav"><a href="Chapter1_Foundations_FAIR.html" class="">Ch 1 · Foundations & FAIR</a><a href="Chapter2_Data_Quality_Preparation.html" class="">Ch 2 · Data Quality & Prep</a><a href="Chapter3_Reproducible_Pipelines.html" class="on">Ch 3 · Pipelines</a><a href="Chapter4_Governance_AI_Ready.html" class="">Ch 4 · Governance & AI</a></nav><span class="small" id="doneCount"></span><button class="iconbtn" id="themeBtn">☾ Dark</button></div><div class="progress" id="progress"></div></div>
+<header class="hero" id="top">
+  <div class="kicker">Chapter 3 · Interactive study guide</div>
+  <h1>Reproducible &amp; Validated Data Pipelines</h1>
+  <p class="lead">In Chapter 2 you cleaned data <b>once, by hand</b>. Next month new files arrive. A pipeline runs the same cleaning <b>the same way, every time</b>, proves the result is right, and shows where every number came from.</p>
+  <div class="callout" style="max-width:760px">Without validated, documented, version-controlled transformations → no trustworthy analytics.</div>
+  <div class="objectives">
+    <div><b>You will be able to</b>Structure a pipeline into raw → clean → output layers</div>
+    <div><b>You will be able to</b>Write Chapter 2 quality checks as pandera rules</div>
+    <div><b>You will be able to</b>Decide when to stop vs. quarantine</div>
+    <div><b>You will be able to</b>Version, document and trace a pipeline (Git, README, lineage)</div>
+  </div>
+</header>
+<div class="layout">
+<aside class="toc"><h4>In this chapter</h4><nav id="tocList"></nav></aside>
+<main>
+
+<section class="chap" id="why" data-title="Why pipelines?">
+  <div class="sec-head"><div><div class="secnum">Section 1</div><h2>From one-off cleaning to a data pipeline</h2></div></div>
+  <div class="flow">
+    <div class="step"><b>E · Extract</b><small>Pull data from apps, APIs, files</small><small><i>Fivetran, Airbyte, scripts</i></small></div><span class="arrow">→</span>
+    <div class="step"><b>L · Load</b><small>Land it, still raw, in a folder, warehouse or lakehouse</small></div><span class="arrow">→</span>
+    <div class="step on"><b>T · Transform</b><small>Clean, validate, document in a repeatable script</small><small><i>← your pipeline lives here</i></small></div><span class="arrow">→</span>
+    <div class="step"><b>Use</b><small>Dashboards, reports, ML, AI</small></div>
+  </div>
+  <p>A <b>reproducible</b> pipeline gives the <b>same output from the same input and code</b> — every time, on any computer — and shows where every number came from.</p>
+  <div class="grid3">
+    <div class="card"><span class="tag blue">Repeatable</span><p>Next month's files are processed with <b>one command</b>, not another afternoon of manual clicks.</p></div>
+    <div class="card"><span class="tag green">Reviewable</span><p>Every cleaning rule is <b>written down</b>, so anyone can read, question and improve it.</p></div>
+    <div class="card"><span class="tag amber">Recoverable</span><p>Raw data stays <b>untouched</b>. If a rule was wrong, fix it and simply run again.</p></div>
+  </div>
+  <div class="analogy"><span class="ico">👩‍🍳</span><div><b>Analogy:</b> Cleaning in a notebook by hand is cooking from memory. A pipeline is a written recipe: anyone can cook it again, taste-test at each step (validation), and you never throw away the original ingredients (raw data).</div></div>
+</section>
+
+<section class="chap" id="structure" data-title="Project structure">
+  <div class="sec-head"><div><div class="secnum">Section 2</div><h2>From notebook to pipeline script</h2></div></div>
+  <div class="grid3">
+    <div class="card"><b>1 · One function per step</b><p class="small">Each step does one job and hands its result to the next.</p></div>
+    <div class="card"><b>2 · One command runs it all</b><p class="small">No clicking, no "run the cells in the right order".</p></div>
+    <div class="card"><b>3 · Raw in, trusted out</b><p class="small">Raw folder is read-only; results go to a separate output folder.</p></div>
+  </div>
+  <div class="widget">
+    <div class="wtitle">Explore the shop_pipeline project</div>
+    <div class="grid2">
+      <div id="tree" style="font-family:var(--mono);font-size:.88rem;line-height:1.9"></div>
+      <div><div id="treeInfo" class="small"></div><pre><code id="treeCode"></code></pre></div>
+    </div>
+  </div>
+  <h3>Inputs &amp; steps</h3>
+  <div class="grid2">
+    <div class="card"><b>Inputs — where data comes in</b><ul class="small" style="margin:6px 0 0;padding-left:18px"><li>Raw files are read, <b>never written</b></li><li>Read everything as <b>text first</b>, then convert types on purpose</li><li>Record <b>which file</b> every row came from — the start of lineage</li></ul></div>
+    <div class="card"><b>Steps — what the pipeline does</b><ul class="small" style="margin:6px 0 0;padding-left:18px"><li>One function = one job: clean, join, split or write</li><li>Steps run in a fixed order, each using the previous result</li><li>Small steps are easy to read, test and fix</li></ul></div>
+  </div>
+<pre><code data-hl="py">frames = []
+for f in RAW.glob('orders_*.csv'):
+    df = pd.read_csv(f, dtype=str)      # everything as text first
+    df['source_file'] = f.name          # lineage starts here
+    frames.append(df)
+orders = pd.concat(frames)</code></pre>
+</section>
+
+<section class="chap" id="layers" data-title="Raw, clean & output layers">
+  <div class="sec-head"><div><div class="secnum">Section 3</div><h2>Raw, clean &amp; output layers</h2></div></div>
+  <div class="grid3">
+    <div class="card" style="border-top:4px solid var(--muted)"><b>raw/</b><p class="small">Files exactly as received: never edited, only read.<br><code>orders_2026_01.csv</code></p></div>
+    <div class="card" style="border-top:4px solid var(--blue)"><b>clean</b><p class="small">Types fixed, formats unified, duplicates removed, problems flagged.<br><code>clean_orders()</code></p></div>
+    <div class="card" style="border-top:4px solid var(--green)"><b>output/</b><p class="small">Trusted, business-facing tables, ready for BI and AI.<br><code>fct_orders.csv</code>, <code>revenue_by_city.csv</code></p></div>
+  </div>
+  <div class="callout blue"><b>Guiding rule</b>Data flows one way: raw → clean → output. Never backwards, never overwriting raw. Each layer can be checked on its own — a cleaning bug is fixed once, and every output is rebuilt.</div>
+  <div class="widget"><div class="wtitle">Which layer does it belong in?</div><div id="sortLayer"></div></div>
+  <p class="small">Industry names for the same idea: <b>bronze / silver / gold</b> (Databricks "medallion architecture") or <b>staging / intermediate / marts</b> (dbt).</p>
+</section>
+
+<section class="chap" id="sim" data-title="Pipeline simulator">
+  <div class="sec-head"><div><div class="secnum">Section 4</div><h2>Run a pipeline yourself</h2></div></div>
+  <p>A mini version of <code>shop_pipeline</code>: three monthly order files, a customer table and a product catalogue. Switch rules on and off, add the April file, and press <b>Run</b>. Watch the log, the trusted output, the quarantine and the revenue.</p>
+  <div class="widget">
+    <div class="wtitle">python pipeline.py</div>
+    <div class="grid2">
+      <div id="rules"></div>
+      <div>
+        <label class="card" style="display:block;padding:8px 12px;margin-bottom:8px"><input type="checkbox" id="addApril"> Copy <code>extras/orders_2026_04.csv</code> into <code>data/raw/</code></label>
+        <button class="btn primary" id="runBtn" style="width:100%;padding:10px">▶ Run pipeline</button>
+        <div class="flow" id="stepFlow" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <pre id="log" style="min-height:120px"><code></code></pre>
+    <div class="kpis" id="simKpi"></div>
+    <div class="tabs" data-group="sim"><button class="on" data-tab="raw">data/raw (input)</button><button data-tab="fct">fct_orders.csv</button><button data-tab="q">quarantine_orders.csv</button><button data-tab="rev">revenue_by_city.csv</button></div>
+    <div class="tabpanel on" data-group="sim" data-tab="raw"><div class="tablewrap"><table id="tRaw"></table></div></div>
+    <div class="tabpanel" data-group="sim" data-tab="fct"><div class="tablewrap"><table id="tFct"></table></div></div>
+    <div class="tabpanel" data-group="sim" data-tab="q"><div class="tablewrap"><table id="tQ"></table></div></div>
+    <div class="tabpanel" data-group="sim" data-tab="rev"><div class="tablewrap"><table id="tRev"></table></div></div>
+    <details class="reveal"><summary>Challenges to try</summary>
+      <ol class="small"><li>Turn off <b>price correction</b>. Why does revenue jump? (Practical 1, step 4)</li><li>Turn off <b>parse mixed dates</b>. Which rows end up in quarantine and why?</li><li>Turn off <b>drop duplicates</b> — what does the critical rule do now?</li><li>Add the April file. Why is <i>nothing</i> written? (Practical 2, steps 3–4)</li><li>Turn off <b>all</b> validation rules and add April. What would a dashboard show — and would anyone notice?</li></ol>
+    </details>
+  </div>
+</section>
+
+<section class="chap" id="functions" data-title="Reusable functions">
+  <div class="sec-head"><div><div class="secnum">Section 5</div><h2>Reusable cleaning functions — DRY</h2></div></div>
+  <p><b>D</b>on't <b>R</b>epeat <b>Y</b>ourself: one function holds one cleaning rule and is called wherever it's needed. Fix a date bug once, in the function, and it's fixed everywhere — instead of in five copied notebooks.</p>
+<pre><code data-hl="py">def parse_mixed_date(col):
+    iso = pd.to_datetime(col, format='%Y-%m-%d', errors='coerce')
+    de  = pd.to_datetime(col, format='%d.%m.%Y', errors='coerce')
+    return iso.fillna(de)
+
+# used wherever dates appear:
+orders['order_date'] = parse_mixed_date(orders['order_date'])</code></pre>
+  <div class="widget"><div class="wtitle">Test parse_mixed_date</div>
+    <textarea id="pdIn" rows="5">2026-01-05
+05.01.2026
+14.02.2026
+2026-13-01
+01/02/2026</textarea>
+    <div class="tablewrap"><table id="pdOut"></table></div>
+    <p class="small">Unparseable values become <code>NaT</code> (missing) instead of crashing — a later validation rule (<code>nullable=False</code>) then decides what happens to them.</p>
+  </div>
+</section>
+
+<section class="chap" id="pandera" data-title="Validation with pandera">
+  <div class="sec-head"><div><div class="secnum">Section 6</div><h2>Validation rules with pandera</h2></div></div>
+  <p>The Chapter 2 KPIs — now checked <b>automatically on every run</b> instead of once by hand. Each built-in check is one line of code:</p>
+  <div class="tablewrap"><table>
+    <tr><th>pandera check</th><th>What it enforces</th><th>Ch. 2 dimension</th></tr>
+    <tr><td><code>nullable=False</code></td><td>No missing values</td><td><span class="tag">Completeness</span></td></tr>
+    <tr><td><code>unique=True</code></td><td>No duplicate values</td><td><span class="tag">Uniqueness</span></td></tr>
+    <tr><td><code>Check.isin([...])</code></td><td>Only values from an allowed list</td><td><span class="tag">Validity</span></td></tr>
+    <tr><td><code>Check.ge(0)</code>, <code>Check.in_range(0,120)</code></td><td>Values within a range</td><td><span class="tag">Validity</span></td></tr>
+    <tr><td><code>Check.str_matches(r'^O\d{4}$')</code></td><td>Pattern / format</td><td><span class="tag">Validity</span></td></tr>
+    <tr><td>Custom <code>Check(lambda df: ...)</code></td><td>Any business rule returning True/False per row</td><td><span class="tag">Consistency / Accuracy</span></td></tr>
+  </table></div>
+  <div class="widget">
+    <div class="wtitle">Rule builder → rules.py</div>
+    <div class="grid2">
+      <div id="rbForm" style="display:grid;gap:8px"></div>
+      <div><pre><code id="rbCode"></code></pre></div>
+    </div>
+  </div>
+  <div class="callout green"><b>lazy=True</b><code>schema.validate(df, lazy=True)</code> reports <b>every</b> failure at once (in <code>err.failure_cases</code>: which rule, which value, which row) — not just the first one.</div>
+</section>
+
+<section class="chap" id="failsafe" data-title="Stop or quarantine">
+  <div class="sec-head"><div><div class="secnum">Section 7</div><h2>Failing safely — stop or quarantine</h2></div></div>
+  <div class="grid2">
+    <div class="card" style="border-top:4px solid var(--red)"><b>🛑 STOP the pipeline</b><p class="small">A critical rule is broken — the <b>whole table</b> can't be trusted (e.g. duplicate order IDs). Nothing is written.</p>
+<pre><code data-hl="py">try:
+    df = rules.validate(df, lazy=True)
+except pa.errors.SchemaErrors as err:
+    print(err.failure_cases)
+    sys.exit(1)        # stop: write nothing</code></pre></div>
+    <div class="card" style="border-top:4px solid var(--amber)"><b>🗄 QUARANTINE rows</b><p class="small">Only <b>some rows</b> are bad (e.g. unknown customer). Set them aside <b>with a reason</b>, keep the rest.</p>
+<pre><code data-hl="py">quarantine = df[df['reason'] != '']
+clean      = df[df['reason'] == '']
+quarantine.to_csv('output/quarantine_orders.csv')</code></pre></div>
+  </div>
+  <div class="callout"><b>Rule of thumb</b>Stop for problems that break the whole table; quarantine problems that affect single rows. Never a silent bad number on a dashboard.</div>
+  <div class="widget"><div class="wtitle">Stop or quarantine?</div><div id="sortFail"></div></div>
+</section>
+
+<section class="chap" id="docs" data-title="Documentation">
+  <div class="sec-head"><div><div class="secnum">Section 8</div><h2>Documentation: README, data dictionary, cleaning log</h2></div></div>
+  <div class="tabs" data-group="doc"><button class="on" data-tab="readme">README.md</button><button data-tab="dict">Data dictionary</button><button data-tab="log">Cleaning log</button></div>
+  <div class="tabpanel on" data-group="doc" data-tab="readme"><pre><code># shop_pipeline
+Turns monthly order exports into trusted tables for the sales dashboard.
+
+## Run it
+    python -m venv .venv && source .venv/bin/activate
+    pip install -r requirements.txt
+    python pipeline.py
+
+## Inputs   data/raw/orders_*.csv, customers.csv, products.csv  (read-only)
+## Outputs  data/output/fct_orders.csv, quarantine_orders.csv, revenue_by_city.csv
+## Rules    see rules.py — a critical failure stops the run, row problems are quarantined
+## Owner    sales-data-team  ·  questions: data@shop.example</code></pre></div>
+  <div class="tabpanel" data-group="doc" data-tab="dict"><div class="tablewrap"><table>
+    <tr><th>Column</th><th>Type</th><th>Meaning</th><th>Rule</th></tr>
+    <tr><td>order_id</td><td>string</td><td>Unique order number</td><td>pattern <code>O\d{4}</code>, unique, not null</td></tr>
+    <tr><td>order_date</td><td>date</td><td>Date the order was placed</td><td>ISO 8601; mixed DE/ISO input parsed</td></tr>
+    <tr><td>quantity</td><td>int</td><td>Units ordered</td><td>&gt; 0</td></tr>
+    <tr><td>unit_price</td><td>float, EUR</td><td>Catalogue price at order time</td><td>≥ 0, taken from products.csv</td></tr>
+    <tr><td>line_total</td><td>float, EUR</td><td>quantity × unit_price</td><td>derived</td></tr>
+    <tr><td>city</td><td>string</td><td>Customer city (from customers.csv)</td><td>customer must exist</td></tr>
+    <tr><td>source_file</td><td>string</td><td>Raw file the row came from</td><td>lineage</td></tr>
+  </table></div></div>
+  <div class="tabpanel" data-group="doc" data-tab="log"><pre><code>2026-04-02 09:14  run started  (git commit 3f2a9c1)
+2026-04-02 09:14  loaded 12 orders from 3 files
+2026-04-02 09:14  clean: dropped 1 exact duplicate
+2026-04-02 09:14  validate: OK (order_id unique)
+2026-04-02 09:14  split: 7 trusted, 4 quarantined
+2026-04-02 09:14  wrote fct_orders.csv, quarantine_orders.csv, revenue_by_city.csv
+Decision 2026-03-20: unit_price always taken from catalogue (raw prices contained typos, e.g. 8990.00)</code></pre></div>
+  <div class="callout green"><b>Docs live with the code</b>README and rules sit in the same Git repository, so they change together. A new team member can rerun and understand the pipeline without asking anyone. Documented + traceable = auditable and trustworthy for AI use.</div>
+</section>
+
+<section class="chap" id="git" data-title="Git & CI">
+  <div class="sec-head"><div><div class="secnum">Section 9</div><h2>Git-based version control &amp; CI</h2></div></div>
+  <div class="widget">
+    <div class="wtitle">Follow a change from idea to production</div>
+    <div class="flow" id="gitFlow"></div>
+    <div class="card" id="gitInfo"></div>
+  </div>
+  <details class="reveal"><summary>Example GitHub Action: run the pipeline on every pull request</summary>
+<pre><code data-hl="yaml"># .github/workflows/pipeline.yml
+name: validate-pipeline
+on: [pull_request, push]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: python pipeline.py      # exit code 1 on a critical rule → merge blocked</code></pre></details>
+  <div class="callout amber"><b>Discussion: what does Git give you that a folder of final_v2.csv files doesn't?</b>Who changed what, when and <i>why</i> (commit messages); the ability to restore any past version; review before changes go live; automatic tests (CI); and code + rules + docs versioned <i>together</i>.</div>
+</section>
+
+<section class="chap" id="lineage" data-title="Lineage">
+  <div class="sec-head"><div><div class="secnum">Section 10</div><h2>Pipeline steps &amp; lineage</h2></div></div>
+  <p>Each step names exactly what it uses as input, so the order of steps — and the <b>lineage graph</b> — follows automatically. The <code>source_file</code> column carries lineage into every output row.</p>
+  <div class="widget">
+    <div class="wtitle">Click a node</div>
+    <p class="small"><span class="tag amber">upstream</span> = root-cause analysis ("where did this number come from?") · <span class="tag purple">downstream</span> = impact analysis ("what breaks if this changes?")</p>
+    <svg id="dag" viewBox="0 0 900 330" width="100%"></svg>
+    <div class="feedback show info" id="dagOut">Click any node in the graph.</div>
+  </div>
+  <p class="small">Tools like <b>dbt</b> draw this graph automatically from <code>ref()</code> calls; <b>OpenLineage</b> standardizes lineage events across tools (→ Chapter 4).</p>
+</section>
+
+<section class="chap" id="industry" data-title="dbt & industry tools">
+  <div class="sec-head"><div><div class="secnum">Section 11</div><h2>Tableau Prep vs. dbt vs. Python — and industry tools</h2></div></div>
+  <div class="tablewrap"><table>
+    <tr><th>Aspect</th><th>Tableau Prep</th><th>dbt</th><th>Python pipeline</th></tr>
+    <tr><td>Interface</td><td>Visual drag-and-drop flow</td><td>Code (SQL + YAML)</td><td>Code (Python script)</td></tr>
+    <tr><td>Best for</td><td>Ad-hoc, exploratory cleaning by analysts</td><td>Teams working in a SQL data warehouse</td><td>Repeatable cleaning with custom logic (this course)</td></tr>
+    <tr><td>Version control</td><td>Limited: flows are hard to diff</td><td>Full Git support, built around it</td><td>Full Git support</td></tr>
+    <tr><td>Testing</td><td>Manual visual inspection</td><td>Built-in generic + custom tests</td><td>pandera rules on every run</td></tr>
+    <tr><td>Documentation</td><td>Flow is somewhat self-documenting</td><td>Auto-generated docs + lineage graph</td><td>README + data dictionary, by you</td></tr>
+  </table></div>
+  <p class="small">Rule of thumb: explore in Tableau Prep or a notebook; turn repeated cleaning into a validated pipeline. SQL teams do the same with dbt.</p>
+  <h3>The same pipeline in dbt</h3>
+  <div class="grid2">
+<pre><code data-hl="sql">-- models/marts/fct_orders.sql
+SELECT o.order_id,
+       o.order_date,
+       o.quantity,
+       p.price               AS unit_price,
+       o.quantity * p.price  AS line_total,
+       c.city
+FROM   {{ ref('stg_orders') }}    o
+JOIN   {{ ref('stg_customers') }} c ON o.customer_id = c.customer_id
+JOIN   {{ ref('stg_products') }}  p ON o.product     = p.product
+WHERE  o.quantity > 0</code></pre>
+<pre><code data-hl="yaml"># models/marts/schema.yml
+models:
+  - name: fct_orders
+    description: Trusted orders, one row per order
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: quantity
+        tests:
+          - dbt_utils.accepted_range: {min_value: 1}
+      - name: city
+        tests:
+          - accepted_values:
+              values: [Heidelberg, Mannheim, Karlsruhe]</code></pre>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="card"><span class="tag">SQL</span><h4>dbt</h4><p class="small">Transformations as tested, documented SQL models with an automatic lineage graph.</p></div>
+    <div class="card"><span class="tag">Python</span><h4>Great Expectations</h4><p class="small">Validation suites with data-quality reports — a larger cousin of pandera.</p></div>
+    <div class="card"><span class="tag">Data versioning</span><h4>DVC</h4><p class="small">Versions large data files alongside Git, so any past dataset can be restored exactly.</p></div>
+    <div class="card"><span class="tag">Orchestration</span><h4>Airflow / Dagster</h4><p class="small">Run pipelines on a schedule and alert when a step fails.</p></div>
+  </div>
+</section>
+
+<section class="chap" id="aiready" data-title="AI-ready datasets">
+  <div class="sec-head"><div><div class="secnum">Section 12</div><h2>Creating analysis- and AI-ready datasets</h2></div></div>
+  <div class="widget">
+    <div class="wtitle">Is your dataset AI-ready?</div>
+    <div id="aiChecks" style="display:grid;gap:6px"></div>
+    <div class="meter" style="margin-top:10px"><div id="aiMeter" style="width:0"></div></div>
+    <p id="aiOut" class="small"></p>
+  </div>
+  <div class="callout green">"A validated, documented, version-controlled dataset is exactly what a reliable dashboard — or a trustworthy AI system — needs to build on."</div>
+</section>
+
+<section class="chap" id="discuss" data-title="Discussion questions">
+  <div class="sec-head"><div><div class="secnum">Section 13</div><h2>Discussion questions (Slido) — think first, then reveal</h2></div></div>
+  <details class="reveal"><summary>Why should a pipeline never edit the raw data files?</summary><p>Raw data is the only ground truth. If a rule is wrong you fix it and re-run from raw; if raw was overwritten, the original information is gone forever and nobody can verify or reproduce the result.</p></details>
+  <details class="reveal"><summary>A step joins clean orders and customers. Which layer does it belong in?</summary><p>It reads from the clean layer and produces a business-facing, enriched table — so its output belongs in the <b>output</b> layer (e.g. <code>fct_orders</code>). It must never write back into raw.</p></details>
+  <details class="reveal"><summary>Why automate validation instead of checking the data by eye?</summary><p>Eyes miss things, get tired and don't scale to millions of rows or monthly runs. Automated rules run every time, check every row, report exactly what failed and are documented in code.</p></details>
+  <details class="reveal"><summary>When should a pipeline stop, and when should it only quarantine a row?</summary><p>Stop when the whole table becomes untrustworthy (duplicate IDs, missing columns, wrong schema). Quarantine when the issue is local to individual rows (unknown customer, negative quantity) — and keep the reason.</p></details>
+  <details class="reveal"><summary>What does Git give you that a folder of final_v2.csv files doesn't?</summary><p>History with authors and reasons, exact restore of any version, branches + review, CI tests before merge, and code/rules/docs versioned together.</p></details>
+</section>
+
+<section class="chap" id="practice" data-title="Practicals & exercise">
+  <div class="sec-head"><div><div class="secnum">Section 14</div><h2>Practicals &amp; home exercise</h2></div></div>
+  <div class="grid3">
+    <div class="card"><span class="tag">Pairs · 25–30 min</span><h4>Practical 1: Run &amp; read</h4><p class="small">Set up a venv, run <code>python pipeline.py</code>, read the log (12 trusted, 4 quarantined, EUR 4,015), map each rule in <code>rules.py</code> to a Ch.2 dimension, remove the price correction and explain the jump to EUR 12,565.</p></div>
+    <div class="card"><span class="tag">Pairs · 15–20 min</span><h4>Practical 2: Add &amp; break rules</h4><p class="small">Add email and country rules to <code>clean_customers_rules</code>, decide stop vs quarantine, copy in the April file and read the failure output.</p></div>
+    <div class="card"><span class="tag">Home · group</span><h4>Extend &amp; version</h4><p class="small">Add one new output (e.g. <code>revenue_by_category.csv</code>), ≥ 3 new rules incl. one custom check, draw the lineage, update README + data dictionary, push to GitHub.</p></div>
+  </div>
+<pre><code># setup (macOS / Linux)
+cd shop_pipeline
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python pipeline.py</code></pre>
+  <div class="links" style="margin-top:12px">
+    <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener"><b>Course repository</b><span>notebooks/week3 — shop_pipeline starter</span></a>
+    <a href="https://pandera.readthedocs.io/" target="_blank" rel="noopener"><b>pandera docs</b><span>DataFrameSchema, Column, Check</span></a>
+    <a href="https://docs.getdbt.com/docs/introduction" target="_blank" rel="noopener"><b>dbt docs</b><span>What is dbt? + free dbt Learn courses</span></a>
+    <a href="https://docs.greatexpectations.io/" target="_blank" rel="noopener"><b>Great Expectations</b><span>Expectations &amp; data docs</span></a>
+    <a href="https://dvc.org/doc/start" target="_blank" rel="noopener"><b>DVC — get started</b><span>Version data like code</span></a>
+    <a href="https://airflow.apache.org/" target="_blank" rel="noopener"><b>Apache Airflow</b><span>Schedule &amp; monitor pipelines</span></a>
+    <a href="https://dagster.io/" target="_blank" rel="noopener"><b>Dagster</b><span>Asset-based orchestration with lineage</span></a>
+    <a href="https://docs.github.com/en/actions" target="_blank" rel="noopener"><b>GitHub Actions</b><span>Run your pipeline as CI</span></a>
+    <a href="https://www.databricks.com/glossary/medallion-architecture" target="_blank" rel="noopener"><b>Medallion architecture</b><span>Bronze / silver / gold layers</span></a>
+    <a href="https://foundations.projectpythia.org/foundations/github/what-is-github.html" target="_blank" rel="noopener"><b>What is GitHub? (Pythia)</b><span>Beginner-friendly Git/GitHub intro</span></a>
+  </div>
+</section>
+
+<section class="chap" id="quiz" data-title="Self-check quiz">
+  <div class="sec-head"><div><div class="secnum">Section 15</div><h2>Self-check quiz</h2></div></div>
+  <div id="quizBox"></div>
+</section>
+</main></div>
+
+<footer class="foot">Data Management · Prof. Dr. Mehrdad Jalali · SRH University of Applied Sciences Heidelberg · Course repository: <a href="https://github.com/MehrdadJalali-AI/DataManagement" target="_blank" rel="noopener">github.com/MehrdadJalali-AI/DataManagement</a></footer>
+<script>// ---------- shared helpers for all chapter pages ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// theme
+(function () {
+  const saved = store.get('dm-theme', null);
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  const b = $('#themeBtn');
+  if (!b) return;
+  const label = () => {
+    const t = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    b.textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
+  };
+  label();
+  b.onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme') ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const nxt = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nxt);
+    store.set('dm-theme', nxt); label();
+  };
+})();
+
+// TOC, scroll spy, progress, "mark as understood"
+(function () {
+  const toc = $('#tocList'); const secs = $$('section.chap');
+  const key = 'dm-done-' + (document.body.dataset.chapter || 'x');
+  const done = new Set(store.get(key, []));
+  secs.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + s.id; a.innerHTML = '<span class="dot"></span>' + esc(s.dataset.title || s.id);
+    if (done.has(s.id)) a.classList.add('done');
+    toc && toc.appendChild(a);
+    const head = s.querySelector('.sec-head');
+    if (head) {
+      const b = document.createElement('button'); b.className = 'donebtn';
+      const paint = () => { b.classList.toggle('on', done.has(s.id)); b.textContent = done.has(s.id) ? '✓ Understood' : 'Mark as understood'; a.classList.toggle('done', done.has(s.id)); updCount(); };
+      b.onclick = () => { done.has(s.id) ? done.delete(s.id) : done.add(s.id); store.set(key, [...done]); paint(); };
+      head.appendChild(b); setTimeout(paint);
+    }
+  });
+  function updCount() { const c = $('#doneCount'); if (c) c.textContent = done.size + ' / ' + secs.length + ' sections understood'; }
+  const links = toc ? $$('a', toc) : [];
+  const onScroll = () => {
+    const h = document.documentElement; const p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+    const bar = $('#progress'); if (bar) bar.style.width = (p * 100) + '%';
+    let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) cur = i; });
+    links.forEach((l, i) => l.classList.toggle('active', i === cur));
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+})();
+
+// tabs: <div class="tabs" data-group="x"><button data-tab="a">..</button></div> + <div class="tabpanel" data-group="x" data-tab="a">
+document.addEventListener('click', e => {
+  const b = e.target.closest('.tabs button'); if (!b) return;
+  const g = b.parentElement.dataset.group;
+  $$('.tabs[data-group="' + g + '"] button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.tabpanel[data-group="' + g + '"]').forEach(p => p.classList.toggle('on', p.dataset.tab === b.dataset.tab));
+});
+
+// copy buttons on code
+function addCopy(root = document) {
+  $$('pre', root).forEach(p => {
+    if (p.querySelector('.copy')) return;
+    const b = document.createElement('button'); b.className = 'copy'; b.textContent = 'Copy';
+    b.onclick = () => { const t = p.querySelector('code') ? p.querySelector('code').innerText : p.innerText.replace(/Copy$/, ''); navigator.clipboard && navigator.clipboard.writeText(t); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1200); };
+    p.appendChild(b);
+  });
+}
+addCopy();
+
+// quiz engine: renderQuiz('#el', [{q, opts:[...], a: idx, why}])
+function renderQuiz(sel, items) {
+  const root = $(sel); if (!root) return; root.classList.add('quiz');
+  let right = 0, answered = 0;
+  const sc = document.createElement('p'); sc.className = 'score';
+  const upd = () => sc.textContent = `Score: ${right} / ${items.length}` + (answered === items.length ? (right === items.length ? ' — perfect! 🎉' : ' — review the explanations and try again.') : '');
+  items.forEach((it, qi) => {
+    const d = document.createElement('div'); d.className = 'q';
+    d.innerHTML = `<p>${qi + 1}. ${it.q}</p><div class="opts"></div><div class="why">💡 ${it.why}</div>`;
+    const o = d.querySelector('.opts');
+    it.opts.forEach((t, i) => {
+      const b = document.createElement('button'); b.innerHTML = t;
+      b.onclick = () => {
+        if (d.classList.contains('answered')) return;
+        d.classList.add('answered'); answered++;
+        if (i === it.a) { b.classList.add('right'); right++; } else { b.classList.add('wrong'); o.children[it.a].classList.add('right'); }
+        upd();
+      };
+      o.appendChild(b);
+    });
+    root.appendChild(d);
+  });
+  const r = document.createElement('button'); r.className = 'btn'; r.textContent = '↺ Reset quiz';
+  r.onclick = () => { root.innerHTML = ''; renderQuiz(sel, items); };
+  root.appendChild(sc); root.appendChild(r); upd();
+}
+
+// sorter engine (click a chip, then click a bucket — or drag): makeSorter('#el', cats:[{id,label}], items:[{t, c, why?}])
+function makeSorter(sel, cats, items) {
+  const root = $(sel); if (!root) return;
+  root.innerHTML = `<div class="pool small">Click an item, then click the box it belongs to (or drag it).</div><div class="sorter"></div><div class="btnrow"><button class="btn primary chk">Check answers</button><button class="btn rst">Reset</button></div><div class="feedback"></div>`;
+  const pool = $('.pool', root), sorter = $('.sorter', root), fb = $('.feedback', root);
+  let selected = null;
+  const shuffled = items.map((x, i) => ({ ...x, i })).sort(() => Math.random() - .5);
+  shuffled.forEach(it => {
+    const c = document.createElement('span'); c.className = 'chip'; c.textContent = it.t; c.draggable = true; c.dataset.c = it.c; c.dataset.i = it.i;
+    if (it.why) c.title = it.why;
+    c.onclick = e => { e.stopPropagation(); $$('.chip', root).forEach(x => x.classList.remove('sel')); selected = c; c.classList.add('sel'); };
+    c.ondragstart = ev => { selected = c; ev.dataTransfer.setData('text', it.i); };
+    pool.appendChild(c);
+  });
+  cats.forEach(cat => {
+    const b = document.createElement('div'); b.className = 'bucket'; b.dataset.id = cat.id; b.innerHTML = `<h5>${cat.label}</h5>`;
+    const drop = () => { if (selected) { b.appendChild(selected); selected.classList.remove('sel', 'right', 'wrong'); selected = null; } };
+    b.onclick = drop;
+    b.ondragover = e => { e.preventDefault(); b.classList.add('over'); };
+    b.ondragleave = () => b.classList.remove('over');
+    b.ondrop = e => { e.preventDefault(); b.classList.remove('over'); drop(); };
+    sorter.appendChild(b);
+  });
+  pool.onclick = () => { if (selected) { pool.appendChild(selected); selected.classList.remove('sel'); selected = null; } };
+  $('.chk', root).onclick = () => {
+    let ok = 0, placed = 0;
+    $$('.bucket .chip', root).forEach(c => { placed++; const good = c.parentElement.dataset.id === c.dataset.c; c.classList.toggle('right', good); c.classList.toggle('wrong', !good); if (good) ok++; });
+    fb.className = 'feedback show ' + (ok === items.length ? 'ok' : 'info');
+    fb.textContent = ok === items.length ? `All ${ok} correct — well done!` : `${ok} of ${items.length} correct (${items.length - placed} not placed yet). Red items are in the wrong box — hover them for a hint.`;
+  };
+  $('.rst', root).onclick = () => makeSorter(sel, cats, items);
+}
+
+// tiny syntax highlighter for python / sql / yaml snippets marked data-hl
+function hl(code, lang) {
+  let s = esc(code);
+  if (lang === 'py' || lang === 'sql') {
+    s = s.replace(/(#.*|--.*)$/gm, '<span class="c-c">$1</span>');
+    s = s.replace(/(&quot;.*?&quot;|'[^'\n]*')/g, '<span class="c-s">$1</span>');
+    const kw = lang === 'py' ? 'def|return|import|from|as|for|in|if|else|try|except|with|lambda|True|False|None|print' : 'SELECT|FROM|WHERE|GROUP BY|ORDER BY|JOIN|LEFT JOIN|ON|AS|WITH|SUM|COUNT|AND|OR|MATCH|RETURN|PREFIX';
+    s = s.replace(new RegExp('\\b(' + kw + ')\\b', 'g'), '<span class="c-k">$1</span>');
+  } else if (lang === 'yaml') {
+    s = s.replace(/(#.*)$/gm, '<span class="c-c">$1</span>').replace(/^(\s*-?\s*)([\w_]+):/gm, '$1<span class="c-k">$2</span>:');
+  }
+  return s;
+}
+$$('pre code[data-hl]').forEach(c => { c.innerHTML = hl(c.textContent, c.dataset.hl); });
+</script>
+<script>
+// ---------- project tree ----------
+const TREE = [
+  ['shop_pipeline/', 0, 'The project root — one Git repository.', ''],
+  ['README.md', 1, 'How to run it, data dictionary and cleaning rules — for someone new.', '# shop_pipeline\nRun: python pipeline.py\nOutputs: data/output/fct_orders.csv ...'],
+  ['requirements.txt', 1, 'Exact library versions → the same result on any computer.', 'pandas==2.2.3\npandera==0.22.1'],
+  ['pipeline.py', 1, 'The steps: load → clean → validate → split → output.', "def main():\n    orders = load_raw()\n    clean  = clean_orders(orders)\n    clean_orders_rules.validate(clean, lazy=True)\n    fct, quarantine = split(enrich(clean, customers, products))\n    write_outputs(fct, quarantine)\n\nif __name__ == '__main__':\n    main()"],
+  ['rules.py', 1, 'Validation rules, one line each, checked on every run.', "clean_orders_rules = pa.DataFrameSchema({\n    'order_id': Column(str, unique=True, nullable=False,\n                       checks=Check.str_matches(r'^O\\d{4}$')),\n    'quantity': Column(int, Check.gt(0)),\n})"],
+  ['data/', 1, '', ''],
+  ['raw/', 2, 'Raw files exactly as received: read, never written.', 'orders_2026_01.csv\norders_2026_02.csv\norders_2026_03.csv\ncustomers.csv\nproducts.csv'],
+  ['output/', 2, 'Trusted output plus a quarantine file with reasons.', 'fct_orders.csv\nquarantine_orders.csv\nrevenue_by_city.csv'],
+  ['logs/run_log.txt', 1, 'What happened on every run.', '2026-04-02 09:14 loaded 12 orders from 3 files ...'],
+  ['extras/orders_2026_04.csv', 1, 'A new month — used in Practical 2 to break the pipeline on purpose.', '']
+];
+$('#tree').innerHTML = TREE.map((t, i) => `<div style="padding-left:${t[1] * 18}px;cursor:pointer" data-i="${i}">${t[0].endsWith('/') ? '📁' : '📄'} ${t[0]}</div>`).join('');
+$$('#tree div').forEach(d => d.onclick = () => { const t = TREE[+d.dataset.i]; $$('#tree div').forEach(x => x.style.color = ''); d.style.color = 'var(--accent)'; $('#treeInfo').textContent = t[2]; $('#treeCode').innerHTML = hl(t[3], 'py'); });
+$('#tree div[data-i="3"]').click();
+
+makeSorter('#sortLayer', [{ id: 'raw', label: 'raw/' }, { id: 'clean', label: 'clean' }, { id: 'out', label: 'output/' }], [
+  { t: 'orders_2026_01.csv exactly as exported', c: 'raw' }, { t: 'Dates parsed to ISO format', c: 'clean' }, { t: 'revenue_by_city.csv', c: 'out' },
+  { t: 'Exact duplicates removed', c: 'clean' }, { t: 'customers.csv from the CRM', c: 'raw' }, { t: 'fct_orders.csv for the dashboard', c: 'out' },
+  { t: 'Columns renamed to snake_case, types fixed', c: 'clean' }, { t: 'quarantine_orders.csv with reasons', c: 'out' }
+]);
+
+// ---------- simulator ----------
+const CUST = { C01: ['Anna', 'Heidelberg'], C02: ['Ben', 'Mannheim'], C03: ['Cem', 'Heidelberg'], C04: ['Dana', 'Karlsruhe'], C05: ['Eli', 'Mannheim'] };
+const PROD = { Laptop: 899, Mouse: 25, Monitor: 199, Keyboard: 49 };
+const RAW = [
+  ['orders_2026_01.csv', 'O0001', 'C01', '2026-01-05', 'Laptop', '1', '899.00'], ['orders_2026_01.csv', 'O0002', 'C02', '05.01.2026', 'Mouse', '2', '25.00'],
+  ['orders_2026_01.csv', 'O0003', 'C03', '2026-01-09', 'Monitor', '1', '199.00'], ['orders_2026_01.csv', 'O0004', 'C99', '2026-01-12', 'Keyboard', '1', '49.00'],
+  ['orders_2026_02.csv', 'O0005', 'C01', '2026-02-02', 'Mouse', '-1', '25.00'], ['orders_2026_02.csv', 'O0002', 'C02', '05.01.2026', 'Mouse', '2', '25.00'],
+  ['orders_2026_02.csv', 'O0006', 'C04', '14.02.2026', 'Laptop', '1', '8990.00'], ['orders_2026_02.csv', 'O0007', 'C02', '2026-02-20', 'Headset', '1', '59.00'],
+  ['orders_2026_03.csv', 'O0008', 'C03', '2026-03-01', 'Monitor', '2', '199.00'], ['orders_2026_03.csv', 'O0009', 'C05', '2026-03-03', 'Laptop', '1', '899.00'],
+  ['orders_2026_03.csv', 'O0010', 'C04', '', 'Mouse', '3', '25.00'], ['orders_2026_03.csv', 'O0011', 'C01', '2026-03-15', 'Keyboard', '2', '49.00']
+];
+const APRIL = [['orders_2026_04.csv', 'O0012', 'C05', '2026-04-01', 'Mouse', '1', '25.00'], ['orders_2026_04.csv', 'O0011', 'C02', '2026-04-02', 'Laptop', '1', '899.00']];
+// source_file is ignored for exact-duplicate detection (same content re-exported in two files)
+const RULES = [
+  ['dedupe', 'clean', 'drop_duplicates() — remove exact duplicate rows', true],
+  ['dates', 'clean', 'parse_mixed_date() — accept ISO and DD.MM.YYYY', true],
+  ['unique', 'critical', 'order_id unique=True → STOP if violated', true],
+  ['cust', 'row', 'customer must exist → quarantine', true],
+  ['qty', 'row', 'quantity > 0 → quarantine', true],
+  ['prod', 'row', 'product in catalogue → quarantine', true],
+  ['date', 'row', 'order_date not null → quarantine', true],
+  ['price', 'enrich', 'price correction: unit_price from catalogue', true]
+];
+const ruleOn = {}; RULES.forEach(r => ruleOn[r[0]] = r[3]);
+$('#rules').innerHTML = '<b class="small">Pipeline rules</b>' + RULES.map(r => `<label class="card" style="display:block;padding:6px 10px;margin:4px 0"><input type="checkbox" data-r="${r[0]}" checked> <span class="tag ${r[1] === 'critical' ? 'red' : r[1] === 'row' ? 'amber' : r[1] === 'clean' ? 'blue' : 'green'}">${r[1]}</span> <span class="small">${r[2]}</span></label>`).join('');
+$$('#rules [data-r]').forEach(c => c.onchange = () => { ruleOn[c.dataset.r] = c.checked; });
+const STEPS = ['load', 'clean', 'validate', 'split', 'output'];
+function drawSteps(n, fail) { $('#stepFlow').innerHTML = STEPS.map((s, i) => `<div class="step ${i < n ? 'on' : ''}" style="${fail && i === n - 1 ? 'border-color:var(--red);background:var(--red-soft)' : ''}"><b>${s}</b></div>`).join('<span class="arrow">→</span>'); }
+drawSteps(0);
+const H = ['source_file', 'order_id', 'customer', 'order_date', 'product', 'qty', 'price'];
+function showRaw() { const rows = RAW.concat($('#addApril').checked ? APRIL : []); $('#tRaw').innerHTML = tbl2(H, rows, (i) => rows[i][0] === 'orders_2026_04.csv' ? 'warn' : ''); }
+function tbl2(head, rows, cls) { return '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>' + rows.map((r, i) => '<tr>' + r.map((c, j) => `<td class="${cls ? cls(i, j) || '' : ''}">${c === '' || c === null ? '<span class="small">∅</span>' : esc(c)}</td>`).join('') + '</tr>').join(''); }
+$('#addApril').onchange = showRaw; showRaw();
+function parseDate(s) { if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { const [y, m, d] = s.split('-').map(Number); return m >= 1 && m <= 12 && d >= 1 && d <= 31 ? s : null; } if (ruleOn.dates) { const m = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/); if (m && +m[2] <= 12) return `${m[3]}-${m[2]}-${m[1]}`; } return null; }
+let running = false;
+$('#runBtn').onclick = async () => {
+  if (running) return; running = true;
+  const log = []; const L = $('#log code'); const say = async (s, cls) => { log.push(cls ? `<span class="${cls}">${esc(s)}</span>` : esc(s)); L.innerHTML = log.join('\n'); await new Promise(r => setTimeout(r, 260)); };
+  ['#tFct', '#tQ', '#tRev'].forEach(s => $(s).innerHTML = ''); $('#simKpi').innerHTML = '';
+  let rows = RAW.concat($('#addApril').checked ? APRIL : []).map(r => [...r]);
+  drawSteps(1); await say('$ python pipeline.py', 'c-k');
+  const files = new Set(rows.map(r => r[0]));
+  await say(`[load]     Loaded ${rows.length} orders from ${files.size} files (dtype=str, source_file added)`);
+  drawSteps(2);
+  if (ruleOn.dedupe) { const s = new Set(); const before = rows.length; rows = rows.filter(r => { const k = r.slice(1).join('|'); if (s.has(k)) return false; s.add(k); return true; }); await say(`[clean]    drop_duplicates: removed ${before - rows.length} exact duplicate row(s)`); }
+  else await say('[clean]    drop_duplicates: SKIPPED', 'c-c');
+  rows.forEach(r => r[3] = parseDate(r[3]) || '');
+  await say(`[clean]    parse dates: ${rows.filter(r => !r[3]).length} value(s) could not be parsed → NaT${ruleOn.dates ? '' : ' (DE format not accepted!)'}`);
+  drawSteps(3);
+  if (ruleOn.unique) {
+    const cnt = {}; rows.forEach(r => cnt[r[1]] = (cnt[r[1]] || 0) + 1); const dup = Object.keys(cnt).filter(k => cnt[k] > 1);
+    if (dup.length) {
+      drawSteps(3, true);
+      await say('[validate] SchemaErrors: column order_id failed check unique', 'c-k');
+      for (const d of dup) for (const r of rows.filter(r => r[1] === d)) await say(`           failure_case: order_id=${r[1]}  file=${r[0]}  customer=${r[2]}`);
+      await say('[STOP]     sys.exit(1) — critical rule broken, NOTHING was written.', 'c-k');
+      await say('           The previous outputs stay as they were; no dashboard shows a wrong number.', 'c-c');
+      $('#simKpi').innerHTML = `<div class="kpi" style="border-color:var(--red)"><div class="l">Status</div><div class="v" style="color:var(--red)">STOPPED</div><div class="small">exit code 1</div></div>`;
+      running = false; return;
+    }
+    await say('[validate] clean_orders_rules: OK (order_id unique)');
+  } else await say('[validate] SKIPPED — no critical checks!', 'c-c');
+  drawSteps(4);
+  const fct = [], q = [];
+  rows.forEach(r => {
+    const reasons = [];
+    if (ruleOn.cust && !CUST[r[2]]) reasons.push('unknown customer');
+    if (ruleOn.qty && !(+r[5] > 0)) reasons.push('quantity <= 0');
+    if (ruleOn.prod && !(r[4] in PROD)) reasons.push('unknown product');
+    if (ruleOn.date && !r[3]) reasons.push('missing/invalid order_date');
+    if (reasons.length) { q.push([...r, reasons.join('; ')]); return; }
+    const price = ruleOn.price && PROD[r[4]] !== undefined ? PROD[r[4]] : parseFloat(r[6]);
+    const city = CUST[r[2]] ? CUST[r[2]][1] : '(unknown)';
+    fct.push([r[1], r[3], r[4], r[5], price.toFixed(2), (price * +r[5]).toFixed(2), city, r[0]]);
+  });
+  await say(`[split]    ${fct.length} trusted, ${q.length} quarantined`);
+  drawSteps(5);
+  const rev = {}; fct.forEach(r => rev[r[6]] = (rev[r[6]] || 0) + +r[5]);
+  const total = fct.reduce((s, r) => s + +r[5], 0);
+  await say(`[output]   wrote fct_orders.csv (${fct.length}), quarantine_orders.csv (${q.length}), revenue_by_city.csv`);
+  await say(`[done]     total revenue EUR ${total.toLocaleString('en', { minimumFractionDigits: 2 })}`, 'c-s');
+  $('#tFct').innerHTML = tbl2(['order_id', 'order_date', 'product', 'qty', 'unit_price', 'line_total', 'city', 'source_file'], fct, (i, j) => (j === 5 && +fct[i][5] > 5000) || (j === 3 && +fct[i][3] <= 0) || (j === 6 && fct[i][6] === '(unknown)') || (j === 1 && !fct[i][1]) ? 'bad' : '');
+  $('#tQ').innerHTML = q.length ? tbl2([...H, 'reason'], q, (i, j) => j === 7 ? 'warn' : '') : '<tr><td>No quarantined rows.</td></tr>';
+  $('#tRev').innerHTML = tbl2(['city', 'revenue_eur'], Object.entries(rev).sort((a, b) => b[1] - a[1]).map(([c, v]) => [c, v.toFixed(2)]));
+  const k = (l, v, s, col) => `<div class="kpi"><div class="l">${l}</div><div class="v" style="color:${col || 'inherit'}">${v}</div><div class="small">${s || ''}</div></div>`;
+  $('#simKpi').innerHTML = k('Status', 'OK', 'exit code 0', 'var(--green)') + k('Trusted', fct.length) + k('Quarantined', q.length) + k('Revenue', '€' + Math.round(total).toLocaleString('en'), total > 9000 ? '⚠ suspiciously high' : '');
+  running = false;
+};
+
+// ---------- parse_mixed_date ----------
+function drawPd() {
+  const rows = $('#pdIn').value.split('\n').filter(s => s.trim()).map(s => { s = s.trim(); let iso = null, de = null; if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { const [y, m, d] = s.split('-').map(Number); if (m <= 12 && d <= 31 && m >= 1) iso = s; } const mm = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/); if (mm && +mm[2] <= 12) de = `${mm[3]}-${mm[2]}-${mm[1]}`; return [s, iso || 'NaT', de || 'NaT', iso || de || 'NaT']; });
+  $('#pdOut').innerHTML = tbl2(['input', "iso (format='%Y-%m-%d')", "de (format='%d.%m.%Y')", 'iso.fillna(de)'], rows, (i, j) => j === 3 ? (rows[i][3] === 'NaT' ? 'bad' : 'good') : '');
+}
+$('#pdIn').oninput = drawPd; drawPd();
+
+// ---------- rule builder ----------
+const RB = [
+  { col: 'order_id', type: 'str', checks: { unique: true, nullable: false, pattern: '^O\\d{4}$' } },
+  { col: 'quantity', type: 'int', checks: { ge: 1 } },
+  { col: 'unit_price', type: 'float', checks: { ge: 0 } },
+  { col: 'category', type: 'str', checks: { isin: 'Accessories, Electronics' } },
+  { col: 'email', type: 'str', checks: { pattern: '^[^@]+@[^@]+\\.[a-z]{2,}$', nullable: true } },
+  { col: 'country', type: 'str', checks: { isin: 'DE, AT, CH' } }
+];
+function drawRb() {
+  $('#rbForm').innerHTML = RB.map((r, i) => `<div class="card" style="padding:8px 10px"><b><code>${r.col}</code></b> <span class="small">(${r.type})</span><div class="btnrow" style="margin:4px 0 0">
+    <label class="small"><input type="checkbox" data-i="${i}" data-k="unique" ${r.checks.unique ? 'checked' : ''}> unique</label>
+    <label class="small"><input type="checkbox" data-i="${i}" data-k="notnull" ${r.checks.nullable === false || (r.checks.nullable === undefined) ? 'checked' : ''}> not null</label>
+    ${'ge' in r.checks ? `<label class="small">≥ <input type="number" data-i="${i}" data-k="ge" value="${r.checks.ge}" style="width:60px"></label>` : ''}
+    ${'isin' in r.checks ? `<label class="small">isin <input type="text" data-i="${i}" data-k="isin" value="${r.checks.isin}" style="width:170px"></label>` : ''}
+    ${'pattern' in r.checks ? `<label class="small">regex <input type="text" data-i="${i}" data-k="pattern" value="${r.checks.pattern}" style="width:170px"></label>` : ''}
+  </div></div>`).join('') + `<label class="small"><input type="checkbox" id="rbCustom" checked> add custom check: <code>line_total == quantity × unit_price</code></label>`;
+  $$('#rbForm input').forEach(inp => inp.oninput = genRb); genRb();
+}
+function genRb() {
+  const g = (i, k) => $(`#rbForm [data-i="${i}"][data-k="${k}"]`);
+  let s = "# rules.py\nimport pandera.pandas as pa\nfrom pandera.pandas import Column, Check\n\nclean_orders_rules = pa.DataFrameSchema({\n";
+  RB.forEach((r, i) => {
+    const parts = [r.type]; if (g(i, 'unique').checked) parts.push('unique=True'); parts.push('nullable=' + (g(i, 'notnull').checked ? 'False' : 'True'));
+    const ch = []; if (g(i, 'ge')) ch.push(`Check.ge(${g(i, 'ge').value || 0})`); if (g(i, 'isin')) ch.push(`Check.isin([${g(i, 'isin').value.split(',').map(x => `'${x.trim()}'`).join(', ')}])`); if (g(i, 'pattern')) ch.push(`Check.str_matches(r'${g(i, 'pattern').value}')`);
+    if (ch.length) parts.push('checks=' + (ch.length === 1 ? ch[0] : '[' + ch.join(', ') + ']'));
+    s += `    '${r.col}': Column(${parts.join(', ')}),\n`;
+  });
+  s += '}';
+  if ($('#rbCustom').checked) s += ",\n    checks=Check(lambda df: (df['line_total'] - df['quantity'] * df['unit_price']).abs() < 0.01,\n                 error='line_total must equal quantity × unit_price')";
+  s += ")\n\n# in pipeline.py\nclean_orders_rules.validate(df, lazy=True)";
+  $('#rbCode').innerHTML = hl(s, 'py'); addCopy($('#pandera'));
+}
+drawRb();
+
+makeSorter('#sortFail', [{ id: 'stop', label: '🛑 Stop the pipeline' }, { id: 'q', label: '🗄 Quarantine the row' }], [
+  { t: 'Two orders share the same order_id', c: 'stop', why: 'Breaks uniqueness of the whole table' }, { t: 'An order references an unknown customer', c: 'q' },
+  { t: 'Column "unit_price" is missing from this month’s file', c: 'stop', why: 'Schema drift: every row affected' }, { t: 'One order has quantity −1', c: 'q' },
+  { t: 'Completeness of the file dropped to 40%', c: 'stop', why: 'Most of the table is broken — something is wrong upstream' }, { t: 'One email address is malformed', c: 'q' },
+  { t: 'All dates are suddenly in the year 1970', c: 'stop' }, { t: 'A single order has a product not in the catalogue', c: 'q' }
+]);
+
+// ---------- git ----------
+const GIT = [
+  ['Branch', 'feature/new-rule', 'Work on a separate branch so the shared pipeline stays stable.', 'git switch -c feature/negative-qty'],
+  ['Commit', 'small, clear messages', 'Each commit records who changed what, and why — permanently.', 'git add rules.py\ngit commit -m "fix: quarantine orders with negative quantity"'],
+  ['Pull request', 'a teammate reviews', 'A teammate reads the new rule before it reaches everyone.', 'git push -u origin feature/negative-qty\n# then open a Pull Request on GitHub'],
+  ['CI: checks', 'pipeline + rules run', 'A GitHub Action runs python pipeline.py on every push and blocks the merge if validation fails.', '# .github/workflows/pipeline.yml runs automatically'],
+  ['Merge', 'safe to use', 'The reviewed, tested change becomes part of main. Tag releases to reproduce old results.', 'git switch main && git pull\ngit tag v1.3 && git push --tags']
+];
+let gi = 0;
+function drawGit() {
+  $('#gitFlow').innerHTML = GIT.map((g, i) => `<div class="step ${i === gi ? 'on' : ''}" data-i="${i}"><b>${g[0]}</b><small>${g[1]}</small></div>`).join('<span class="arrow">→</span>');
+  $$('#gitFlow .step').forEach(s => s.onclick = () => { gi = +s.dataset.i; drawGit(); });
+  $('#gitInfo').innerHTML = `<p>${GIT[gi][2]}</p><pre><code>${esc(GIT[gi][3])}</code></pre>`; addCopy($('#gitInfo'));
+}
+drawGit();
+
+// ---------- lineage DAG ----------
+const N = {
+  o1: [20, 20, 'orders_2026_01.csv', 'raw'], o2: [20, 70, 'orders_2026_02.csv', 'raw'], o3: [20, 120, 'orders_2026_03.csv', 'raw'],
+  cu: [20, 200, 'customers.csv', 'raw'], pr: [20, 270, 'products.csv', 'raw'],
+  co: [230, 70, 'clean_orders', 'step'], cc: [230, 200, 'clean_customers', 'step'],
+  en: [430, 135, 'enrich_orders', 'step'], sp: [600, 135, 'split', 'step'],
+  fct: [600, 40, 'fct_orders', 'out'], qu: [600, 235, 'quarantine_orders', 'out'],
+  rev: [770, 20, 'revenue_by_city', 'out'], dash: [770, 90, 'Sales dashboard', 'use'], ml: [770, 160, 'Demand forecast (ML)', 'use']
+};
+const E = [['o1', 'co'], ['o2', 'co'], ['o3', 'co'], ['cu', 'cc'], ['co', 'en'], ['cc', 'en'], ['pr', 'en'], ['en', 'sp'], ['sp', 'fct'], ['sp', 'qu'], ['fct', 'rev'], ['rev', 'dash'], ['fct', 'ml']];
+const W = 120, Hh = 34;
+function walk(start, dir) { const seen = new Set(); const st = [start]; while (st.length) { const n = st.pop(); E.forEach(([a, b]) => { const nx = dir === 'up' ? (b === n ? a : null) : (a === n ? b : null); if (nx && !seen.has(nx)) { seen.add(nx); st.push(nx); } }); } return seen; }
+function drawDag(sel) {
+  const up = sel ? walk(sel, 'up') : new Set(), dn = sel ? walk(sel, 'down') : new Set();
+  const col = { raw: 'var(--muted)', step: 'var(--blue)', out: 'var(--green)', use: 'var(--purple)' };
+  let s = '<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>';
+  E.forEach(([a, b]) => { const A = N[a], B = N[b]; const on = sel && ((up.has(a) || a === sel) && (up.has(b) || b === sel) || (dn.has(b) || b === sel) && (dn.has(a) || a === sel)); const x1 = A[0] + W, y1 = A[1] + Hh / 2, x2 = B[0], y2 = B[1] + Hh / 2; s += `<path d="M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}" fill="none" stroke="${on ? 'var(--accent)' : 'var(--line)'}" stroke-width="${on ? 2.5 : 1.5}" marker-end="url(#ar)"/>`; });
+  Object.entries(N).forEach(([id, [x, y, l, t]]) => { const fill = id === sel ? 'var(--accent-soft)' : up.has(id) ? 'var(--amber-soft)' : dn.has(id) ? 'var(--purple-soft)' : 'var(--surface)'; s += `<g data-n="${id}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${W}" height="${Hh}" rx="8" fill="${fill}" stroke="${id === sel ? 'var(--accent)' : col[t]}" stroke-width="${id === sel ? 2.5 : 1.5}"/><text x="${x + W / 2}" y="${y + 21}" text-anchor="middle" font-size="11" fill="var(--ink)">${l}</text></g>`; });
+  [['raw files', 'var(--muted)'], ['steps', 'var(--blue)'], ['outputs', 'var(--green)'], ['consumers', 'var(--purple)']].forEach(([l, c], i) => s += `<rect x="${230 + i * 110}" y="300" width="12" height="12" rx="3" fill="none" stroke="${c}" stroke-width="2"/><text x="${248 + i * 110}" y="310" font-size="11" fill="var(--muted)">${l}</text>`);
+  $('#dag').innerHTML = s;
+  $$('#dag [data-n]').forEach(g => g.onclick = () => drawDag(g.dataset.n));
+  if (sel) $('#dagOut').innerHTML = `<b>${N[sel][2]}</b> — upstream (${up.size}): ${[...up].map(x => N[x][2]).join(', ') || 'none — this is a source'}.<br>Downstream (${dn.size}): ${[...dn].map(x => N[x][2]).join(', ') || 'none — this is an end consumer'}.${N[sel][3] === 'raw' && dn.size ? '<br>⚠ If this file changes schema, all downstream assets are at risk — add a validation rule right after loading.' : ''}`;
+}
+drawDag(null);
+
+// ---------- AI-ready ----------
+const AIC = [['Validated', 'every rule passes on every run'], ['Documented', 'README and data dictionary for every column'], ['Version-controlled', 'code and rules reviewed in Git'], ['Traceable', 'each row points back to its raw file'], ['Reproducible & owned', 'one command rebuilds it; a named owner']];
+$('#aiChecks').innerHTML = AIC.map((a, i) => `<label class="card" style="padding:8px 12px"><input type="checkbox" data-a="${i}"> <b>${a[0]}</b> — <span class="small">${a[1]}</span></label>`).join('');
+const aiUpd = () => { const n = $$('#aiChecks input:checked').length; $('#aiMeter').style.width = n / 5 * 100 + '%'; $('#aiOut').textContent = n === 5 ? '✅ Ready for a dashboard or an ML model.' : `${n}/5 — every unchecked box is your to-do list before training a model on this data.`; };
+$$('#aiChecks input').forEach(c => c.onchange = aiUpd); aiUpd();
+
+renderQuiz('#quizBox', [
+  { q: 'What makes a pipeline reproducible?', opts: ['It runs fast', 'Same input + same code → same output, on any computer', 'It uses a GUI', 'It edits raw files in place'], a: 1, why: 'Reproducible = deterministic output from the same input and code, plus traceability.' },
+  { q: 'Which layer may the pipeline write to?', opts: ['raw/ only', 'clean and output/, never raw/', 'All layers', 'None'], a: 1, why: 'Data flows one way: raw → clean → output. Raw is read-only.' },
+  { q: 'What does lazy=True do in pandera?', opts: ['Skips validation', 'Reports every failure at once instead of stopping at the first', 'Runs validation in the background', 'Only checks the first row'], a: 1, why: 'All failures are collected in err.failure_cases.' },
+  { q: 'Check.isin(["Accessories","Electronics"]) enforces which Chapter 2 dimension?', opts: ['Timeliness', 'Validity', 'Uniqueness', 'Completeness'], a: 1, why: 'Allowed-list checks are validity checks.' },
+  { q: 'A new monthly file contains an order_id that already exists with different content. The pipeline should…', opts: ['Quarantine one of them', 'Stop and write nothing', 'Keep both', 'Overwrite the old one'], a: 1, why: 'A duplicate key breaks the whole table — a critical rule. Stop, report, fix.' },
+  { q: 'Why add a source_file column when loading?', opts: ['To make files larger', 'It is the start of lineage: every row can be traced to its raw file', 'pandas requires it', 'For sorting'], a: 1, why: 'Lineage lets you trace any number back to its raw source.' },
+  { q: 'DRY in pipelines means…', opts: ['Delete raw yearly', 'Don’t Repeat Yourself — one function per rule, reused everywhere', 'Data Ready Yesterday', 'Drop rows yielding errors'], a: 1, why: 'Fix a bug once, in the function, and it’s fixed everywhere.' },
+  { q: 'Which tool is the SQL-based equivalent of our Python pipeline with built-in tests and lineage?', opts: ['Tableau Prep', 'dbt', 'Excel', 'DVC'], a: 1, why: 'dbt: tested, documented SQL models with an automatic lineage graph.' },
+  { q: 'What does CI add to a Git workflow?', opts: ['It writes the code for you', 'It runs the pipeline and rules automatically on every push/PR and blocks broken merges', 'It stores data files', 'It replaces code review'], a: 1, why: 'Continuous Integration catches broken changes before merge.' },
+  { q: 'DVC is used to…', opts: ['Orchestrate schedules', 'Version large data files alongside Git', 'Draw dashboards', 'Validate schemas'], a: 1, why: 'DVC lets you restore any past dataset exactly.' }
+]);
+</script>
+</body></html>
