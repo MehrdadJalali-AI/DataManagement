@@ -215,7 +215,7 @@ svg text{font-family:inherit}
     <label>Organization: <select id="lcOrg"><option value="shop">Online shop</option><option value="hosp">Hospital</option><option value="uni">University</option></select></label>
     <div class="flow" id="lcFlow"></div>
     <div class="card" id="lcDetail"></div>
-    <p class="small">This is exactly <b>In-Class Practical 1</b>: for each stage, decide whether it is mainly about <i>running</i> the business (operations / OLTP) or <i>understanding</i> it (analysis / OLAP).</p>
+    <p class="small">You will need this in <a href="#lab11"><b>Lab 1.1</b></a>, where you mark all six stages on your own data-flow drawing.</p>
   </div>
 </section>
 
@@ -271,7 +271,7 @@ ORDER BY month;</code></pre></div>
     <tr><td>Example tools</td><td>Informatica, Talend, SSIS, Pentaho</td><td>Fivetran / Airbyte (EL) + dbt (T) in Snowflake / BigQuery</td></tr>
   </table></div>
   <div class="analogy"><span class="ico">🍳</span><div><b>Analogy:</b> ETL is a restaurant that washes and chops vegetables <i>before</i> they go into the fridge. ELT puts all the groceries in a huge fridge first and prepares them when a recipe needs them — you can always re-cook from the original ingredients.</div></div>
-  <div class="widget"><div class="wtitle">ETL or ELT? (Practical 2 warm-up)</div><div id="sortEtl"></div></div>
+  <div class="widget"><div class="wtitle">ETL or ELT? (Lab 1.1 warm-up)</div><div id="sortEtl"></div></div>
 </section>
 
 <!-- 5 -->
@@ -371,7 +371,7 @@ GET [base]/Observation?patient=P123456789</code></pre>
   </div>
   <div class="widget">
     <div class="wtitle">FAIR self-assessment of a dataset</div>
-    <p class="small">Pick a dataset you know (e.g. a Kaggle CSV, a Zenodo record, your thesis data) and tick what is true. This mirrors the manual walkthrough in the home exercise; tools like <a href="https://www.f-uji.net/" target="_blank" rel="noopener">F-UJI</a> automate it.</p>
+    <p class="small">Pick a dataset you know (e.g. a Kaggle CSV, a Zenodo record, your thesis data) and tick what is true. <a href="#lab12">Lab 1.2</a> uses a shorter 0–2 score per letter; this checklist shows what to look for. Tools like <a href="https://www.f-uji.net/" target="_blank" rel="noopener">F-UJI</a> automate it.</p>
     <div class="grid2" id="fairChecks"></div>
     <div id="fairBars" style="margin-top:12px"></div>
     <div class="feedback info show" id="fairAdvice"></div>
@@ -434,7 +434,7 @@ GET [base]/Observation?patient=P123456789</code></pre>
   <div class="tabpanel" data-group="std" data-tab="dcite"><p>The standard behind DOIs for research data. Mandatory: identifier, creator, title, publisher, publicationYear, resourceType. <a href="https://schema.datacite.org/" target="_blank" rel="noopener">DataCite Metadata Schema →</a></p></div>
   <div class="tabpanel" data-group="std" data-tab="sorg"><p>JSON-LD embedded in web pages, read by search engines (that's how Google Dataset Search works). <a href="https://schema.org/Dataset" target="_blank" rel="noopener">schema.org/Dataset →</a></p></div>
   <div class="widget">
-    <div class="wtitle">Metadata record builder (home-exercise helper)</div>
+    <div class="wtitle">Metadata record builder</div>
     <p class="small">Fill in the form — the DataCite XML and schema.org JSON-LD update live. Copy the result into your submission.</p>
     <div class="grid2">
       <div style="display:grid;gap:8px" id="mdForm">
@@ -459,18 +459,124 @@ GET [base]/Observation?patient=P123456789</code></pre>
 </section>
 
 <!-- 10 -->
-<section class="chap" id="practice" data-title="Practicals & exercise">
-  <div class="sec-head"><div><div class="secnum">Section 10</div><h2>Practicals &amp; home exercise — with hints</h2></div></div>
-  <div class="grid3">
-    <div class="card"><span class="tag">In class · 15–20 min</span><h4>Practical 1: Lifecycle mapping</h4><p>Pick an organization, sketch all 6 stages, mark each as operations vs. analysis.</p><details class="reveal"><summary>Hint</summary>Use the lifecycle widget in Section 2. "Create/collect" and "Store" are usually operational; "Analyze &amp; model" is analytical; "Process &amp; integrate" is the bridge.</details></div>
-    <div class="card"><span class="tag">In class · 15–20 min</span><h4>Practical 2: OLTP/OLAP, ETL/ELT</h4><p>Classify instructor scenarios and justify with this chapter's characteristics.</p><details class="reveal"><summary>Hint</summary>Ask: Is it many small writes on current data (OLTP) or big reads over history (OLAP)? Is raw data kept and transformed later (ELT) or cleaned before storing (ETL)?</details></div>
-    <div class="card"><span class="tag">Home · groups of 3–5</span><h4>Metadata record &amp; FAIR assessment</h4><p>Choose a public dataset, write DataCite XML or schema.org JSON-LD, run a FAIR assessment, note 2 strengths + 2 improvements.</p><details class="reveal"><summary>Hint</summary>Use the builder in Section 9 and the self-assessment in Section 7, then validate with F-UJI if your dataset has a DOI.</details></div>
+<section class="chap" id="lab11" data-title="Lab 1.1: Data Flow Blueprint">
+  <div class="sec-head"><div><div class="secnum">Section 10 · Lab 1.1</div><h2>Lab 1.1: Data Flow Blueprint</h2></div></div>
+  <p><b>Goal:</b> connect everything from this session — data types, OLTP/OLAP, ETL/ELT, storage, lifecycle — in <b>one picture</b>. Choose <b>one</b> organization: an online shop, a hospital, or a university.</p>
+  <div class="grid2">
+    <div class="card"><b>Your tasks</b> <span class="small">(groups of 3–5 · ~40 min in class · finish before the next session)</span>
+      <ol class="small" style="margin:6px 0 0;padding-left:20px">
+        <li><b>Find the data sources</b> — list 3 and label each structured / semi-structured / unstructured <span class="tag">8 min</span></li>
+        <li><b>Separate OLTP and OLAP</b> — name the OLTP systems; write 1 question management wants answered <span class="tag">8 min</span></li>
+        <li><b>Draw the pipeline</b> — sources → ETL or ELT → storage → dashboard, 1 sentence why for each choice <span class="tag">12 min</span></li>
+        <li><b>Mark the lifecycle</b> — write the 6 stages (1–6) onto your drawing <span class="tag">5 min</span></li>
+        <li><b>Fill in the worksheet</b> — type your answers into <code>Lab1.1_Worksheet.pptx</code> <span class="tag">5 min</span></li>
+      </ol></div>
+    <div class="card"><b>Files &amp; submission</b>
+      <p class="small" style="margin:6px 0">📄 <code>Lab1.1_Worksheet.pptx</code> on Moodle — the sheet you fill in.<br>
+      📤 Submit on Moodle: the filled-in worksheet <b>as PDF</b>, all names on it — <code>Lab1.1_Group&lt;Nr&gt;.pdf</code>, one file per group, by the group representative.<br>
+      ⏰ Deadline: before the next session.<br>
+      👀 Progress check at the end of the session: show your progress and explain <b>one</b> choice (ETL vs. ELT, or storage).</p></div>
   </div>
+  <div class="widget">
+    <div class="wtitle">Blueprint planner — draft your worksheet here</div>
+    <p class="small">Plan your answers, watch the pipeline picture build itself, then copy the text into <code>Lab1.1_Worksheet.pptx</code>. Your draft is saved in this browser only. This planner is a thinking aid — the Moodle worksheet is what you submit.</p>
+    <div class="btnrow"><label>Organization: <select id="l1org"><option value="">— choose —</option><option>Online shop</option><option>Hospital</option><option>University</option></select></label><button class="btn" id="l1ideas">💡 Show idea prompts</button><button class="btn" id="l1reset">Clear draft</button></div>
+    <div id="l1prompts" class="callout blue" style="display:none"></div>
+    <div class="grid2">
+      <div class="card"><span class="tag blue">1 · Sources</span> <span class="small">3 sources + type</span><div id="l1src" style="display:grid;gap:6px;margin-top:6px"></div></div>
+      <div class="card"><span class="tag blue">2 · OLTP systems</span> <span class="small">which systems run the business day-to-day?</span><textarea id="l1oltp" rows="3" placeholder="e.g. system — what it records" style="margin-top:6px;font-family:inherit"></textarea></div>
+      <div class="card"><span class="tag green">3 · ETL or ELT?</span><div class="btnrow" id="l1etl"></div><textarea id="l1etlWhy" rows="2" placeholder="1 sentence why — use a characteristic from the slides" style="font-family:inherit"></textarea><div class="small" id="l1etlHint"></div></div>
+      <div class="card"><span class="tag green">4 · Storage</span><div class="btnrow" id="l1sto"></div><textarea id="l1stoWhy" rows="2" placeholder="1 sentence why" style="font-family:inherit"></textarea><div class="small" id="l1stoHint"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><span class="tag purple">5 · OLAP question</span> <span class="small">what does management want to know?</span><textarea id="l1q" rows="2" placeholder="A question that needs historical, integrated data from several sources" style="margin-top:6px;font-family:inherit"></textarea><div class="small" id="l1qHint"></div></div>
+    <div class="card" style="margin-top:14px"><span class="tag amber">6 · Lifecycle</span> <span class="small">tick which of the 6 stages happen in each box (1 Create · 2 Store · 3 Process &amp; integrate · 4 Analyze · 5 Share · 6 Preserve &amp; reuse)</span><div class="tablewrap"><table id="l1life"></table></div></div>
+    <h4 style="margin-top:16px">Your blueprint</h4>
+    <svg id="l1svg" viewBox="0 0 900 250" width="100%"></svg>
+    <b class="small">Before you upload</b>
+    <div id="l1check" class="btnrow"></div>
+    <div class="btnrow"><button class="btn primary" id="l1copy">Copy my answers as text</button><span class="small" id="l1copied"></span></div>
+  </div>
+  <details class="reveal"><summary>What makes a strong answer?</summary>
+    <ul class="small"><li><b>Every choice is justified with a characteristic from the slides</b> — a chain like "data variety → ELT → lakehouse", not "because it is modern".</li><li>The three sources really differ in type (don't list three tables).</li><li>The OLAP question needs <b>historical, integrated</b> data from <b>several</b> sources — something no single OLTP system could answer.</li><li>All six lifecycle stages appear somewhere on the drawing.</li></ul></details>
+</section>
+
+<section class="chap" id="lab12" data-title="Lab 1.2: FAIR Rescue">
+  <div class="sec-head"><div><div class="secnum">Section 11 · Lab 1.2</div><h2>Lab 1.2: FAIR Rescue</h2></div></div>
+  <p><b>Goal:</b> turn a messy dataset into a FAIR one — a guided rehearsal for the home exercise.<br><b>Scenario:</b> a colleague emailed you <code>survey_FINAL_v2.xlsx</code>. No README, no license, cryptic column names.</p>
+  <div class="grid2">
+    <div class="card"><b>Your tasks</b> <span class="small">(groups of 3–5 · ~35 min in class · finish before the next session)</span>
+      <ol class="small" style="margin:6px 0 0;padding-left:20px">
+        <li><b>Audit it</b> — score F, A, I, R from 0–2; note the biggest gap per letter <span class="tag">8 min</span></li>
+        <li><b>Write a README</b> — what, who, when, unit of every column <span class="tag">8 min</span></li>
+        <li><b>Choose license + repository</b> — e.g. CC BY 4.0 + Zenodo, 1 sentence why <span class="tag">4 min</span></li>
+        <li><b>Write the metadata record</b> — complete <code>metadata_template.json</code> (schema.org Dataset) <span class="tag">10 min</span></li>
+        <li><b>Re-score and finish</b> — fill the "After" column; zip your three files <span class="tag">5 min</span></li>
+      </ol></div>
+    <div class="card"><b>Files &amp; submission</b>
+      <p class="small" style="margin:6px 0">On Moodle: 📊 <code>survey_FINAL_v2.xlsx</code> (the messy dataset) · 📄 <code>Lab1.2_Scorecard.pptx</code> (audit, before → after) · 📝 <code>README_template.md</code> · 🧾 <code>metadata_template.json</code><br>
+      📤 Submit on Moodle: <b>ZIP</b> with Scorecard PDF + <code>README.md</code> + <code>metadata.json</code> — <code>Lab1.2_Group&lt;Nr&gt;.zip</code>, one file per group.<br>
+      ⏰ Deadline: before the next session.<br>
+      👀 Progress check: show your progress and <b>one fix</b> that raised your FAIR score.</p></div>
+  </div>
+
+  <div class="widget">
+    <div class="wtitle">Step 1 &amp; 5 · FAIR scorecard (before → after)</div>
+    <p class="small">0 = missing · 1 = partly · 2 = fully. Score honestly: a planned fix is not a finished fix.</p>
+    <div class="tablewrap"><table id="l2score"></table></div>
+    <div class="grid2"><div><b class="small">Before</b><div class="meter"><div id="l2mB" style="background:var(--amber)"></div></div></div><div><b class="small">After</b><div class="meter"><div id="l2mA"></div></div></div></div>
+    <div class="feedback show info" id="l2scoreOut"></div>
+  </div>
+
+  <div class="widget">
+    <div class="wtitle">Step 2 · README builder</div>
+    <div class="grid2">
+      <div style="display:grid;gap:8px" id="l2rd">
+        <label>Dataset title<br><input type="text" data-k="title" placeholder="A clear, human-readable title" style="width:100%"></label>
+        <label>What is it? (1–2 sentences; what is one row?)<br><input type="text" data-k="what" placeholder="e.g. … One row = one …" style="width:100%"></label>
+        <label>Creator / contact<br><input type="text" data-k="who" placeholder="team, organization (write TO CONFIRM if unknown)" style="width:100%"></label>
+        <label>Collected when?<br><input type="text" data-k="when" placeholder="year or date range (TO CONFIRM if unknown)" style="width:100%"></label>
+        <label>Version<br><input type="text" data-k="version" placeholder="e.g. 3" style="width:100%"></label>
+        <div><b class="small">Columns — clear name + unit / allowed values for <u>every</u> column</b><div id="l2cols" style="display:grid;gap:4px;margin-top:4px"></div><button class="btn" id="l2addCol" style="margin-top:4px">+ column</button></div>
+        <label>Provenance — one step per line<br><textarea data-k="prov" rows="3" placeholder="Exported from …&#10;Removed …&#10;Renamed columns, saved as CSV" style="font-family:inherit"></textarea></label>
+      </div>
+      <div><pre><code id="l2readme"></code></pre><button class="btn" id="l2dlR">⬇ Download README.md</button>
+        <div class="callout amber" style="margin-top:10px"><b>Don't invent facts</b>If you don't know who collected the data or when, write <code>TO CONFIRM</code>. An honest gap is better metadata than a guess.</div></div>
+    </div>
+  </div>
+
+  <div class="widget">
+    <div class="wtitle">Step 3 · License + repository</div>
+    <div class="grid2">
+      <div><b class="small">License</b><div class="btnrow" id="l2lic"></div><div class="small" id="l2licInfo"></div></div>
+      <div><b class="small">Repository</b><div class="btnrow" id="l2repo"></div><div class="small" id="l2repoInfo"></div></div>
+    </div>
+    <label class="small">Your 1 sentence why<br><input type="text" id="l2why" style="width:100%" placeholder="We chose … because …"></label>
+  </div>
+
+  <div class="widget">
+    <div class="wtitle">Step 4 · metadata.json (schema.org Dataset)</div>
+    <p class="small">Built from your README answers above, plus two extra fields. Compare it with your <code>metadata_template.json</code>.</p>
+    <div class="grid2">
+      <div style="display:grid;gap:8px;align-content:start">
+        <label>Keywords (comma-separated)<br><input type="text" id="l2kw" style="width:100%" placeholder="what would someone type to find this?"></label>
+        <label>File format after your fix<br><select id="l2fmt"><option value="text/csv">CSV (text/csv) — open format</option><option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">XLSX — spreadsheet format</option></select></label>
+        <label><input type="checkbox" id="l2free" checked> Freely accessible (open access)</label>
+        <div class="feedback show" id="l2jsonCheck"></div>
+      </div>
+      <div><pre><code id="l2json"></code></pre><button class="btn" id="l2dlJ">⬇ Download metadata.json</button></div>
+    </div>
+  </div>
+
+  <b class="small">Before you upload</b>
+  <div id="l2check" class="btnrow"></div>
+  <details class="reveal"><summary>What makes a strong answer?</summary>
+    <ul class="small"><li><b>The scores are honest.</b> F and A only reach 2 once the dataset is actually published with a DOI and a download route — a plan to upload earns a 1.</li><li>Unknown facts are marked <code>TO CONFIRM</code> instead of being invented.</li><li>Column names say what they contain and in which unit (the difference between <code>inc</code> and a name with currency and period in it).</li><li>The README has provenance: what you did to the file, step by step.</li></ul></details>
+  <p class="small">More help: the <a href="#fair">FAIR self-assessment</a> in Section 7 breaks each letter into three concrete checks, and the <a href="#metadata">metadata builder</a> in Section 9 shows the DataCite XML version.</p>
 </section>
 
 <!-- 11 -->
 <section class="chap" id="links" data-title="Real-world links">
-  <div class="sec-head"><div><div class="secnum">Section 11</div><h2>Explore real applications</h2></div></div>
+  <div class="sec-head"><div><div class="secnum">Section 12</div><h2>Explore real applications</h2></div></div>
   <div class="links">
     <a href="https://www.go-fair.org/fair-principles/" target="_blank" rel="noopener"><b>GO FAIR</b><span>The full list of FAIR sub-principles (F1–R1.3)</span></a>
     <a href="https://www.f-uji.net/" target="_blank" rel="noopener"><b>F-UJI</b><span>Automated FAIR assessment of a dataset by DOI</span></a>
@@ -492,7 +598,7 @@ GET [base]/Observation?patient=P123456789</code></pre>
 
 <!-- 12 -->
 <section class="chap" id="quiz" data-title="Self-check quiz">
-  <div class="sec-head"><div><div class="secnum">Section 12</div><h2>Self-check quiz</h2></div></div>
+  <div class="sec-head"><div><div class="secnum">Section 13</div><h2>Self-check quiz</h2></div></div>
   <div id="quizBox"></div>
 </section>
 </main></div>
@@ -815,6 +921,134 @@ ${kws.map(k => `    <subject>${esc(k)}</subject>`).join('\n')}
   addCopy($('#metadata'));
 }
 $$('#mdForm [data-k]').forEach(i => i.oninput = i.onchange = drawMd); drawMd();
+
+
+// ================= Lab 1.1 planner =================
+(function () {
+  const KEY = 'dm-lab11'; const def = { org: '', src: [['', ''], ['', ''], ['', '']], oltp: '', etl: '', etlWhy: '', sto: '', stoWhy: '', q: '', life: {} };
+  let S = Object.assign({}, def, store.get(KEY, {})); const save = () => store.set(KEY, S);
+  const TYPES = ['', 'structured', 'semi-structured', 'unstructured'];
+  const PROMPTS = {
+    'Online shop': 'Think about: what happens at checkout? What does the app or website log while people browse? What do customers upload or write? Which systems would stop the business if they went down for an hour?',
+    'Hospital': 'Think about: what is recorded at admission? What do lab devices and monitors produce? What do radiology and doctors\' letters look like as data? Which systems does a nurse use every few minutes?',
+    'University': 'Think about: what happens when a student registers for a course? What does Moodle log? What do students hand in? Which systems must work on exam-registration day?'
+  };
+  const BOXES = [['src', 'Sources'], ['oltp', 'OLTP systems'], ['pipe', 'ETL / ELT pipeline'], ['sto', 'Storage'], ['dash', 'Dashboard / OLAP']];
+  const STAGES = ['1 Create', '2 Store', '3 Process', '4 Analyze', '5 Share', '6 Preserve'];
+  function ui() {
+    $('#l1org').value = S.org;
+    $('#l1src').innerHTML = S.src.map((s, i) => `<div style="display:flex;gap:6px"><input type="text" data-i="${i}" value="${esc(s[0])}" placeholder="Source ${i + 1}" style="flex:1;min-width:0"><select data-i="${i}">${TYPES.map(t => `<option ${t === s[1] ? 'selected' : ''} value="${t}">${t || 'type…'}</option>`).join('')}</select></div>`).join('');
+    $$('#l1src input').forEach(e => e.oninput = () => { S.src[+e.dataset.i][0] = e.value; save(); draw(); });
+    $$('#l1src select').forEach(e => e.onchange = () => { S.src[+e.dataset.i][1] = e.value; save(); draw(); });
+    [['l1oltp', 'oltp'], ['l1etlWhy', 'etlWhy'], ['l1stoWhy', 'stoWhy'], ['l1q', 'q']].forEach(([id, k]) => { $('#' + id).value = S[k]; $('#' + id).oninput = e => { S[k] = e.target.value; save(); draw(); }; });
+    const pick = (el, k, opts) => { $(el).innerHTML = opts.map(o => `<button class="btn ${S[k] === o ? 'sel' : ''}">${o}</button>`).join(''); $$(el + ' button').forEach(b => b.onclick = () => { S[k] = b.textContent; save(); pick(el, k, opts); draw(); }); };
+    pick('#l1etl', 'etl', ['ETL', 'ELT']); pick('#l1sto', 'sto', ['Warehouse', 'Lake', 'Lakehouse']);
+    $('#l1life').innerHTML = '<tr><th></th>' + STAGES.map(s => `<th>${s}</th>`).join('') + '</tr>' + BOXES.map(([k, l]) => `<tr><td>${l}</td>${STAGES.map((_, j) => `<td><input type="checkbox" data-b="${k}" data-s="${j + 1}" ${(S.life[k] || []).includes(j + 1) ? 'checked' : ''}></td>`).join('')}</tr>`).join('');
+    $$('#l1life input').forEach(c => c.onchange = () => { const a = new Set(S.life[c.dataset.b] || []); c.checked ? a.add(+c.dataset.s) : a.delete(+c.dataset.s); S.life[c.dataset.b] = [...a].sort(); save(); draw(); });
+  }
+  function draw() {
+    const types = S.src.map(s => s[1]).filter(Boolean), varied = new Set(types).size;
+    const hasRaw = types.some(t => t !== 'structured');
+    $('#l1etlHint').innerHTML = !S.etl ? '' : S.etl === 'ETL' && hasRaw ? '🤔 You listed semi-/unstructured sources. Can they be cleaned <i>before</i> loading? What would you lose by not keeping the raw copy? Make sure your sentence answers that.' : S.etl === 'ELT' && types.length === 3 && !hasRaw ? '🤔 All your sources are structured. ELT can still be right — say what you gain by keeping raw data.' : '';
+    $('#l1stoHint').innerHTML = !S.sto ? '' : S.sto === 'Warehouse' && hasRaw ? '🤔 A warehouse holds structured data only. Where do your semi-/unstructured sources go?' : S.sto === 'Lake' ? '🤔 A lake is cheap and flexible — how will you avoid a "data swamp" and serve management dashboards?' : '';
+    $('#l1qHint').innerHTML = S.q.length > 15 && !/(month|year|trend|over|last|by |per |compare|region|semester|quarter)/i.test(S.q) ? '🤔 Does your question need <b>history</b> or a <b>comparison across groups</b>? If one OLTP system could answer it with a simple lookup, it is not yet an OLAP question.' : '';
+    // diagram
+    const tcol = { structured: 'var(--blue)', 'semi-structured': 'var(--green)', unstructured: 'var(--amber)', '': 'var(--line)' };
+    const badge = (k, x, y) => (S.life[k] || []).map((n, i) => `<circle cx="${x + i * 20}" cy="${y}" r="9" fill="var(--accent)"/><text x="${x + i * 20}" y="${y + 4}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">${n}</text>`).join('');
+    const cut = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
+    let g = '<defs><marker id="l1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>';
+    S.src.forEach((s, i) => { const y = 20 + i * 68; g += `<rect x="10" y="${y}" width="170" height="54" rx="9" fill="var(--surface)" stroke="${tcol[s[1]]}" stroke-width="2" ${s[0] ? '' : 'stroke-dasharray="5 4"'}/><text x="95" y="${y + 23}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">${esc(cut(s[0] || 'Source ' + (i + 1), 24))}</text><text x="95" y="${y + 41}" text-anchor="middle" font-size="10" fill="${s[1] ? tcol[s[1]] : 'var(--muted)'}">${s[1] || 'type?'}</text><line x1="182" y1="${y + 27}" x2="250" y2="115" stroke="var(--muted)" marker-end="url(#l1a)"/>`; });
+    g += badge('src', 20, 232);
+    const oltpLines = S.oltp.split('\n').filter(x => x.trim()).slice(0, 3);
+    g += `<rect x="252" y="60" width="150" height="110" rx="10" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/><text x="327" y="82" text-anchor="middle" font-size="12" font-weight="700" fill="var(--blue)">OLTP</text>` + (oltpLines.length ? oltpLines.map((l, i) => `<text x="327" y="${104 + i * 18}" text-anchor="middle" font-size="10.5" fill="var(--ink)">${esc(cut(l, 24))}</text>`).join('') : `<text x="327" y="118" text-anchor="middle" font-size="10.5" fill="var(--muted)">which systems?</text>`) + badge('oltp', 262, 186);
+    g += `<line x1="404" y1="115" x2="440" y2="115" stroke="var(--muted)" marker-end="url(#l1a)"/><rect x="442" y="80" width="110" height="70" rx="10" fill="var(--green-soft)" stroke="var(--green)" stroke-width="2" ${S.etl ? '' : 'stroke-dasharray="5 4"'}/><text x="497" y="112" text-anchor="middle" font-size="16" font-weight="700" fill="var(--green)">${S.etl || 'ETL / ELT?'}</text><text x="497" y="132" text-anchor="middle" font-size="10" fill="var(--muted)">${S.etl === 'ETL' ? 'clean first, then store' : S.etl === 'ELT' ? 'store first, then clean' : ''}</text>` + badge('pipe', 452, 166);
+    g += `<line x1="554" y1="115" x2="590" y2="115" stroke="var(--muted)" marker-end="url(#l1a)"/><rect x="592" y="70" width="120" height="90" rx="10" fill="var(--amber-soft)" stroke="var(--amber)" stroke-width="2" ${S.sto ? '' : 'stroke-dasharray="5 4"'}/><text x="652" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="var(--amber)">${S.sto || 'Storage?'}</text><text x="652" y="130" text-anchor="middle" font-size="10" fill="var(--muted)">${{ Warehouse: 'structured · schema-on-write', Lake: 'raw files · schema-on-read', Lakehouse: 'raw + structured · ACID' }[S.sto] || ''}</text>` + badge('sto', 602, 176);
+    g += `<line x1="714" y1="115" x2="750" y2="115" stroke="var(--muted)" marker-end="url(#l1a)"/><rect x="752" y="70" width="138" height="90" rx="10" fill="var(--purple-soft)" stroke="var(--purple)" stroke-width="2"/><text x="821" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="var(--purple)">Dashboard · OLAP</text>` + (S.q ? [0, 1, 2].map(i => { let t = S.q.slice(i * 26, i * 26 + 26); if (i === 2 && S.q.length > 78) t = t.slice(0, 25) + '…'; return `<text x="821" y="${110 + i * 15}" text-anchor="middle" font-size="9.5" fill="var(--ink)">${esc(t)}</text>`; }).join('') : `<text x="821" y="120" text-anchor="middle" font-size="10.5" fill="var(--muted)">management question?</text>`) + badge('dash', 762, 176);
+    $('#l1svg').innerHTML = g;
+    const marked = new Set(Object.values(S.life).flat());
+    const checks = [['3 sources labelled', S.src.every(s => s[0].trim() && s[1])], ['OLTP named', S.oltp.trim().length > 2], ['ETL/ELT justified', S.etl && S.etlWhy.trim().length > 15], ['storage justified', S.sto && S.stoWhy.trim().length > 15], ['OLAP question', S.q.trim().length > 15], ['6 stages marked', marked.size === 6], ['source types differ', varied >= 2]];
+    $('#l1check').innerHTML = checks.map(([l, ok]) => `<span class="tag ${ok ? 'green' : ''}">${ok ? '☑' : '☐'} ${l}</span>`).join('') + '<span class="tag">☐ all names (on the worksheet)</span>';
+  }
+  $('#l1org').onchange = e => { S.org = e.target.value; save(); if ($('#l1prompts').style.display !== 'none') showP(); };
+  function showP() { $('#l1prompts').style.display = 'block'; $('#l1prompts').innerHTML = S.org ? `<b>${S.org}</b>${PROMPTS[S.org]}` : 'Choose an organization first.'; }
+  $('#l1ideas').onclick = () => { if ($('#l1prompts').style.display === 'none') showP(); else $('#l1prompts').style.display = 'none'; };
+  $('#l1reset').onclick = () => { S = JSON.parse(JSON.stringify(def)); save(); ui(); draw(); };
+  $('#l1copy').onclick = () => {
+    const lf = k => (S.life[k] || []).join('·') || '—';
+    const t = `Lab 1.1 — Data Flow Blueprint\nOrganization: ${S.org}\n\n1 · SOURCES (lifecycle ${lf('src')})\n${S.src.map(s => `- ${s[0]} — ${s[1]}`).join('\n')}\n\n2 · OLTP SYSTEMS (lifecycle ${lf('oltp')})\n${S.oltp}\n\n3 · ETL or ELT? (lifecycle ${lf('pipe')})\n${S.etl} — ${S.etlWhy}\n\n4 · STORAGE (lifecycle ${lf('sto')})\n${S.sto} — ${S.stoWhy}\n\n5 · OLAP QUESTION (lifecycle ${lf('dash')})\n${S.q}\n`;
+    navigator.clipboard && navigator.clipboard.writeText(t); $('#l1copied').textContent = 'Copied — paste into Lab1.1_Worksheet.pptx'; setTimeout(() => $('#l1copied').textContent = '', 2500);
+  };
+  ui(); draw();
+})();
+
+// ================= Lab 1.2 =================
+(function () {
+  const KEY = 'dm-lab12';
+  const def = { sc: { F: [null, '', null, ''], A: [null, '', null, ''], I: [null, '', null, ''], R: [null, '', null, ''] }, rd: { title: '', what: '', who: '', when: '', version: '', prov: '' }, cols: [['', ''], ['', ''], ['', '']], lic: '', repo: '', why: '', kw: '', fmt: 'text/csv', free: true };
+  let S = Object.assign(JSON.parse(JSON.stringify(def)), store.get(KEY, {})); const save = () => store.set(KEY, S);
+  const LOOK = { F: ['Findable', 'ID (DOI), title, keywords, in a catalog?'], A: ['Accessible', 'Download route, standard protocol, clear access rules?'], I: ['Interoperable', 'Open format (CSV), clear column names, units?'], R: ['Reusable', 'License, provenance, README / codebook?'] };
+  const LIC = { 'CC BY 4.0': ['https://creativecommons.org/licenses/by/4.0/', 'Anyone may reuse, also commercially, if they credit you. The usual choice for open research data.'], 'CC0 1.0': ['https://creativecommons.org/publicdomain/zero/1.0/', 'Public domain: no conditions at all, not even attribution.'], 'CC BY-NC 4.0': ['https://creativecommons.org/licenses/by-nc/4.0/', 'Reuse with credit, but not commercially — this limits reuse by companies.'], 'Restricted (data use agreement)': ['', 'Access only under an agreement — still FAIR if the rules are clear. Needed when data is personal or confidential.'] };
+  const REPO = { Zenodo: 'CERN-run, free, any discipline, mints a DOI, GitHub integration.', Figshare: 'Free for public items, DOI, good previews.', Dryad: 'Curated research data, DOI; may charge a fee.', Dataverse: 'Institutional/Harvard installations, DOI, fine-grained access control.' };
+  function scoreUi() {
+    const sel = (p, idx) => `<select data-p="${p}" data-x="${idx}">${['', 0, 1, 2].map(v => `<option value="${v}" ${String(S.sc[p][idx] ?? '') === String(v) ? 'selected' : ''}>${v === '' ? '–' : v + ' / 2'}</option>`).join('')}</select>`;
+    $('#l2score').innerHTML = '<tr><th>Principle</th><th>What to look for</th><th>Before</th><th>Biggest gap</th><th>After</th><th>Your fix</th></tr>' + Object.entries(LOOK).map(([p, [n, w]]) => `<tr><td><b>${p}</b> · ${n}</td><td class="small">${w}</td><td>${sel(p, 0)}</td><td><input type="text" data-p="${p}" data-x="1" value="${esc(S.sc[p][1])}" style="width:100%;min-width:130px"></td><td>${sel(p, 2)}</td><td><input type="text" data-p="${p}" data-x="3" value="${esc(S.sc[p][3])}" style="width:100%;min-width:130px"></td></tr>`).join('') + '<tr><th colspan="2">TOTAL</th><th id="l2tB"></th><th></th><th id="l2tA"></th><th></th></tr>';
+    $$('#l2score select').forEach(e => e.onchange = () => { S.sc[e.dataset.p][+e.dataset.x] = e.value === '' ? null : +e.value; save(); scoreOut(); checks(); });
+    $$('#l2score input').forEach(e => e.oninput = () => { S.sc[e.dataset.p][+e.dataset.x] = e.value; save(); checks(); });
+    scoreOut();
+  }
+  function scoreOut() {
+    const tot = i => Object.values(S.sc).reduce((s, r) => s + (r[i] ?? 0), 0);
+    const b = tot(0), a = tot(2); $('#l2tB').textContent = b + ' / 8'; $('#l2tA').textContent = a + ' / 8';
+    $('#l2mB').style.width = b / 8 * 100 + '%'; $('#l2mA').style.width = a / 8 * 100 + '%';
+    const msgs = [];
+    const doneB = Object.values(S.sc).every(r => r[0] !== null), doneA = Object.values(S.sc).every(r => r[2] !== null);
+    if (!doneB) msgs.push('Start with the <b>Before</b> column: open the spreadsheet and look for evidence for each letter.');
+    else if (!doneA) msgs.push(`Before: <b>${b}/8</b>. Now do tasks 2–4, then fill the <b>After</b> column.`);
+    else msgs.push(`Before <b>${b}/8</b> → After <b>${a}/8</b> (${a - b >= 0 ? '+' : ''}${a - b}).`);
+    if (S.sc.F[2] === 2 || S.sc.A[2] === 2) msgs.push('🤔 You gave F or A a 2 after your fix. Is the dataset really <i>published</i> — with a DOI and a public download route — or is that still a plan? A plan is a 1.');
+    Object.entries(S.sc).forEach(([p, r]) => { if (r[0] !== null && r[2] !== null && r[2] < r[0]) msgs.push(`🤔 ${p} got worse after your fix — check the scores.`); });
+    $('#l2scoreOut').innerHTML = msgs.join('<br>');
+  }
+  function colsUi() {
+    $('#l2cols').innerHTML = S.cols.map((c, i) => `<div style="display:flex;gap:6px"><input type="text" data-i="${i}" data-j="0" value="${esc(c[0])}" placeholder="clear_column_name" style="flex:1;min-width:0;font-family:var(--mono);font-size:.85rem"><input type="text" data-i="${i}" data-j="1" value="${esc(c[1])}" placeholder="unit / allowed values" style="flex:1;min-width:0"><button class="btn" data-del="${i}" title="remove">✕</button></div>`).join('');
+    $$('#l2cols input').forEach(e => e.oninput = () => { S.cols[+e.dataset.i][+e.dataset.j] = e.value; save(); out(); });
+    $$('#l2cols [data-del]').forEach(b => b.onclick = () => { S.cols.splice(+b.dataset.del, 1); save(); colsUi(); out(); });
+  }
+  const readme = () => {
+    const r = S.rd, cols = S.cols.filter(c => c[0].trim());
+    const w = Math.max(12, ...cols.map(c => c[0].length)) + 3;
+    return `# ${r.title || '<dataset title>'}\n${r.what || '<what is this dataset? what is one row?>'}\n\nCreator: ${r.who || 'TO CONFIRM'}\nCollected: ${r.when || 'TO CONFIRM'}\nVersion: ${r.version || '1'}\n\n## Columns\n${cols.length ? cols.map(c => c[0].padEnd(w) + (c[1] || '<unit?>')).join('\n') : '<column_name>   <unit / allowed values>'}\n\n## Provenance\n${r.prov.split('\n').filter(x => x.trim()).map((x, i) => `${i + 1}. ${x.trim()}`).join('\n') || '1. <what did you do to the original file?>'}\n\n## License\n${S.lic || '<license>'}\n`;
+  };
+  const meta = () => {
+    const r = S.rd, kws = S.kw.split(',').map(x => x.trim()).filter(Boolean);
+    const j = { '@context': 'https://schema.org', '@type': 'Dataset', name: r.title, description: r.what, keywords: kws, creator: { '@type': 'Organization', name: r.who }, version: r.version, temporalCoverage: r.when, license: S.lic ? (LIC[S.lic][0] || S.lic) : '', encodingFormat: S.fmt, isAccessibleForFree: S.free };
+    return JSON.stringify(j, null, 2);
+  };
+  function out() {
+    $('#l2readme').textContent = readme(); $('#l2json').textContent = meta(); addCopy($('#lab12'));
+    const r = S.rd, miss = [];
+    if (!r.title) miss.push('name'); if (!r.what) miss.push('description'); if (!S.kw.trim()) miss.push('keywords'); if (!S.lic) miss.push('license'); if (!r.who) miss.push('creator');
+    const c = $('#l2jsonCheck'); c.className = 'feedback show ' + (miss.length ? 'no' : 'ok');
+    c.innerHTML = miss.length ? 'Still empty: <b>' + miss.join(', ') + '</b>. name + description are the minimum for the lab.' : '✓ Valid JSON with name, description, keywords, creator and license.' + (S.fmt !== 'text/csv' ? '<br>🤔 Still XLSX — would an open format raise your <b>I</b> score?' : '');
+    checks();
+  }
+  function checks() {
+    const cols = S.cols.filter(c => c[0].trim());
+    const list = [['before score', Object.values(S.sc).every(r => r[0] !== null)], ['README with units for every column', cols.length >= 1 && cols.every(c => c[1].trim()) && !!S.rd.title], ['license + repository', !!S.lic && !!S.repo && S.why.trim().length > 10], ['JSON-LD with name + description', !!S.rd.title && !!S.rd.what], ['after score', Object.values(S.sc).every(r => r[2] !== null)]];
+    $('#l2check').innerHTML = list.map(([l, ok]) => `<span class="tag ${ok ? 'green' : ''}">${ok ? '☑' : '☐'} ${l}</span>`).join('') + '<span class="tag">☐ all names (on the scorecard)</span>';
+  }
+  function pick(el, k, opts, info, infoEl) { $(el).innerHTML = Object.keys(opts).map(o => `<button class="btn ${S[k] === o ? 'sel' : ''}">${o}</button>`).join(''); $$(el + ' button').forEach(b => b.onclick = () => { S[k] = b.textContent; save(); pick(el, k, opts, info, infoEl); out(); }); $(infoEl).textContent = S[k] ? info(opts[S[k]]) : ''; }
+  const dl = (name, text, type) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
+  $$('#l2rd [data-k]').forEach(e => { e.value = S.rd[e.dataset.k] || ''; e.oninput = () => { S.rd[e.dataset.k] = e.value; save(); out(); }; });
+  $('#l2addCol').onclick = () => { S.cols.push(['', '']); save(); colsUi(); };
+  $('#l2why').value = S.why; $('#l2why').oninput = e => { S.why = e.target.value; save(); checks(); };
+  $('#l2kw').value = S.kw; $('#l2kw').oninput = e => { S.kw = e.target.value; save(); out(); };
+  $('#l2fmt').value = S.fmt; $('#l2fmt').onchange = e => { S.fmt = e.target.value; save(); out(); };
+  $('#l2free').checked = S.free; $('#l2free').onchange = e => { S.free = e.target.checked; save(); out(); };
+  $('#l2dlR').onclick = () => dl('README.md', readme(), 'text/markdown');
+  $('#l2dlJ').onclick = () => dl('metadata.json', meta(), 'application/json');
+  scoreUi(); colsUi(); pick('#l2lic', 'lic', LIC, v => v[1], '#l2licInfo'); pick('#l2repo', 'repo', REPO, v => v, '#l2repoInfo'); out();
+})();
 
 // ---- quiz ----
 renderQuiz('#quizBox', [
