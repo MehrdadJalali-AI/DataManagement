@@ -381,6 +381,31 @@ GET [base]/Observation?patient=P123456789</code></pre>
     <div class="card"><h4>Benefits</h4><p><b>Efficiency</b> — one documented, citable version instead of <code>DATA_final_NEW.xlsx</code>.<br><b>Visibility</b> — "climate data Germany" returns 1 match instead of 0.<br><b>Collaboration</b> — research, industry, academia and government build on a shared repository.<br><b>Reuse cycle</b> — found → used → shared → new data → …</p></div>
     <div class="card"><h4>Challenges</h4><p>Effort and cost of good metadata · lack of skills and incentives · privacy &amp; legal constraints · many competing standards and vocabularies · legacy systems with no identifiers.</p></div>
   </div>
+  <h3>Try it: assess a real dataset with F-UJI</h3>
+  <p>The checklist above is your own judgement. <a href="https://www.f-uji.net/" target="_blank" rel="noopener"><b>F-UJI</b></a> does the same job automatically: it reads a dataset's landing page and metadata the way a <b>machine</b> would and scores it against the FAIRsFAIR metrics (developed by PANGAEA). Now test a real published dataset.</p>
+  <div class="widget">
+    <div class="wtitle">Exercise · Automated FAIR assessment</div>
+    <ol style="margin:0;padding-left:20px">
+      <li><b>Pick a dataset with a DOI</b> from a repository such as Zenodo, Figshare, Dryad or Dataverse. Search a topic you like (e.g. "air quality", "diabetes", "bike sharing") and open a <b>dataset</b> record — not a paper. Copy its DOI, e.g. <code>10.5281/zenodo.…</code></li>
+      <li><b>Go to <a href="https://www.f-uji.net/" target="_blank" rel="noopener">www.f-uji.net</a></b>, open the assessment page, paste the DOI (or the full <code>https://doi.org/…</code> link) and run the assessment.</li>
+      <li><b>Read the result.</b> Note the overall FAIR score, the score for each letter (F, A, I, R), and the list of individual metrics with their IDs — e.g. <code>FsF-F1-02D</code> (persistent identifier), <code>FsF-R1.1-01M</code> (license), <code>FsF-R1.2-01M</code> (provenance).</li>
+      <li><b>Compare</b> with the self-assessment widget above: tick what you believe is true for the same dataset. Where do you and F-UJI disagree?</li>
+      <li><b>Explain your results</b> in 6–8 sentences (see the guide below).</li>
+    </ol>
+    <div class="links" style="grid-template-columns:1fr 1fr;margin-top:12px">
+      <a href="https://www.f-uji.net/" target="_blank" rel="noopener"><b>F-UJI</b><span>Paste a DOI → automated FAIR score</span></a>
+      <a href="https://zenodo.org/" target="_blank" rel="noopener"><b>Zenodo</b><span>Find a dataset and copy its DOI</span></a>
+      <a href="https://figshare.com/" target="_blank" rel="noopener"><b>Figshare</b><span>Public items get a DOI</span></a>
+      <a href="https://datadryad.org/" target="_blank" rel="noopener"><b>Dryad</b><span>Curated research datasets</span></a>
+    </div>
+  </div>
+  <div class="callout blue"><b>What to write</b>1) Dataset title, repository and DOI · 2) Overall score and the strongest / weakest letter · 3) Two metrics that <b>passed</b> and why (what in the record made them pass) · 4) Two metrics that <b>failed or scored low</b> and what is missing · 5) One concrete fix the data owner could make · 6) Where your own checklist and F-UJI disagreed, and who you think is right.</div>
+  <details class="reveal"><summary>How to interpret typical F-UJI results</summary>
+    <p><b>Findable is usually high</b> on Zenodo-style repositories: the DOI passes the unique and persistent identifier checks (<code>FsF-F1-01D</code>, <code>FsF-F1-02D</code>), and the repository publishes title, creator and keywords that machines can read (<code>FsF-F2-01M</code>, <code>FsF-F4-01M</code>).</p>
+    <p><b>Accessible</b> checks whether metadata and data can be retrieved over a standard protocol such as HTTPS and whether the access level (open, restricted, embargoed) is stated. A restricted dataset can still score well here — remember, FAIR ≠ open.</p>
+    <p><b>Interoperable and Reusable are often lower.</b> Common reasons: no machine-readable license (<code>FsF-R1.1-01M</code>), no provenance information (<code>FsF-R1.2-01M</code>), no link to related papers or code (<code>FsF-I3-01M</code>), metadata that does not follow a community standard (<code>FsF-R1.3-01M</code>), or files in a proprietary format like <code>.xlsx</code> instead of CSV (<code>FsF-R1.3-02D</code>).</p>
+    <p><b>Be critical of the tool.</b> F-UJI only sees what is machine-readable. A README full of provenance, or a license written only in a PDF, may be invisible to it — so a low score can mean "not exposed to machines" rather than "bad data". Equally, a high score does not prove the data itself is correct or well documented. That gap is exactly why we combine automated checks with human review.</p>
+  </details>
 </section>
 
 <!-- 8 -->
