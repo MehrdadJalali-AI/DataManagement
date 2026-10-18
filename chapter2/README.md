@@ -5,7 +5,7 @@
 One messy online-shop dataset travels through five labs: first in Python (pandas, Jupyter), then again as a Tableau Prep flow.
 Your manager asks: *"I need revenue by city and by customer segment for March and April. Can we trust these files?"*
 
-Slides with all task descriptions: [`slides/C2_Labs.pptx`](slides/C2_Labs.pptx) · Interactive study guide: [Chapter 2 page](https://mehrdadjalali-ai.github.io/DataManagement/interactive/Chapter2_Data_Quality_Preparation.html)
+Interactive study guide: [Chapter 2 page](https://mehrdadjalali-ai.github.io/DataManagement/interactive/Chapter2_Data_Quality_Preparation.html)
 
 ## The five labs
 
