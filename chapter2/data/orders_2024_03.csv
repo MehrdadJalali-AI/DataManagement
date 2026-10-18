@@ -1,0 +1,33 @@
+order_id,order_date,customer_id,customer_name,city,country,category,quantity,unit_price,currency,email,last_updated
+O1001,2024-03-01,C001,Anna Weber,Berlin,Germany,Electronics,1,499.00,EUR,anna.weber@mail.de,2024-03-01
+O1002,2024-03-02,C002,Ben Fischer,Munich,Germany,Accessories,2,19.90,EUR,ben.f@mail.de,2024-03-02
+O1003,03.03.2024,C003,Clara Schmidt,Hamburg,Germany,Electronics,1,899.00,EUR,clara@web.de,2024-03-03
+O1004,2024-03-04,C004,David Müller,münchen,Germany,Accessories,3,9.99,EUR,david.m@mail.de,2024-03-04
+O1005,2024-03-05,C005,Eva Klein,Heidelberg,Germany,Office,5,4.50,EUR,,2024-03-05
+O1006,03/06/2024,C006,Felix Wagner,Frankfurt,Germany,Electronics,1,1299.00,EUR,felix.w@mail.de,2024-03-06
+O1007,2024-03-07,C007,,Cologne,Germany,Office,10,2.99,EUR,g.braun@mail.de,2024-03-07
+O1008,2024-03-08,C001,Anna Weber,Berlin,Germany,Accessories,1,29.00,EUR,anna.weber@mail.de,2024-03-08
+O1009,2024-03-09,C008,Hannah Becker,Stuttgart,Germny,Electronics,2,249.00,EUR,hannah.b@mail.de,2024-03-09
+O1010,2024-03-10,C009,Ivan Petrov,Vienna,Austria,Office,3,12.00,€,ivan.p@mail.at,2024-03-10
+O1011,2024-03-11,C010,Julia Hoffmann,Berlin,Germany,Electronics,-1,199.00,EUR,julia.h@mail.de,2024-03-11
+O1012,2024-03-12,C011,Karl Schulz,Munich,Germany,Accessories,2,,EUR,karl.s@mail.de,2024-03-12
+O1013,2024-03-13,C012,Lena Koch,Leipzig,Germany,Office,4,6.50,EUR,lena.koch@,2024-03-13
+O1014,2024-03-14,C013,Max Richter,Zurich,Switzerland,Electronics,1,349.00,CHF,max.r@mail.ch,2024-03-14
+O1015,2024-03-15,C014,Nora Wolf,Hamburg,Germany,Accessories,500,14.90,EUR,nora.w@mail.de,2024-03-15
+O1016,2024-03-15,C015,Oliver Neumann,Dresden,Germany,Electronics,1,599.00,EUR,oliver.n@mail.de,2024-03-16
+O1017,2024-03-16,C016,Paula Schwarz,Bonn,Germany,Office,2,8.99,EUR,paula.s@mail.de,2024-03-29
+O1018,2024-03-17,C017,Quentin Braun,Munich ,Germany,Electronics,1,129.00,EUR,q.braun@mail.de,2024-03-17
+O1019,2024-03-18,C003,Clara Schmidt,Hamburg,Germany,Accessories,1,39.90,EUR,clara@web.de,2024-03-18
+O1020,2024-03-19,C018,Rita Lange,Essen,Germany,Office,6,3.49,EUR,rita.l@mail.de,2024-03-19
+O1021,2024-03-20,C019,Sven Krause,Hanover,Germany,Electronics,1,999.00,USD,sven.k@mail.com,2024-03-20
+O1022,2024-03-20,C020,Tina Vogel,Berlin,Germany,Accessories,2,24.90,EUR,tina.v@mail.de,2024-03-20
+O1023,2024-03-21,C021,Uwe Jung,Mannheim,Germany,Office,1,59.00,EUR,uwe.j@mail.de,2024-04-02
+O1024,2024-03-22,C099,Vera Hahn,Karlsruhe,Germany,Electronics,1,449.00,EUR,vera.h@mail.de,2024-03-22
+O1025,2024-03-23,C022,Willi Roth,Munich,Germany,Accessories,3,15.00,EUR,willi.r@mail.de,2024-03-23
+O1022,2024-03-20,C020,Tina Vogel,Berlin,Germany,Accessories,2,24.90,EUR,tina.v@mail.de,2024-03-20
+O1026,2024-03-24,C023,Xenia Frank,Freiburg,Germany,Office,2,7.50,EUR,,2024-03-24
+O1027,2024-03-25,C005,Eva Klein,Heidelberg,Germany,Electronics,1,279.00,EUR,eva.klein@mail.de,2024-03-25
+O1028,2024-03-26,C024,Yusuf Demir,Berlin,Germany,Electronics,1,1899.00,EUR,yusuf.d@mail.de,2024-03-26
+O1029,2024-03-27,C025,Zoe Lehmann,Nuremberg,Germany,Accessories,1,49.00,EUR,,2024-04-10
+O1030,2024-03-28,C002,Benjamin Fischer,Munich,Germany,Office,2,5.99,EUR,ben.f@mail.de,2024-03-28
+O1031,2024-03-29,C026,Anja Seidel,Potsdam,Germany,Gadgets,1,79.00,EUR,anja.s@mail.de,2024-03-29

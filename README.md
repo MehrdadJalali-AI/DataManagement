@@ -16,3 +16,11 @@ Open these in your browser. Each page explains the chapter's concepts with examp
 All four: <https://mehrdadjalali-ai.github.io/DataManagement/interactive/>
 
 Offline: download the `.html` files from the [`interactive/`](interactive/) folder and open them in any browser.
+
+## Lab exercises
+
+Hands-on labs with datasets, notebook templates and worksheets.
+
+| Chapter | Topic | Open |
+|---|---|---|
+| 2 | Data Quality, Profiling & Preparation — Labs 2.1–2.5 | [chapter2/](chapter2/) |
