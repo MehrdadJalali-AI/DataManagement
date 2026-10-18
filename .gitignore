@@ -1,0 +1,14 @@
+# Instructor material — never publish solutions
+*_INSTRUCTOR*
+*solution*
+*Solution*
+
+# Generated lab outputs
+*_clean.csv
+*_quarantine.csv
+*_final.csv
+
+# Jupyter / OS
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
