@@ -24,3 +24,4 @@ Hands-on labs with datasets, notebook templates and worksheets.
 | Chapter | Topic | Open |
 |---|---|---|
 | 2 | Data Quality, Profiling & Preparation — Labs 2.1–2.5 | [chapter2/](chapter2/) |
+| 3 | Reproducible & Validated Data Pipelines — Labs 3.1–3.3 | [chapter3/](chapter3/) |
