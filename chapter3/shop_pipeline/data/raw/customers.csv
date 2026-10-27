@@ -1,0 +1,10 @@
+customer_id,customer_name,city,country,email,segment
+C001,Anna Weber,Berlin,Germany,anna.weber@mail.de,Private
+C002,Ben Schulz,Hamburg,Germany,ben.schulz@web.de,Business
+C003,Clara Schmidt,Munich,Germany,clara.schmidt(at)web.de,Private
+C004,David Müller,Munich,Germany,david.m@mail.de,Private
+C005,Elena Fischer,Cologne,Germany,elena.f@gmx.de,Business
+C006,Felix Wagner,Frankfurt,Germany,felix.wagner@mail.de,Business
+C007,Greta Braun,Vienna,Germny,greta.braun@mail.at,Private
+C008,Hannes Wolf,Berlin,Germany,,Business
+C009,Ivan Petrov,Vienna,Austria,ivan.p@mail.at,Private

@@ -1,0 +1,4 @@
+order_id,order_date,customer_id,category,quantity,unit_price
+O114,2026-03-03,C009,Accessories,2,1999
+O115,2026-03-10,C003,Accessories,1,4638
+O116,,C006,Electronics,1,15900
