@@ -1,0 +1,21 @@
+Employee_ID,Name,Department,Age,Salary,City
+E001,Anna Weber,IT,29,58000,Heidelberg
+E002,Ben Schulz,Finance,45,64000,Mannheim
+E003,Clara Klein,HR,38,49000,Heidelberg
+E004,David Wolf,IT,34,67000,Karlsruhe
+E005,Elena Neumann,Marketing,27,46000,Stuttgart
+E006,Felix Braun,Sales,51,59000,Mannheim
+E007,Greta Zimmer,IT,42,74000,Heidelberg
+E008,Hannes Hartmann,Operations,56,52000,Speyer
+E009,Helga Brandt,Finance,63,81000,Heidelberg
+E010,Ines Krüger,IT,25,52000,Karlsruhe
+E011,Jonas Lange,Sales,31,48000,Stuttgart
+E012,Katrin Fuchs,HR,49,55000,Mannheim
+E013,Lukas Vogel,IT,58,79000,Heidelberg
+E014,Mira Jung,Marketing,36,51000,Karlsruhe
+E015,Nils Roth,Operations,44,50000,Speyer
+E016,Olga Frank,Finance,33,60000,Heidelberg
+E017,Paul Berger,IT,38,71000,Mannheim
+E018,Rosa Kaiser,Sales,60,62000,Stuttgart
+E019,Simon Lorenz,Operations,28,44000,Karlsruhe
+E020,Tara Peters,Marketing,47,57000,Heidelberg
