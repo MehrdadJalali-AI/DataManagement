@@ -12,3 +12,8 @@
 .ipynb_checkpoints/
 __pycache__/
 .DS_Store
+
+# Chapter 3 pipeline outputs (created by running pipeline.py)
+chapter3/shop_pipeline/data/output/*.csv
+chapter3/shop_pipeline/logs/*.txt
+.venv/

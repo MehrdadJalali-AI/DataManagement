@@ -1,0 +1,8 @@
+order_id,order_date,customer_id,category,quantity,unit_price
+O108,2026-02-02,C006,Electronics,2,129.00
+O108,2026-02-02,C006,Electronics,2,129.00
+O109,2026-02-05,C099,Electronics,1,299.00
+O110,2026-02-11,C007,Accessories,4,12.90
+O111,2026-02-14,C005,Accessories,2,
+O112,17.02.2026,C002,Electronics,1,1199.00
+O113,2026-02-25,C008,Electronics,1,578.59
